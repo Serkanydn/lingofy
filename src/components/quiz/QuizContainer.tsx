@@ -1,104 +1,161 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { QuizQuestion as QuizQuestionType } from "@/types/content.types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { QuizQuestion } from "./QuizQuestion";
-import { QuizResult } from "./QuizResult";
-import { useSubmitQuiz } from "@/lib/hooks/useReading";
-import { ArrowLeft } from "lucide-react";
+import { scoreCalculator } from '@/lib/utils/scoreCalculator'
+import { QuizContent, QuizState, UserAnswer } from '@/types/content.types'
+import { useState } from 'react'
+import { QuizResult } from './QuizResult'
+import { Button } from '../ui/button'
+import { ArrowLeft, Send } from 'lucide-react'
+import { Card } from '../ui/card'
 
 interface QuizContainerProps {
-  questions: QuizQuestionType[];
-  contentType: "reading" | "listening" | "grammar";
-  contentId: string;
-  onComplete: () => void;
+  quiz: QuizContent
+  onExit: () => void
+  onComplete: (score: number, maxScore: number) => void
 }
 
-export function QuizContainer({
-  questions,
-  contentType,
-  contentId,
-  onComplete,
-}: QuizContainerProps) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<number[]>([]);
-  const [showResults, setShowResults] = useState(false);
-  const submitQuiz = useSubmitQuiz();
+export function QuizContainer({ quiz, onExit, onComplete }: QuizContainerProps) {
+  const [quizState, setQuizState] = useState<QuizState>({
+    currentQuestionIndex: 0,
+    userAnswers: {},
+    isSubmitted: false,
+    showResults: false,
+  })
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  const currentQuestion = quiz.questions[quizState.currentQuestionIndex]
+  const totalQuestions = quiz.questions.length
+  const progress = ((quizState.currentQuestionIndex + 1) / totalQuestions) * 100
 
-  const handleAnswer = (answerIndex: number) => {
-    const newAnswers = [...userAnswers, answerIndex];
-    setUserAnswers(newAnswers);
+  const handleAnswer = (answer: UserAnswer) => {
+    setQuizState((prev) => ({
+      ...prev,
+      userAnswers: {
+        ...prev.userAnswers,
+        [currentQuestion.id]: answer,
+      },
+    }))
+  }
 
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      // Quiz completed
-      const score = newAnswers.reduce((acc, answer, index) => {
-        return acc + (answer === questions[index].correct_answer ? 1 : 0);
-      }, 0);
-
-      submitQuiz.mutate({
-        contentType,
-        contentId,
-        score,
-        totalQuestions: questions.length,
-        answers: newAnswers,
-      });
-
-      setShowResults(true);
+  const handleNext = () => {
+    if (quizState.currentQuestionIndex < totalQuestions - 1) {
+      setQuizState((prev) => ({
+        ...prev,
+        currentQuestionIndex: prev.currentQuestionIndex + 1,
+      }))
     }
-  };
+  }
 
-  if (showResults) {
-    const score = userAnswers.reduce((acc, answer, index) => {
-      return acc + (answer === questions[index].correct_answer ? 1 : 0);
-    }, 0);
+  const handlePrevious = () => {
+    if (quizState.currentQuestionIndex > 0) {
+      setQuizState((prev) => ({
+        ...prev,
+        currentQuestionIndex: prev.currentQuestionIndex - 1,
+      }))
+    }
+  }
 
+  const handleSubmit = () => {
+    const { totalScore, maxScore, percentage } = scoreCalculator.calculateScore(
+      quiz.questions,
+      quizState.userAnswers
+    )
+
+    setQuizState((prev) => ({
+      ...prev,
+      isSubmitted: true,
+      showResults: true,
+    }))
+
+    onComplete(totalScore, maxScore)
+  }
+
+  const handleRetry = () => {
+    setQuizState({
+      currentQuestionIndex: 0,
+      userAnswers: {},
+      isSubmitted: false,
+      showResults: false,
+    })
+  }
+
+  const isQuestionAnswered = (questionId: string) => {
+    const answer = quizState.userAnswers[questionId]
+    if (!answer) return false
+    return !!(answer.selectedOptionId || answer.textAnswer)
+  }
+
+  const answeredCount = quiz.questions.filter((q) =>
+    isQuestionAnswered(q.id)
+  ).length
+
+  if (quizState.showResults) {
     return (
       <QuizResult
-        score={score}
-        totalQuestions={questions.length}
-        questions={questions}
-        userAnswers={userAnswers}
-        onRetry={() => {
-          setCurrentQuestionIndex(0);
-          setUserAnswers([]);
-          setShowResults(false);
-        }}
-        onExit={onComplete}
+        quiz={quiz}
+        userAnswers={quizState.userAnswers}
+        onRetry={handleRetry}
+        onExit={onExit}
       />
-    );
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <Button variant="ghost" className="mb-4" onClick={onComplete}>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <Button variant="ghost" onClick={onExit} className="mb-4">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Exit Quiz
       </Button>
 
-      <Card>
-        <CardHeader>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <CardTitle>Quiz</CardTitle>
-              <span className="text-sm text-muted-foreground">
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </span>
-            </div>
-            <Progress value={progress} className="h-2" />
+      <Card className="p-6">
+        <QuizProgress
+          currentQuestion={quizState.currentQuestionIndex + 1}
+          totalQuestions={totalQuestions}
+          answeredCount={answeredCount}
+          progress={progress}
+        />
+
+        <div className="mt-8">
+          <QuestionRenderer
+            question={currentQuestion}
+            userAnswer={quizState.userAnswers[currentQuestion.id]}
+            onAnswer={handleAnswer}
+            isSubmitted={quizState.isSubmitted}
+            showFeedback={quizState.isSubmitted}
+          />
+        </div>
+
+        <div className="mt-8 flex items-center justify-between gap-4">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={quizState.currentQuestionIndex === 0}
+          >
+            Previous
+          </Button>
+
+          <div className="text-sm text-muted-foreground">
+            {answeredCount} / {totalQuestions} answered
           </div>
-        </CardHeader>
-        <CardContent>
-          <QuizQuestion question={currentQuestion} onAnswer={handleAnswer} />
-        </CardContent>
+
+          {quizState.currentQuestionIndex === totalQuestions - 1 ? (
+            <Button
+              onClick={handleSubmit}
+              disabled={answeredCount !== totalQuestions}
+              className="min-w-[120px]"
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Submit Quiz
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNext}
+              disabled={!isQuestionAnswered(currentQuestion.id)}
+            >
+              Next
+            </Button>
+          )}
+        </div>
       </Card>
     </div>
-  );
+  )
 }

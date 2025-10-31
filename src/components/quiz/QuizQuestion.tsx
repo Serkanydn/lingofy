@@ -27,7 +27,7 @@ export function QuizQuestion({ question, onAnswer }: QuizQuestionProps) {
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-sm font-semibold">
                 {String.fromCharCode(65 + index)}
               </span>
-              <span className="flex-1">{option}</span>
+              <span className="flex-1">{option.text}</span>
             </span>
           </Button>
         ))}

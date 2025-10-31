@@ -1,48 +1,58 @@
-export type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1'
+export type QuestionType = "mc" | "fb" | "tf";
+export type DifficultyLevel =
+  | "beginner"
+  | "elementary"
+  | "intermediate"
+  | "upper-intermediate"
+  | "advanced";
 
-export interface BaseContent {
-  id: string
-  title: string
-  description: string
-  level: Level
-  type: 'reading' | 'listening' | 'grammar'
-  is_premium: boolean
-  order_index: number
-  created_at: string
-}
-
-export interface ReadingContent extends BaseContent {
-  type: 'reading'
-  content: string
-  audio_urls: string[]
+export interface QuizOption {
+  id: string;
+  text: string;
+  is_correct: boolean;
 }
 
 export interface QuizQuestion {
-  id: string
-  question_text: string
-  options: string[]
-  correct_answer: number
-  explanation?: string
-  content_type: 'reading' | 'listening' | 'grammar'
-  content_id: string
-  order_index: number
+  id: string;
+  quiz_content_id: string;
+  question_type: QuestionType;
+  question_text: string;
+  points: number;
+  order_index: number;
+  options: QuizOption[];
 }
 
-export interface QuizSubmission {
-  contentType: 'reading' | 'listening' | 'grammar'
-  contentId: string
-  score: number
-  totalQuestions: number
-  answers: Record<string, any>
+export interface QuizContent {
+  id: string;
+  content_type: "reading" | "listening" | "grammar";
+  content_id: string;
+  title: string;
+  difficulty_level: DifficultyLevel;
+  word_count?: number;
+  questions: QuizQuestion[];
 }
 
-export interface QuizResult {
-  id: string
-  user_id: string
-  content_type: 'reading' | 'listening' | 'grammar'
-  content_id: string
-  score: number
-  total_questions: number
-  answers: Record<string, any>
-  created_at: string
+export interface UserAnswer {
+  question_id: string;
+  type: "option" | "text";
+  selectedOptionId?: string | null;
+  textAnswer?: string | null;
+}
+
+export interface QuizAttempt {
+  id?: string;
+  user_id: string;
+  quiz_content_id: string;
+  answers: UserAnswer[];
+  total_score: number;
+  max_score: number;
+  percentage: number;
+  completed_at?: string;
+}
+
+export interface QuizState {
+  currentQuestionIndex: number;
+  userAnswers: Record<string, UserAnswer>;
+  isSubmitted: boolean;
+  showResults: boolean;
 }
