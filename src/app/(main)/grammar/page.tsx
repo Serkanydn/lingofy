@@ -1,9 +1,15 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { GRAMMAR_CATEGORIES } from '@/lib/constants/categories'
-import Link from 'next/link'
-import { BookOpen } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { BookOpen } from "lucide-react";
+import { GRAMMAR_CATEGORIES } from "@/features/grammar/constants/categories";
 
 export default function GrammarPage() {
   return (
@@ -11,13 +17,14 @@ export default function GrammarPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Grammar Practice</h1>
         <p className="text-muted-foreground">
-          All grammar topics are free for everyone! Choose a category to start learning.
+          All grammar topics are free for everyone! Choose a category to start
+          learning.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Object.values(GRAMMAR_CATEGORIES).map((category) => (
-          <Link key={category.id} href={`/grammar/${category.id}`}>
+        {Object.entries(GRAMMAR_CATEGORIES).map(([id, category]) => (
+          <Link key={id} href={`/grammar/${id}`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -43,14 +50,17 @@ export default function GrammarPage() {
         <div className="flex items-start gap-4">
           <div className="text-3xl">✨</div>
           <div>
-            <h3 className="font-semibold text-lg mb-2">Grammar is Free for Everyone!</h3>
+            <h3 className="font-semibold text-lg mb-2">
+              Grammar is Free for Everyone!
+            </h3>
             <p className="text-muted-foreground">
-              We believe grammar is essential for learning English. That's why all grammar 
-              topics, explanations, and quizzes are completely free. No premium subscription needed!
+              We believe grammar is essential for learning English. That's why
+              all grammar topics, explanations, and quizzes are completely free.
+              No premium subscription needed!
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

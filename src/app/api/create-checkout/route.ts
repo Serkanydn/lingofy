@@ -1,41 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { createCheckout } from '@/lib/lemonsqueezy/client'
-import { LEMON_SQUEEZY_CONFIG } from '@/lib/lemonsqueezy/config'
+import { createCheckout } from "@/shared/lib/lemonsqueezy/client";
+import { LEMON_SQUEEZY_CONFIG } from "@/shared/lib/lemonsqueezy/config";
+import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = createServerSupabaseClient();
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { plan } = await request.json()
+    const { plan } = await request.json();
 
     const variantId =
-      plan === 'yearly'
+      plan === "yearly"
         ? LEMON_SQUEEZY_CONFIG.yearlyVariantId
-        : LEMON_SQUEEZY_CONFIG.monthlyVariantId
+        : LEMON_SQUEEZY_CONFIG.monthlyVariantId;
 
-    const checkoutUrl = await createCheckout(
-      variantId,
-      user.email!,
-      user.id
-    )
+    const checkoutUrl = await createCheckout(variantId, user.email!, user.id);
 
-    return NextResponse.json({ url: checkoutUrl })
+    return NextResponse.json({ url: checkoutUrl });
   } catch (error) {
-    console.error('Checkout error:', error)
+    console.error("Checkout error:", error);
     return NextResponse.json(
-      { error: 'Failed to create checkout' },
+      { error: "Failed to create checkout" },
       { status: 500 }
-    )
+    );
   }
 }

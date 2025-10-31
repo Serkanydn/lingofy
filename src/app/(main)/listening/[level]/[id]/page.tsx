@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useListeningDetail, useListeningQuiz } from '@/lib/hooks/useListening'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, FileText } from 'lucide-react'
-import { ListeningPlayer } from '@/components/listening/ListeningPlayer'
-import { QuizContainer } from '@/components/quiz/QuizContainer'
+import { useListeningDetail, useListeningQuiz } from '@/shared/hooks/useListening'
+import { QuizContainer } from '@/features/quiz/components/QuizContainer'
+import { ListeningPlayer } from '@/features/listening/components/ListeningPlayer'
+
 
 export default function ListeningDetailPage({ 
   params 
@@ -32,10 +33,16 @@ export default function ListeningDetailPage({
   if (showQuiz && quizQuestions) {
     return (
       <QuizContainer
-        questions={quizQuestions}
-        contentType="listening"
-        contentId={params.id}
-        onComplete={() => {
+        quiz={{
+          id: params.id,
+          content_type: 'listening',
+          content_id: params.id,
+          title: listening.title,
+          difficulty_level: listening.level,
+          questions: quizQuestions
+        }}
+        onExit={() => setShowQuiz(false)}
+        onComplete={(score, maxScore) => {
           setShowQuiz(false)
           setShowTranscript(true)
         }}
@@ -66,7 +73,7 @@ export default function ListeningDetailPage({
           )}
         </CardHeader>
         <CardContent className="space-y-6">
-          <ListeningPlayer 
+          <ListeningPlayer
             audioUrls={listening.audio_urls} 
             duration={listening.duration_seconds}
           />

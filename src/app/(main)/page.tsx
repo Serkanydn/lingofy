@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { BookOpen, Headphones, BookText, BookMarked, Crown, ArrowRight } from 'lucide-react'
-import { useAuthStore } from '@/lib/store/authStore'
+import { useAuthStore } from '@/shared/hooks/useAuth'
 
 export default function HomePage() {
   const { user } = useAuthStore()

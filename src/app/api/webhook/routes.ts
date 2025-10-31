@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-import { LEMON_SQUEEZY_CONFIG } from '@/lib/lemonsqueezy/config'
+import { LEMON_SQUEEZY_CONFIG } from '@/shared/lib/lemonsqueezy/config'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

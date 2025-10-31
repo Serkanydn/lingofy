@@ -1,11 +1,12 @@
 'use client'
 
-import { useGrammarByCategory } from '@/lib/hooks/useGrammar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, BookOpen } from 'lucide-react'
-import { GRAMMAR_CATEGORIES } from '@/lib/constants/categories'
+import { useGrammarByCategory } from '@/shared/hooks/useGrammar'
+import { GRAMMAR_CATEGORIES } from '@/features/grammar/constants/categories'
+
 
 export default function GrammarCategoryPage({ params }: { params: { category: string } }) {
   const category = params.category as keyof typeof GRAMMAR_CATEGORIES

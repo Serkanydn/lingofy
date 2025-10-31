@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Check, Crown, Zap } from 'lucide-react'
-import { useAuthStore } from '@/lib/store/authStore'
-import { toast } from '@/components/ui/use-toast'
-import { PRICING } from '@/lib/lemonsqueezy/config'
+import { useAuthStore } from '@/shared/hooks/useAuth'
+import { PRICING } from '@/shared/lib/lemonsqueezy/config'
+
 
 const PREMIUM_FEATURES = [
   {
@@ -44,10 +45,8 @@ export default function PremiumPage() {
 
   const handleSubscribe = async () => {
     if (!user) {
-      toast({
-        title: 'Authentication Required',
+      toast.error('Authentication Required', {
         description: 'Please login to subscribe',
-        variant: 'destructive',
       })
       return
     }
@@ -73,10 +72,8 @@ export default function PremiumPage() {
         throw new Error('No checkout URL received')
       }
     } catch (error) {
-      toast({
-        title: 'Error',
+      toast.error('Error', {
         description: 'Failed to create checkout session',
-        variant: 'destructive',
       })
     } finally {
       setLoading(false)

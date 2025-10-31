@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
 import { BookOpen, Headphones, BookText, BookMarked, Crown, BarChart3, Home } from 'lucide-react'
-import { useAuthStore } from '@/lib/store/authStore'
-import { PremiumBadge } from '@/components/premium/PremiumBadge'
+import { useAuthStore } from '@/shared/hooks/useAuth'
+import { cn } from '@/shared/lib/utils'
+import { PremiumBadge } from '@/features/premium/components/PremiumBadge'
+
 
 const navigation = [
   {

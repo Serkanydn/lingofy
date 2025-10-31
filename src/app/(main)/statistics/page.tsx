@@ -1,9 +1,6 @@
 'use client'
 
-import { useStatistics, useQuizHistory } from '@/lib/hooks/useStatistics'
-import { useAuthStore } from '@/lib/store/authStore'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { StatsCard } from '@/components/statistics/StatsCard'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -19,12 +16,17 @@ import {
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
+import { useAuthStore } from '@/shared/hooks/useAuth'
+import { useStatistics } from '@/shared/hooks/useStatistics'
+import { useQuizHistory } from '@/shared/hooks/useQuiz'
+import { StatsCard } from '@/features/statistics/components/StatsCard'
 
 export default function StatisticsPage() {
   const router = useRouter()
+  const user = useAuthStore((state) => state.user)
   const isPremium = useAuthStore((state) => state.isPremium())
   const { data: stats, isLoading } = useStatistics()
-  const { data: quizHistory } = useQuizHistory()
+  const { data: quizHistory } = useQuizHistory(user?.id || '')
 
   if (!isPremium) {
     return (

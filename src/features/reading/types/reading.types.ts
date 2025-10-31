@@ -1,0 +1,27 @@
+import { Level } from '@/shared/types/common.types'
+
+export type ReadingContent = {
+  id: string
+  title: string
+  content: string
+  level: Level
+  audio_urls: string[]
+  is_premium: boolean
+  order_index: number
+  word_count: number
+  created_at: string
+}
+
+export type ReadingFilters = {
+  level?: Level
+  search?: string
+  isPremium?: boolean
+}
+
+export type ReadingStats = {
+  totalReadings: number
+  completedReadings: number
+  averageScore: number
+  timeSpent: number
+  level: Level
+}

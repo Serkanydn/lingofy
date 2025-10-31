@@ -11,12 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useAuthStore } from '@/lib/store/authStore'
-import { supabase } from '@/lib/supabase/client'
+
 import { useRouter } from 'next/navigation'
 import { Menu, Crown, LogOut, User, BarChart3 } from 'lucide-react'
-import { PremiumBadge } from '@/components/premium/PremiumBadge'
 import Link from 'next/link'
+import { useAuthStore } from '@/shared/hooks/useAuth'
+import { supabase } from '@/shared/lib/supabase/client'
+import { PremiumBadge } from '@/features/premium/components/PremiumBadge'
 
 export function Navbar() {
   const router = useRouter()

@@ -1,44 +1,45 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { useReading } from '../hooks/useReading'
-import { useQuiz } from '@/features/quiz/hooks/useQuiz'
-import { useQuizSubmit } from '@/features/quiz/hooks/useQuizSubmit'
-import { useAuthStore } from '@/features/auth/store/authStore'
-import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { ArrowLeft, Plus, Play } from 'lucide-react'
-import { AudioPlayer } from '../components/AudioPlayer'
-import { QuizContainer } from '@/features/quiz/components/QuizContainer'
-import { AddWordDialog } from '@/features/words/components/AddWordDialog'
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useAuthStore } from "@/shared/hooks/useAuth";
+import { useQuiz } from "@/shared/hooks/useQuiz";
+import { useReadingByLevel, useReadingDetail } from "@/shared/hooks/useReading";
+import { useQuizSubmit } from "@/shared/hooks/useQuizSubmit";
+import { QuizContainer } from "@/features/quiz/components/QuizContainer";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, PlayCircleIcon, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
+import { AddWordDialog } from "@/features/words/components/addWordDialog";
+import { Play } from "next/font/google";
 
 export function ReadingDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const contentId = params.id as string
-  const level = params.level as string
-  
-  const { user } = useAuthStore()
-  const { data: reading, isLoading } = useReading(contentId)
-  const { data: quiz } = useQuiz('reading', contentId)
-  const submitQuiz = useQuizSubmit()
-  
-  const [showQuiz, setShowQuiz] = useState(false)
-  const [showAddWord, setShowAddWord] = useState(false)
-  const [selectedText, setSelectedText] = useState('')
+  const params = useParams();
+  const router = useRouter();
+  const contentId = params.id as string;
+  const level = params.level as string;
+
+  const { user } = useAuthStore();
+  const { data: reading, isLoading } = useReadingDetail(contentId);
+  const { data: quiz } = useQuiz("reading", contentId);
+  const submitQuiz = useQuizSubmit();
+
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [showAddWord, setShowAddWord] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
 
   const handleTextSelection = () => {
-    const selection = window.getSelection()?.toString().trim()
+    const selection = window.getSelection()?.toString().trim();
     if (selection) {
-      setSelectedText(selection)
-      setShowAddWord(true)
+      setSelectedText(selection);
+      setShowAddWord(true);
     }
-  }
+  };
 
   const handleQuizComplete = async (score: number, maxScore: number) => {
-    if (!user || !quiz) return
+    if (!user || !quiz) return;
 
     await submitQuiz.mutateAsync({
       user_id: user.id,
@@ -47,15 +48,15 @@ export function ReadingDetailPage() {
       total_score: score,
       max_score: maxScore,
       percentage: (score / maxScore) * 100,
-    })
-  }
+    });
+  };
 
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
 
   if (!reading) {
-    return <div className="container mx-auto px-4 py-8">Reading not found</div>
+    return <div className="container mx-auto px-4 py-8">Reading not found</div>;
   }
 
   if (showQuiz && quiz) {
@@ -65,7 +66,7 @@ export function ReadingDetailPage() {
         onExit={() => setShowQuiz(false)}
         onComplete={handleQuizComplete}
       />
-    )
+    );
   }
 
   return (
@@ -96,11 +97,13 @@ export function ReadingDetailPage() {
             className="prose prose-lg max-w-none"
             onMouseUp={handleTextSelection}
           >
-            {reading.content.split('\n\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {reading.content
+              .split("\n\n")
+              .map((paragraph: any, index: number) => (
+                <p key={index} className="mb-4 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
           </div>
 
           <div className="flex gap-4">
@@ -110,14 +113,14 @@ export function ReadingDetailPage() {
               onClick={() => setShowQuiz(true)}
               disabled={!quiz}
             >
-              <Play className="mr-2 h-5 w-5" />
+              <PlayCircleIcon className="mr-2 h-5 w-5" />
               Take Quiz
             </Button>
             <Button
               variant="outline"
               onClick={() => {
-                setSelectedText('')
-                setShowAddWord(true)
+                setSelectedText("");
+                setShowAddWord(true);
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -135,5 +138,5 @@ export function ReadingDetailPage() {
         sourceId={contentId}
       />
     </div>
-  )
+  );
 }

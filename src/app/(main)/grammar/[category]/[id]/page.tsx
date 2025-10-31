@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useGrammarDetail, useGrammarQuiz } from '@/lib/hooks/useGrammar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { DifficultyLevel } from '@/shared/types/content.types'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
-import { QuizContainer } from '@/components/quiz/QuizContainer'
+import { useGrammarDetail, useGrammarQuiz } from '@/shared/hooks/useGrammar'
+import { QuizContainer } from '@/features/quiz/components/QuizContainer'
 
 export default function GrammarTopicPage({ 
   params 
@@ -29,10 +30,18 @@ export default function GrammarTopicPage({
   if (showQuiz && quizQuestions) {
     return (
       <QuizContainer
-        questions={quizQuestions}
-        contentType="grammar"
-        contentId={params.id}
-        onComplete={() => setShowQuiz(false)}
+        quiz={{
+          id: params.id,
+          content_type: 'grammar',
+          content_id: params.id,
+          title: topic.title,
+          difficulty_level: 'intermediate', // Default difficulty level for grammar
+          questions: quizQuestions
+        }}
+        onExit={() => setShowQuiz(false)}
+        onComplete={(score, maxScore) => {
+          setShowQuiz(false)
+        }}
       />
     )
   }

@@ -1,27 +1,39 @@
-'use client'
+"use client";
 
-import { useReadingByLevel } from '@/lib/hooks/useReading'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { ArrowLeft, Lock, BookOpen } from 'lucide-react'
-import { useAuthStore } from '@/lib/store/authStore'
-import { useState } from 'react'
-import PaywallModal from '@/components/premium/PaywallModal'
-import { Level, ReadingContent } from '@/types/content.types'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useReadingByLevel } from "@/lib/hooks/useReading";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeft, Lock, BookOpen } from "lucide-react";
+import { ReadingContent } from "@/features/reading/types/reading.types";
+import { Level } from "@/shared/types/common.types";
+import { useAuthStore } from "@/shared/hooks/useAuth";
+import { useState } from "react";
+import { PaywallModal } from "@/features/premium/components/PaywallModal";
 
 interface ReadingCardProps {
-  reading: ReadingContent
-  level: Level
-  index: number
-  isPremium: boolean
-  onPremiumClick: () => void
+  reading: ReadingContent;
+  level: Level;
+  index: number;
+  isPremium: boolean;
+  onPremiumClick: () => void;
 }
 
-function ReadingCard({ reading, level, index, isPremium, onPremiumClick }: ReadingCardProps) {
-  const isLocked = reading.is_premium && !isPremium
+function ReadingCard({
+  reading,
+  level,
+  index,
+  isPremium,
+  onPremiumClick,
+}: ReadingCardProps) {
+  const isLocked = reading.is_premium && !isPremium;
 
   if (isLocked) {
     return (
@@ -36,25 +48,19 @@ function ReadingCard({ reading, level, index, isPremium, onPremiumClick }: Readi
             </div>
             <Lock className="h-5 w-5 text-muted-foreground" />
           </div>
-          <CardTitle className="mt-2 line-clamp-2">
-            {reading.title}
-          </CardTitle>
+          <CardTitle className="mt-2 line-clamp-2">{reading.title}</CardTitle>
           <CardDescription className="line-clamp-3">
             {reading.content.substring(0, 100)}...
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button 
-            className="w-full" 
-            variant="outline"
-            onClick={onPremiumClick}
-          >
+          <Button className="w-full" variant="outline" onClick={onPremiumClick}>
             <Lock className="mr-2 h-4 w-4" />
             Premium Only
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -69,9 +75,7 @@ function ReadingCard({ reading, level, index, isPremium, onPremiumClick }: Readi
               </span>
             </div>
           </div>
-          <CardTitle className="mt-2 line-clamp-2">
-            {reading.title}
-          </CardTitle>
+          <CardTitle className="mt-2 line-clamp-2">{reading.title}</CardTitle>
           <CardDescription className="line-clamp-3">
             {reading.content.substring(0, 100)}...
           </CardDescription>
@@ -81,7 +85,7 @@ function ReadingCard({ reading, level, index, isPremium, onPremiumClick }: Readi
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
 
 function LoadingSkeleton() {
@@ -90,26 +94,24 @@ function LoadingSkeleton() {
       {[...Array(6)].map((_, i) => (
         <Card key={i} className="h-full">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-5 w-24" />
-            </div>
-            <Skeleton className="h-6 w-full mt-2" />
-            <Skeleton className="h-20 w-full mt-2" />
+            <div className="flex items-center justify-between"></div>
           </CardHeader>
-          <CardContent>
-            <Skeleton className="h-10 w-full" />
-          </CardContent>
+          <CardContent></CardContent>
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
-export default function ReadingLevelPage({ params }: { params: { level: string } }) {
-  const level = params.level.toUpperCase() as Level
-  const { data: readings, isLoading } = useReadingByLevel(level)
-  const isPremium = useAuthStore((state) => state.isPremium())
-  const [showPaywall, setShowPaywall] = useState(false)
+export default function ReadingLevelPage({
+  params,
+}: {
+  params: { level: string };
+}) {
+  const level = params.level.toUpperCase() as Level;
+  const { data: readings, isLoading } = useReadingByLevel(level);
+  const isPremium = useAuthStore((state) => state.isPremium());
+  const [showPaywall, setShowPaywall] = useState(false);
 
   if (isLoading) {
     return (
@@ -129,7 +131,7 @@ export default function ReadingLevelPage({ params }: { params: { level: string }
         </div>
         <LoadingSkeleton />
       </div>
-    )
+    );
   }
 
   return (
@@ -165,5 +167,5 @@ export default function ReadingLevelPage({ params }: { params: { level: string }
 
       <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
-  )
+  );
 }

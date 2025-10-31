@@ -1,24 +1,25 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useUserWords } from '@/lib/hooks/useWords'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Plus, Search, BookOpen } from 'lucide-react'
-import { WordCard } from '@/components/words/WordCard'
-import { AddWordDialog } from '@/components/words/AddWordDialog'
-import { FlashcardPractice } from '@/components/words/FlashcardPractice'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AddWordDialog } from "@/features/words/components/addWordDialog";
+import { FlashcardPractice } from "@/features/words/components/FlashcardPractice";
+import { WordCard } from "@/features/words/components/WordCard";
+import { useUserWords } from "@/shared/hooks/useWords";
+import { BookOpen, Plus, Search } from "lucide-react";
+import { useState } from "react";
 
 export default function MyWordsPage() {
-  const { data: words, isLoading } = useUserWords()
-  const [showAddDialog, setShowAddDialog] = useState(false)
-  const [showFlashcards, setShowFlashcards] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const { data: words, isLoading } = useUserWords();
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showFlashcards, setShowFlashcards] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredWords = words?.filter((word) =>
-    word.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    word.translation.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredWords = words?.filter(
+    (word) =>
+      word.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      word.translation.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (showFlashcards && words && words.length > 0) {
     return (
@@ -26,7 +27,7 @@ export default function MyWordsPage() {
         words={words}
         onExit={() => setShowFlashcards(false)}
       />
-    )
+    );
   }
 
   return (
@@ -70,7 +71,9 @@ export default function MyWordsPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No words found matching your search.</p>
+              <p className="text-muted-foreground">
+                No words found matching your search.
+              </p>
             </div>
           )}
         </>
@@ -81,7 +84,8 @@ export default function MyWordsPage() {
           </div>
           <h3 className="text-2xl font-semibold mb-2">No words yet</h3>
           <p className="text-muted-foreground mb-6">
-            Start building your vocabulary by adding words from reading texts or manually.
+            Start building your vocabulary by adding words from reading texts or
+            manually.
           </p>
           <Button onClick={() => setShowAddDialog(true)} size="lg">
             <Plus className="mr-2 h-5 w-5" />
@@ -95,5 +99,5 @@ export default function MyWordsPage() {
         onClose={() => setShowAddDialog(false)}
       />
     </div>
-  )
+  );
 }
