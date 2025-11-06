@@ -1,6 +1,5 @@
-import { Navbar } from "./Navbar"
+import { Header } from "@/components/ui/header"
 import { Sidebar } from "./Sidebar"
-
 
 export default function MainLayout({
   children,
@@ -9,7 +8,7 @@ export default function MainLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Header />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 pt-16 lg:ml-64">

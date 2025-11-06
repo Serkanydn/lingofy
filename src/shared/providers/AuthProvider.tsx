@@ -21,8 +21,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const store = useAuthStore();
 
   useEffect(() => {
-    // Initialize auth state from local storage or session
-    // This will be handled by useAuthStore
+    let mounted = true;
+    
+    const initializeAuth = async () => {
+      const { supabase } = await import('@/shared/lib/supabase/client')
+      
+      // Get initial session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user && mounted) {
+        store.setUser(session.user)
+        console.log('session.user',session.user);
+        
+        // Fetch user profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+
+          console.log('profile',profile);
+          
+        if (profile && mounted) {
+          store.setProfile(profile)
+        }
+      }
+
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (!mounted) return;
+        
+        store.setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+            
+          if (mounted) {
+            store.setProfile(profile ?? null)
+          }
+        } else {
+          store.setProfile(null)
+        }
+      })
+
+      return () => {
+        subscription.unsubscribe()
+        mounted = false
+      }
+    }
+
+    initializeAuth()
+    return () => {
+      mounted = false
+    }
   }, []);
 
   return (

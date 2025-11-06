@@ -1,49 +1,54 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { ArrowLeft, RotateCw, Volume2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { UserWord } from '@/lib/hooks/useWords'
-import { useUpdateFlashcardPractice } from '@/lib/hooks/useWords'
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  ArrowLeft,
+  RotateCw,
+  Volume2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { UserWord, useUpdateFlashcardPractice } from "@/shared/hooks/useWords";
 
 interface FlashcardPracticeProps {
-  words: UserWord[]
-  onExit: () => void
+  words: UserWord[];
+  onExit: () => void;
 }
 
 export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isFlipped, setIsFlipped] = useState(false)
-  const updatePractice = useUpdateFlashcardPractice()
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const updatePractice = useUpdateFlashcardPractice();
 
-  const currentWord = words[currentIndex]
-  const progress = ((currentIndex + 1) / words.length) * 100
+  const currentWord = words[currentIndex];
+  const progress = ((currentIndex + 1) / words.length) * 100;
 
   const handleNext = () => {
     if (currentIndex < words.length - 1) {
-      setCurrentIndex(currentIndex + 1)
-      setIsFlipped(false)
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
     } else {
-      updatePractice.mutate()
-      onExit()
+      updatePractice.mutate();
+      onExit();
     }
-  }
+  };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
-      setIsFlipped(false)
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
     }
-  }
+  };
 
   const handleSpeak = () => {
-    const utterance = new SpeechSynthesisUtterance(currentWord.word)
-    utterance.lang = 'en-US'
-    utterance.rate = 0.8
-    window.speechSynthesis.speak(utterance)
-  }
+    const utterance = new SpeechSynthesisUtterance(currentWord.word);
+    utterance.lang = "en-US";
+    utterance.rate = 0.8;
+    window.speechSynthesis.speak(utterance);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -56,16 +61,18 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
 
       <div className="mb-6 space-y-2">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Card {currentIndex + 1} of {words.length}</span>
+          <span>
+            Card {currentIndex + 1} of {words.length}
+          </span>
           <span>{Math.round(progress)}% Complete</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
 
       <div className="mb-6 perspective-1000">
-        <Card 
+        <Card
           className={`min-h-[400px] cursor-pointer transition-all duration-500 transform-style-3d ${
-            isFlipped ? 'rotate-y-180' : ''
+            isFlipped ? "rotate-y-180" : ""
           }`}
           onClick={() => setIsFlipped(!isFlipped)}
         >
@@ -79,8 +86,8 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
                     variant="ghost"
                     size="icon"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      handleSpeak()
+                      e.stopPropagation();
+                      handleSpeak();
                     }}
                   >
                     <Volume2 className="h-6 w-6" />
@@ -134,11 +141,8 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
           <RotateCw className="h-5 w-5" />
         </Button>
 
-        <Button
-          size="lg"
-          onClick={handleNext}
-        >
-          {currentIndex === words.length - 1 ? 'Finish' : 'Next'}
+        <Button size="lg" onClick={handleNext}>
+          {currentIndex === words.length - 1 ? "Finish" : "Next"}
           <ChevronRight className="ml-2 h-5 w-5" />
         </Button>
       </div>
@@ -155,5 +159,5 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
         }
       `}</style>
     </div>
-  )
+  );
 }
