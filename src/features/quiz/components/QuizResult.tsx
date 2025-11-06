@@ -1,33 +1,43 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Button } from '@/shared/components/ui/button'
-import { Badge } from '@/shared/components/ui/badge'
-import { Progress } from '@/shared/components/ui/progress'
-import { QuizContent, UserAnswer } from '../types/quiz.types'
-import { scoreCalculator } from '../utils/scoreCalculator'
-import { quizValidator } from '../utils/quizValidator'
-import { RotateCcw, ArrowLeft, CheckCircle2, XCircle, Trophy } from 'lucide-react'
-import { QuestionRenderer } from './QuestionRenderer'
+import { scoreCalculator } from "../utils/scoreCalculator";
+import { quizValidator } from "../utils/quizValidator";
+import {
+  RotateCcw,
+  ArrowLeft,
+  CheckCircle2,
+  XCircle,
+  Trophy,
+} from "lucide-react";
+import { QuestionRenderer } from "./QuestionRenderer";
+import { QuizContent, UserAnswer } from "@/shared/types/content.types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface QuizResultProps {
-  quiz: QuizContent
-  userAnswers: Record<string, UserAnswer>
-  onRetry: () => void
-  onExit: () => void
+  quiz: QuizContent;
+  userAnswers: Record<string, UserAnswer>;
+  onRetry: () => void;
+  onExit: () => void;
 }
 
-export function QuizResult({ quiz, userAnswers, onRetry, onExit }: QuizResultProps) {
+export function QuizResult({
+  quiz,
+  userAnswers,
+  onRetry,
+  onExit,
+}: QuizResultProps) {
   const { totalScore, maxScore, percentage } = scoreCalculator.calculateScore(
     quiz.questions,
     userAnswers
-  )
+  );
 
-  const performance = scoreCalculator.getPerformanceLevel(percentage)
-  
+  const performance = scoreCalculator.getPerformanceLevel(percentage);
+
   const correctCount = quiz.questions.filter((q) =>
     quizValidator.isAnswerCorrect(q, userAnswers[q.id])
-  ).length
+  ).length;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
@@ -51,7 +61,9 @@ export function QuizResult({ quiz, userAnswers, onRetry, onExit }: QuizResultPro
           <div className="grid grid-cols-3 gap-4 text-center py-4 border-t">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Correct</p>
-              <p className="text-2xl font-bold text-green-600">{correctCount}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {correctCount}
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-1">Wrong</p>
@@ -81,13 +93,16 @@ export function QuizResult({ quiz, userAnswers, onRetry, onExit }: QuizResultPro
       {/* Detailed Review */}
       <div className="space-y-4">
         <h3 className="text-2xl font-bold">Review Your Answers</h3>
-        
+
         {quiz.questions.map((question, index) => {
-          const userAnswer = userAnswers[question.id]
-          const isCorrect = quizValidator.isAnswerCorrect(question, userAnswer)
+          const userAnswer = userAnswers[question.id];
+          const isCorrect = quizValidator.isAnswerCorrect(question, userAnswer);
 
           return (
-            <Card key={question.id} className={isCorrect ? 'border-green-200' : 'border-red-200'}>
+            <Card
+              key={question.id}
+              className={isCorrect ? "border-green-200" : "border-red-200"}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-3 mb-4">
                   <div className="flex-shrink-0">
@@ -104,11 +119,11 @@ export function QuizResult({ quiz, userAnswers, onRetry, onExit }: QuizResultPro
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
                       <Badge variant="outline">Question {index + 1}</Badge>
-                      <Badge variant={isCorrect ? 'default' : 'destructive'}>
-                        {isCorrect ? `+${question.points} pts` : '0 pts'}
+                      <Badge variant={isCorrect ? "default" : "destructive"}>
+                        {isCorrect ? `+${question.points} pts` : "0 pts"}
                       </Badge>
                     </div>
-                    
+
                     <QuestionRenderer
                       question={question}
                       userAnswer={userAnswer}
@@ -120,9 +135,9 @@ export function QuizResult({ quiz, userAnswers, onRetry, onExit }: QuizResultPro
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

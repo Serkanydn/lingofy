@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthStore } from "@/shared/hooks/useAuth";
 import { useQuiz } from "@/shared/hooks/useQuiz";
-import { useReadingByLevel, useReadingDetail } from "@/shared/hooks/useReading";
+import { useReadingDetail } from "@/shared/hooks/useReading";
 import { useQuizSubmit } from "@/shared/hooks/useQuizSubmit";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
-import { Play } from "next/font/google";
 
-export function ReadingDetailPage() {
-  const params = useParams();
+export default function ReadingDetailPage() {
+  // ✅ unwrap async params
+  const { id: contentId, level } = useParams() as { id: string; level: string };
+
   const router = useRouter();
-  const contentId = params.id as string;
-  const level = params.level as string;
-
   const { user } = useAuthStore();
   const { data: reading, isLoading } = useReadingDetail(contentId);
   const { data: quiz } = useQuiz("reading", contentId);
@@ -44,7 +42,7 @@ export function ReadingDetailPage() {
     await submitQuiz.mutateAsync({
       user_id: user.id,
       quiz_content_id: quiz.id,
-      answers: [], // Will be populated by QuizContainer
+      answers: [],
       total_score: score,
       max_score: maxScore,
       percentage: (score / maxScore) * 100,
@@ -97,13 +95,11 @@ export function ReadingDetailPage() {
             className="prose prose-lg max-w-none"
             onMouseUp={handleTextSelection}
           >
-            {reading.content
-              .split("\n\n")
-              .map((paragraph: any, index: number) => (
-                <p key={index} className="mb-4 leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
+            {reading.content.split("\n\n").map((p, i) => (
+              <p key={i} className="mb-4 leading-relaxed">
+                {p}
+              </p>
+            ))}
           </div>
 
           <div className="flex gap-4">

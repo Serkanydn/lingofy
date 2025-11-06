@@ -43,8 +43,8 @@ const readingContent = [
 // Sample Quiz Questions
 const quizQuestions = [
   {
-    content_type: 'reading',
-    content_id: null, // Will be set after content insertion
+    questions_type: 'reading',
+    quiz_content_id: null, // Will be set after content insertion
     question_text: 'What time does the person wake up?',
     options: ['6 o\'clock', '7 o\'clock', '8 o\'clock', '9 o\'clock'],
     correct_answer: 1,
@@ -52,8 +52,8 @@ const quizQuestions = [
     order_index: 1,
   },
   {
-    content_type: 'reading',
-    content_id: null,
+    questions_type: 'reading',
+    quiz_content_id: null,
     question_text: 'What does the person eat for breakfast?',
     options: ['Bread, cheese, and eggs', 'Rice and fish', 'Pasta and salad', 'Soup and bread'],
     correct_answer: 0,
@@ -123,26 +123,58 @@ async function seedContent() {
 
     if (readingError) {
       console.error('Error inserting reading content:', readingError)
+      if (readingError.code === 'PGRST204') {
+        console.error('Schema error - Please ensure the reading_content table exists with correct columns')
+        console.error('Required columns: title (text), level (text), content (text), audio_urls (text[]), is_premium (boolean), order_index (integer)')
+      }
       return
     }
 
     console.log(`Inserted ${readingData.length} reading items`)
 
-    // Insert Quiz Questions for first reading
+    // Insert Quiz Questions for readings
     if (readingData.length > 0) {
-      const questionsWithContentId = quizQuestions.map(q => ({
-        ...q,
-        content_id: readingData[0].id,
-      }))
+      console.log('Inserting quiz questions...')
+      
+      // Create questions for each reading content
+      const allQuestions = readingData.flatMap((reading, readingIndex) => {
+        // For the first reading, use the sample questions
+        if (readingIndex === 0) {
+          return quizQuestions.map(q => ({
+            ...q,
+            quiz_content_id: reading.id,
+          }))
+        }
+        
+        // For other readings, generate basic comprehension questions
+        const basicQuestions = [
+          {
+            questions_type: 'reading' as const,
+            quiz_content_id: reading.id,
+            question_text: `What is this text about?`,
+            options: [`The main topic is ${reading.title.toLowerCase()}`, 'Shopping', 'Weather', 'Travel'],
+            correct_answer: 0,
+            explanation: `The text discusses ${reading.title.toLowerCase()}.`,
+            order_index: 1,
+          }
+        ]
+        
+        return basicQuestions
+      })
 
       const { error: quizError } = await supabase
         .from('quiz_questions')
-        .insert(questionsWithContentId)
+        .insert(allQuestions)
 
       if (quizError) {
         console.error('Error inserting quiz questions:', quizError)
+        // Check if it's a schema error and log more details
+        if (quizError.code === 'PGRST204') {
+          console.error('Schema error - Please ensure the quiz_questions table exists with correct columns')
+          console.error('Required columns: quiz_content_id (uuid), questions_type (text), question_text (text), options (text[]), correct_answer (integer), explanation (text), order_index (integer)')
+        }
       } else {
-        console.log(`Inserted ${questionsWithContentId.length} quiz questions`)
+        console.log(`Inserted ${allQuestions.length} quiz questions`)
       }
     }
 
@@ -155,6 +187,10 @@ async function seedContent() {
 
     if (grammarError) {
       console.error('Error inserting grammar topics:', grammarError)
+      if (grammarError.code === 'PGRST204') {
+        console.error('Schema error - Please ensure the grammar_topics table exists with correct columns')
+        console.error('Required columns: category (text), title (text), explanation (text), examples (text[]), mini_text (text), order_index (integer)')
+      }
     } else {
       console.log(`Inserted ${grammarData.length} grammar topics`)
     }
@@ -168,6 +204,10 @@ async function seedContent() {
 
     if (listeningError) {
       console.error('Error inserting listening content:', listeningError)
+      if (listeningError.code === 'PGRST204') {
+        console.error('Schema error - Please ensure the listening_content table exists with correct columns')
+        console.error('Required columns: title (text), level (text), description (text), audio_urls (text[]), duration_seconds (integer), transcript (text), is_premium (boolean), order_index (integer)')
+      }
     } else {
       console.log(`Inserted ${listeningData.length} listening items`)
     }

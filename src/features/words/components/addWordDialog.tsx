@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAddWord } from '@/lib/hooks/useWords'
 import {
   Dialog,
   DialogContent,
@@ -12,8 +11,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
+import { useAddWord } from '@/shared/hooks/useWords'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from '@/components/ui/use-toast'
+
 
 interface AddWordDialogProps {
   open: boolean
@@ -46,12 +47,8 @@ export function AddWordDialog({
     e.preventDefault()
 
     if (!word || !translation || !exampleEn || !exampleTr) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in all fields',
-        variant: 'destructive',
-      })
-      return
+      toast.error('Please fill in all fields')
+        return
     }
 
     try {
@@ -64,10 +61,7 @@ export function AddWordDialog({
         source_id: sourceId,
       })
 
-      toast({
-        title: 'Success',
-        description: 'Word added to your collection!',
-      })
+      toast.success('Word added to your collection!')
 
       // Reset form
       setWord('')
@@ -76,11 +70,7 @@ export function AddWordDialog({
       setExampleTr('')
       onClose()
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to add word',
-        variant: 'destructive',
-      })
+      toast.error('Failed to add word')
     }
   }
 

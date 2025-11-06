@@ -1,10 +1,12 @@
 'use client'
 
-import { QuizQuestion, UserAnswer } from '../types/quiz.types'
-import { Button } from '@/shared/components/ui/button'
-import { cn } from '@/shared/lib/utils/cn'
+
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { quizValidator } from '../utils/quizValidator'
+import { QuizQuestion } from '../types/quiz.types'
+import { UserAnswer } from '@/shared/types/content.types'
+import { cn } from '@/shared/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface MultipleChoiceQuestionProps {
   question: QuizQuestion
@@ -29,6 +31,7 @@ export function MultipleChoiceQuestion({
       type: 'option',
       selectedOptionId: optionId,
       textAnswer: null,
+      
     })
   }
 

@@ -1,20 +1,33 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { ArrowLeft, BookOpen } from 'lucide-react'
-import { useGrammarByCategory } from '@/shared/hooks/useGrammar'
-import { GRAMMAR_CATEGORIES } from '@/features/grammar/constants/categories'
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeft, BookOpen } from "lucide-react";
+import { useGrammarByCategory } from "@/shared/hooks/useGrammar";
+import { GRAMMAR_CATEGORIES } from "@/features/grammar/constants/categories";
 
+export default function GrammarCategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
+  // ✅ Unwrap the async params with React.use()
+  const { category } = React.use(params);
 
-export default function GrammarCategoryPage({ params }: { params: { category: string } }) {
-  const category = params.category as keyof typeof GRAMMAR_CATEGORIES
-  const categoryInfo = GRAMMAR_CATEGORIES[category]
-  const { data: topics, isLoading } = useGrammarByCategory(category)
+  const categoryKey = category as keyof typeof GRAMMAR_CATEGORIES;
+  const categoryInfo = GRAMMAR_CATEGORIES[categoryKey];
+  const { data: topics, isLoading } = useGrammarByCategory(categoryKey);
 
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
 
   return (
@@ -28,10 +41,12 @@ export default function GrammarCategoryPage({ params }: { params: { category: st
 
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-5xl">{categoryInfo.icon}</span>
-          <h1 className="text-4xl font-bold">{categoryInfo.name}</h1>
+          <span className="text-5xl">{categoryInfo?.icon}</span>
+          <h1 className="text-4xl font-bold">{categoryInfo?.name}</h1>
         </div>
-        <p className="text-muted-foreground text-lg">{categoryInfo.description}</p>
+        <p className="text-muted-foreground text-lg">
+          {categoryInfo.description}
+        </p>
         <p className="text-sm text-muted-foreground mt-2">
           {topics?.length || 0} topics available
         </p>
@@ -50,7 +65,9 @@ export default function GrammarCategoryPage({ params }: { params: { category: st
                     </span>
                   </div>
                 </div>
-                <CardTitle className="mt-2 line-clamp-2">{topic.title}</CardTitle>
+                <CardTitle className="mt-2 line-clamp-2">
+                  {topic.title}
+                </CardTitle>
                 <CardDescription className="line-clamp-3">
                   {topic.explanation.substring(0, 100)}...
                 </CardDescription>
@@ -63,5 +80,5 @@ export default function GrammarCategoryPage({ params }: { params: { category: st
         ))}
       </div>
     </div>
-  )
+  );
 }

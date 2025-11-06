@@ -8,6 +8,7 @@ import type { QuizQuestion, QuizResult, QuizSubmission } from '@/features/quiz/t
  * Hook to fetch reading content list by level
  */
 export function useReadingByLevel(level: Level) {
+  console.log('level',level);
   return useQuery({
     queryKey: ['reading', level],
     queryFn: async () => {
@@ -15,7 +16,7 @@ export function useReadingByLevel(level: Level) {
         .from('reading_content')
         .select('*')
         .eq('level', level)
-        .eq('type', 'reading')
+        // .eq('type', 'reading')
         .order('order_index')
 
       if (error) throw error
@@ -27,6 +28,23 @@ export function useReadingByLevel(level: Level) {
 /**
  * Hook to fetch reading content details by id
  */
+// export function useReadingDetail(id: string) {
+//   return useQuery({
+//     queryKey: ['reading', id],
+//     queryFn: async () => {
+//       const { data, error } = await supabase
+//         .from('reading_content')
+//         .select('*')
+//         .eq('id', id)
+//         .eq('"type"', 'reading')
+//         .single()
+
+//       if (error) throw error
+//       return data as ReadingContent
+//     },
+//   })
+// }
+
 export function useReadingDetail(id: string) {
   return useQuery({
     queryKey: ['reading', id],
@@ -35,14 +53,16 @@ export function useReadingDetail(id: string) {
         .from('reading_content')
         .select('*')
         .eq('id', id)
-        .eq('type', 'reading')
-        .single()
+        // If 'type' column exists and isn't reserved, keep it:
+        // .eq('content_type', 'reading')
+        .maybeSingle()
 
       if (error) throw error
       return data as ReadingContent
     },
   })
 }
+
 
 /**
  * Hook to fetch quiz questions for reading content

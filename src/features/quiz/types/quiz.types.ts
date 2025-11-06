@@ -1,14 +1,22 @@
 import { Level, ContentType } from '@/shared/types/common.types'
 
+export interface QuizOption {
+  id: string
+  text: string
+  is_correct: boolean
+}
+
 export type QuizQuestion = {
   id: string
   content_id: string
   content_type: ContentType
   question_text: string
-  options: string[]
+  options: QuizOption[]
   correct_answer: number
   explanation: string | null
   order_index: number
+  points?: number
+  question_type:string
 }
 
 export type QuizResult = {
@@ -25,7 +33,7 @@ export type QuizResult = {
 export type QuizAnswer = {
   question_id: string
   selected_option: number
-  is_correct: boolean
+  is_correct?: boolean
   time_taken: number
 }
 

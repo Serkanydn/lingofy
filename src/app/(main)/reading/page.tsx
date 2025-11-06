@@ -11,7 +11,8 @@ import { useReadingByLevel } from "@/shared/hooks/useReading";
 import { useAuthStore } from "@/shared/lib/store/authStore";
 import { cn } from "@/shared/lib/utils";
 import { Level } from "@/shared/types/common.types";
-import { Badge, BookOpen, Link, Lock } from "lucide-react";
+import { Badge, BookOpen, Lock } from "lucide-react";
+import Link from "next/link";
 
 const LEVEL_INFO: Record<
   Level,
@@ -51,11 +52,12 @@ const LEVEL_INFO: Record<
 function LevelCard({ level }: { level: Level }) {
   const isPremium = useAuthStore((state) => state.isPremium());
   const { data: readings, isLoading } = useReadingByLevel(level);
+  console.log('readings',readings);
   const totalTexts = readings?.length ?? 0;
   const freeTexts = Math.min(10, totalTexts);
 
   return (
-    <Link href={`/reading/${level}`}>
+    <Link href={`/reading/${level}`} className="block">
       <Card
         className={cn(
           "hover:shadow-lg transition-shadow cursor-pointer h-full",

@@ -1,6 +1,5 @@
 "use client";
 
-import { useReadingByLevel } from "@/lib/hooks/useReading";
 import {
   Card,
   CardContent,
@@ -8,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { use } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -17,6 +17,7 @@ import { Level } from "@/shared/types/common.types";
 import { useAuthStore } from "@/shared/hooks/useAuth";
 import { useState } from "react";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
+import { useReadingByLevel } from "@/shared/hooks/useReading";
 
 interface ReadingCardProps {
   reading: ReadingContent;
@@ -106,10 +107,12 @@ function LoadingSkeleton() {
 export default function ReadingLevelPage({
   params,
 }: {
-  params: { level: string };
+  params: Promise<{ level: string }>;
 }) {
-  const level = params.level.toUpperCase() as Level;
+  const { level: paramLevel } = use(params);
+  const level = paramLevel.toUpperCase() as Level;
   const { data: readings, isLoading } = useReadingByLevel(level);
+  console.log('readings',readings);
   const isPremium = useAuthStore((state) => state.isPremium());
   const [showPaywall, setShowPaywall] = useState(false);
 

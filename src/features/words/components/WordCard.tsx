@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Volume2, Trash2 } from 'lucide-react'
-import { UserWord } from '@/lib/hooks/useWords'
-import { useDeleteWord } from '@/lib/hooks/useWords'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { useDeleteWord, UserWord } from '@/shared/hooks/useWords'
 
 interface WordCardProps {
   word: UserWord

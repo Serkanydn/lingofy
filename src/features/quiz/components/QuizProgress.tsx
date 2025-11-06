@@ -1,6 +1,6 @@
 "use client";
 
-import { Progress } from "@/shared/components/ui/progress";
+import { Progress } from "@/components/ui/progress";
 import { CheckCircle2 } from "lucide-react";
 
 interface QuizProgressProps {
