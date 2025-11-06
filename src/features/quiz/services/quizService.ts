@@ -5,6 +5,7 @@ interface Quiz {
   id: number;
   title: string;
   description: string;
+  content_id: string;
   type: 'grammar' | 'vocabulary' | 'reading' | 'listening';
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   questions: QuizQuestion[];
@@ -27,7 +28,9 @@ interface QuizAttempt {
   user_id: string;
   quiz_id: number;
   score: number;
-  answers: Record<number, string>;
+  max_score: number;
+  percentage: number;
+  answers: QuizAnswer[];
   completed_at: string;
 }
 
@@ -52,16 +55,21 @@ export class QuizService extends BaseService<Quiz> {
     return { ...quiz, questions };
   }
 
-  async submitQuizAttempt(contentId: string, userId: string, answers: QuizAnswer[]) {
-    const answersMap = Object.fromEntries(
-      answers.map(a => [a.question_id, a.selected_option.toString()])
-    );
-
+  async submitQuizAttempt(
+    quizContentId: string, 
+    userId: string, 
+    answers: QuizAnswer[], 
+    totalScore: number, 
+    maxScore: number, 
+    percentage: number
+  ) {
     const attempt = await this.attemptsService.create({
       user_id: userId,
-      quiz_id: parseInt(contentId),
-      score: 0, // Will be calculated by the database trigger
-      answers: answersMap,
+      quiz_id: parseInt(quizContentId),
+      score: totalScore,
+      max_score: maxScore,
+      percentage: percentage,
+      answers: answers,
       completed_at: new Date().toISOString(),
     });
 
@@ -83,5 +91,48 @@ export class QuizService extends BaseService<Quiz> {
     const totalQuestions = questions.length;
     const correctAnswers = questions.filter(q => answers[q.id] === q.correct_answer).length;
     return (correctAnswers / totalQuestions) * 100;
+  }
+
+  async getQuizByContent(contentType: 'reading' | 'listening' | 'grammar', contentId: string) {
+    const { data, error } = await this.supabase
+      .from("quizzes")
+      .select("*, quiz_questions(*)")
+      .eq("type", contentType)
+      .eq("content_id", contentId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getUserQuizHistory(userId: string) {
+    const { data, error } = await this.supabase
+      .from("quiz_attempts")
+      .select(`
+        *,
+        quizzes (
+          id,
+          title,
+          type,
+          difficulty
+        )
+      `)
+      .eq("user_id", userId)
+      .order("completed_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
+
+  async hasAttempted(userId: string, quizContentId: string) {
+    const { data, error } = await this.supabase
+      .from("quiz_attempts")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("quiz_id", quizContentId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return !!data;
   }
 }

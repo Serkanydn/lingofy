@@ -1,12 +1,17 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
 
+import { Level, GrammarCategory } from '@/shared/types/common.types';
+
 interface GrammarRule {
-  id: number;
+  id: string;
   title: string;
-  description: string;
-  level: string;
+  category: GrammarCategory;
+  explanation: string;
   examples: string[];
-  category: string;
+  mini_text: string;
+  difficulty_level: Level;
+  is_premium: boolean;
+  order_index: number;
   created_at: string;
   updated_at: string;
 }
@@ -29,7 +34,7 @@ export class GrammarService extends BaseService<GrammarRule> {
     this.exercisesService = new BaseService<GrammarExercise>("grammar_exercises");
   }
 
-  async getRuleWithExercises(ruleId: number) {
+  async getRuleWithExercises(ruleId: string) {
     const rule = await this.getById(ruleId);
     const { data: exercises, error } = await this.supabase
       .from("grammar_exercises")
@@ -40,17 +45,17 @@ export class GrammarService extends BaseService<GrammarRule> {
     return { rule, exercises };
   }
 
-  async getRulesByLevel(level: string) {
+  async getRulesByLevel(level: Level) {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select("*")
-      .eq("level", level);
+      .eq("difficulty_level", level);
 
     if (error) throw error;
     return data as GrammarRule[];
   }
 
-  async getRulesByCategory(category: string) {
+  async getRulesByCategory(category: GrammarCategory) {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select("*")

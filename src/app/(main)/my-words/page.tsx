@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { FlashcardPractice } from "@/features/words/components/FlashcardPractice";
 import { WordCard } from "@/features/words/components/WordCard";
-import { useUserWords } from "@/shared/hooks/useWords";
+import { useUserWords } from "@/features/words/hooks/useWords";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { useState } from "react";
 

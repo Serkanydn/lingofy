@@ -7,10 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/shared/lib/supabase/client'
 import { Crown, LogOut, Settings } from 'lucide-react'
-import { useAuthStore } from '@/shared/hooks/useAuth'
-
+import { useAuth } from '../hooks/useAuth'
+ 
 export default function ProfilePage() {
-  const { user, profile } = useAuthStore()
+  const { user, profile, isPremium } = useAuth();
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 

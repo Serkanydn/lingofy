@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { UserWord, useUpdateFlashcardPractice } from "@/shared/hooks/useWords";
+import { UserWord, useUpdateFlashcardPractice } from "../hooks/useWords";
 
 interface FlashcardPracticeProps {
   words: UserWord[];

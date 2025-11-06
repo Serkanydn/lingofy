@@ -14,10 +14,10 @@ import Link from "next/link";
 import { ArrowLeft, Lock, BookOpen } from "lucide-react";
 import { ReadingContent } from "@/features/reading/types/reading.types";
 import { Level } from "@/shared/types/common.types";
-import { useAuthStore } from "@/shared/hooks/useAuth";
-import { useState } from "react";
+ import { useState } from "react";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
-import { useReadingByLevel } from "@/shared/hooks/useReading";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useReadingByLevel } from "@/features/reading/hooks/useReading";
 
 interface ReadingCardProps {
   reading: ReadingContent;
@@ -112,7 +112,7 @@ export default function ReadingLevelPage({
   const { level: paramLevel } = use(params);
   const level = paramLevel.toUpperCase() as Level;
   const { data: readings, isLoading } = useReadingByLevel(level);
-  const isPremium = useAuthStore((state) => state.isPremium());
+  const { user, profile, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
 
   if (isLoading) {

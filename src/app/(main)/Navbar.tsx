@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,26 +10,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
 
-import { useRouter } from 'next/navigation'
-import { Menu, Crown, LogOut, User, BarChart3 } from 'lucide-react'
-import Link from 'next/link'
-import { useAuthStore } from '@/shared/hooks/useAuth'
-import { supabase } from '@/shared/lib/supabase/client'
-import { PremiumBadge } from '@/features/premium/components/PremiumBadge'
+import { useRouter } from "next/navigation";
+import { Menu, Crown, LogOut, User, BarChart3 } from "lucide-react";
+import Link from "next/link";
+import { supabase } from "@/shared/lib/supabase/client";
+import { PremiumBadge } from "@/features/premium/components/PremiumBadge";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function Navbar() {
-  const router = useRouter()
-  const { user, profile } = useAuthStore()
-  const isPremium = useAuthStore((state) => state.isPremium())
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const router = useRouter();
+  const { user, profile, isPremium } = useAuth();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b">
@@ -67,10 +67,14 @@ export function Navbar() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-10 w-10 rounded-full"
+                >
                   <Avatar>
                     <AvatarFallback>
-                      {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                      {profile?.full_name?.charAt(0).toUpperCase() ||
+                        user.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -79,7 +83,7 @@ export function Navbar() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {profile?.full_name || 'User'}
+                      {profile?.full_name || "User"}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
@@ -93,12 +97,12 @@ export function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {isPremium && (
-                  <DropdownMenuItem onClick={() => router.push('/statistics')}>
+                  <DropdownMenuItem onClick={() => router.push("/statistics")}>
                     <BarChart3 className="mr-2 h-4 w-4" />
                     Statistics
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => router.push('/my-words')}>
+                <DropdownMenuItem onClick={() => router.push("/my-words")}>
                   <User className="mr-2 h-4 w-4" />
                   My Words
                 </DropdownMenuItem>
@@ -122,5 +126,5 @@ export function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

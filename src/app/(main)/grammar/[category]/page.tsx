@@ -11,8 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import { useGrammarByCategory } from "@/shared/hooks/useGrammar";
 import { GRAMMAR_CATEGORIES } from "@/features/grammar/constants/categories";
+import { useGrammarByCategory } from "@/features/grammar/hooks/useGrammar";
 
 export default function GrammarCategoryPage({
   params,

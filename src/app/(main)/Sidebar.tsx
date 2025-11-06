@@ -1,58 +1,64 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { BookOpen, Headphones, BookText, BookMarked, Crown, BarChart3, Home } from 'lucide-react'
-import { useAuthStore } from '@/shared/hooks/useAuth'
-import { cn } from '@/shared/lib/utils'
-import { PremiumBadge } from '@/features/premium/components/PremiumBadge'
-
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  BookOpen,
+  Headphones,
+  BookText,
+  BookMarked,
+  Crown,
+  BarChart3,
+  Home,
+} from "lucide-react";
+import { cn } from "@/shared/lib/utils";
+import { PremiumBadge } from "@/features/premium/components/PremiumBadge";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const navigation = [
   {
-    name: 'Home',
-    href: '/',
+    name: "Home",
+    href: "/",
     icon: Home,
   },
   {
-    name: 'Reading',
-    href: '/reading',
+    name: "Reading",
+    href: "/reading",
     icon: BookOpen,
   },
   {
-    name: 'Listening',
-    href: '/listening',
+    name: "Listening",
+    href: "/listening",
     icon: Headphones,
   },
   {
-    name: 'Grammar',
-    href: '/grammar',
+    name: "Grammar",
+    href: "/grammar",
     icon: BookText,
   },
   {
-    name: 'My Words',
-    href: '/my-words',
+    name: "My Words",
+    href: "/my-words",
     icon: BookMarked,
     requiresAuth: true,
   },
   {
-    name: 'Statistics',
-    href: '/statistics',
+    name: "Statistics",
+    href: "/statistics",
     icon: BarChart3,
     requiresPremium: true,
   },
   {
-    name: 'Premium',
-    href: '/premium',
+    name: "Premium",
+    href: "/premium",
     icon: Crown,
     hideWhenPremium: true,
   },
-]
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const { user } = useAuthStore()
-  const isPremium = useAuthStore((state) => state.isPremium())
+  const pathname = usePathname();
+  const { user, profile, isPremium } = useAuth();
 
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col pt-16">
@@ -60,34 +66,33 @@ export function Sidebar() {
         <nav className="flex-1 px-4 py-6 space-y-1">
           {navigation.map((item) => {
             // Hide if requires auth and user not logged in
-            if (item.requiresAuth && !user) return null
-            
-            // Hide if requires premium and user not premium
-            if (item.requiresPremium && !isPremium) return null
-            
-            // Hide premium link if user is already premium
-            if (item.hideWhenPremium && isPremium) return null
+            if (item.requiresAuth && !user) return null;
 
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+            // Hide if requires premium and user not premium
+            if (item.requiresPremium && !isPremium) return null;
+
+            // Hide premium link if user is already premium
+            if (item.hideWhenPremium && isPremium) return null;
+
+            const isActive =
+              pathname === item.href || pathname?.startsWith(item.href + "/");
 
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                  "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
                 {item.name}
-                {item.requiresPremium && (
-                  <PremiumBadge />
-                )}
+                {item.requiresPremium && <PremiumBadge />}
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -106,5 +111,5 @@ export function Sidebar() {
         )}
       </div>
     </aside>
-  )
+  );
 }

@@ -16,16 +16,16 @@ import {
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
-import { useAuthStore } from '@/shared/hooks/useAuth'
-import { useStatistics } from '@/shared/hooks/useStatistics'
-import { useQuizHistory } from '@/shared/hooks/useQuiz'
-import { StatsCard } from '@/features/statistics/components/StatsCard'
+ import { useStatistics } from '@/shared/hooks/useStatistics'
+ import { StatsCard } from '@/features/statistics/components/StatsCard'
 import { SkeletonStats } from '@/features/statistics/components/SkeletonStats'
+import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useQuizHistory } from '@/features/quiz/hooks/useQuiz'
 
 export default function StatisticsPage() {
   const router = useRouter()
-  const user = useAuthStore((state) => state.user)
-  const isPremium = useAuthStore((state) => state.isPremium())
+   const { user, profile, isPremium } = useAuth();
+ 
   const { data: stats, isLoading } = useStatistics()
   const { data: quizHistory } = useQuizHistory(user?.id || '')
 

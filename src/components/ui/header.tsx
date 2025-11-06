@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
-import { useAuth } from "@/shared/providers/AuthProvider";
 import { supabase } from "@/shared/lib/supabase/client";
 import {
   Crown,
@@ -28,6 +27,7 @@ import {
 } from "lucide-react";
 import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function Header() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export function Header() {
     router.refresh();
   };
 
-  console.log('user',user);
+  console.log("user", user);
   const mainMenuItems = [
     { href: "/reading", name: "Reading", icon: BookOpen },
     { href: "/listening", name: "Listening", icon: Headphones },

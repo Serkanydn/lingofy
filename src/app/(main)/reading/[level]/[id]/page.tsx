@@ -2,10 +2,6 @@
 
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuthStore } from "@/shared/hooks/useAuth";
-import { useQuiz } from "@/shared/hooks/useQuiz";
-import { useReadingDetail } from "@/shared/hooks/useReading";
-import { useQuizSubmit } from "@/shared/hooks/useQuizSubmit";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, PlayCircleIcon, Plus } from "lucide-react";
@@ -13,13 +9,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useQuiz } from "@/features/quiz/hooks/useQuiz";
+import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
+import { useReadingDetail } from "@/features/reading/hooks/useReading";
 
 export default function ReadingDetailPage() {
   // ✅ unwrap async params
   const { id: contentId, level } = useParams() as { id: string; level: string };
 
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, profile, isPremium } = useAuth();
   const { data: reading, isLoading } = useReadingDetail(contentId);
   const { data: quiz } = useQuiz("reading", contentId);
   const submitQuiz = useQuizSubmit();
@@ -40,7 +40,6 @@ export default function ReadingDetailPage() {
     if (!user || !quiz) return;
 
     await submitQuiz.mutateAsync({
-      user_id: user.id,
       quiz_content_id: quiz.id,
       answers: [],
       total_score: score,

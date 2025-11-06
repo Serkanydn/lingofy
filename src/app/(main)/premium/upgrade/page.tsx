@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Loader2 } from "lucide-react";
-import { useAuthStore } from "@/shared/hooks/useAuth";
-import { createCheckoutSession } from "@/shared/lib/lemonsqueezy/api";
+ 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { addPremiumToUser } from "@/features/premium/services/addPremiumService";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const MONTHLY_PRICE = 9.99;
 const ANNUAL_PRICE = 99.99;
@@ -65,7 +65,8 @@ export default function PremiumUpgradePage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { user, profile } = useAuthStore();
+   const { user, profile, isPremium } = useAuth();
+ 
 
   const handleUpgrade = async (plan: PricingPlan) => {
     handleUpgradev2();

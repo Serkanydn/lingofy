@@ -1,41 +1,53 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { QuizAttempt } from '@/shared/types/content.types'
-import { QuizAnswer } from '../types/quiz.types'
-import { quizService } from '../services'
-import { authService } from '@/features/auth/services'
-import { toast } from 'sonner'
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { QuizAttempt } from "@/shared/types/content.types";
+import { QuizAnswer } from "../types/quiz.types";
+import { quizService } from "../services";
+import { authService } from "@/features/auth/services";
+import { toast } from "sonner";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface QuizSubmitParams {
-  contentId: string;
+  quiz_content_id: string;
   answers: QuizAnswer[];
+  total_score: number;
+  max_score: number;
+  percentage: number;
 }
 
 export function useQuizSubmit() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ contentId, answers }: QuizSubmitParams) => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error('Not authenticated');
+    mutationFn: async ({
+      quiz_content_id,
+      answers,
+      total_score,
+      max_score,
+      percentage,
+    }: QuizSubmitParams) => {
+      const { user } = useAuth();
 
-      const attempt = await quizService.submitQuizAttempt(
-        contentId,
+      if (!user) throw new Error("Not authenticated");
+
+      return await quizService.submitQuizAttempt(
+        quiz_content_id,
         user.id,
-        answers
+        answers,
+        total_score,
+        max_score,
+        percentage
       );
-
-      return attempt;
     },
     onSuccess: (data) => {
-      toast.success(`Quiz submitted successfully!`)
+      toast.success(`Quiz submitted successfully!`);
       // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: ['quiz-history'] })
-      queryClient.invalidateQueries({ queryKey: ['statistics'] })
-      queryClient.invalidateQueries({ queryKey: ['quiz-attempted'] })
+      queryClient.invalidateQueries({ queryKey: ["quiz-history"] });
+      queryClient.invalidateQueries({ queryKey: ["statistics"] });
+      queryClient.invalidateQueries({ queryKey: ["quiz-attempted"] });
     },
     onError: (error) => {
-      toast.error('Failed to submit quiz. Please try again.')
-      console.error('Quiz submission error:', error)
+      toast.error("Failed to submit quiz. Please try again.");
+      console.error("Quiz submission error:", error);
     },
-  })
+  });
 }

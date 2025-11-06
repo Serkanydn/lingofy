@@ -1,13 +1,16 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
 
+import { Level } from "@/shared/types/common.types";
+
 interface ReadingText {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  level: string;
-  category: string;
-  estimated_time: number;
-  vocabulary: string[];
+  level: Level;
+  word_count: number;
+  audio_urls: string[];
+  is_premium: boolean;
+  order_index: number;
   created_at: string;
   updated_at: string;
 }
@@ -26,10 +29,12 @@ export class ReadingService extends BaseService<ReadingText> {
 
   constructor() {
     super("reading_texts");
-    this.questionsService = new BaseService<ReadingQuestion>("reading_questions");
+    this.questionsService = new BaseService<ReadingQuestion>(
+      "reading_questions"
+    );
   }
 
-  async getTextWithQuestions(textId: number) {
+  async getTextWithQuestions(textId: string) {
     const text = await this.getById(textId);
     const { data: questions, error } = await this.supabase
       .from("reading_questions")

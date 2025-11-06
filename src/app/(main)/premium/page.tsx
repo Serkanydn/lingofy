@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Check, Crown, Zap } from 'lucide-react'
-import { useAuthStore } from '@/shared/hooks/useAuth'
 import { PRICING } from '@/shared/lib/lemonsqueezy/config'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 
 
 const PREMIUM_FEATURES = [
@@ -38,8 +38,8 @@ const PREMIUM_FEATURES = [
 ]
 
 export default function PremiumPage() {
-  const { user } = useAuthStore()
-  const isPremium = useAuthStore((state) => state.isPremium())
+  const { user, profile, isPremium } = useAuth();
+
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
   const [loading, setLoading] = useState(false)
 

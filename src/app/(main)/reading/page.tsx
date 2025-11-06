@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useReadingByLevel } from "@/shared/hooks/useReading";
-import { useAuthStore } from "@/shared/lib/store/authStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useReadingByLevel } from "@/features/reading/hooks/useReading";
 import { cn } from "@/shared/lib/utils";
 import { Level } from "@/shared/types/common.types";
 import { Badge, BookOpen, Lock } from "lucide-react";
@@ -50,7 +50,7 @@ const LEVEL_INFO: Record<
 };
 
 function LevelCard({ level }: { level: Level }) {
-  const isPremium = useAuthStore((state) => state.isPremium());
+  const { isPremium } = useAuth();
   const { data: readings, isLoading } = useReadingByLevel(level);
   const totalTexts = readings?.length ?? 0;
   const freeTexts = Math.min(10, totalTexts);
