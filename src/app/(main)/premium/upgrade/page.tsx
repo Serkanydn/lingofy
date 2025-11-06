@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,10 +102,11 @@ export default function PremiumUpgradePage() {
   };
 
   // Redirect premium users to dashboard
-  if (profile?.is_premium) {
-    router.push("/");
-    return null;
-  }
+  useEffect(() => {
+    if (profile?.is_premium) {
+      router.push("/");
+    }
+  }, [profile?.is_premium, router]);
 
   return (
     <div className="container mx-auto px-4 py-16">

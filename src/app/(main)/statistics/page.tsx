@@ -20,6 +20,7 @@ import { useAuthStore } from '@/shared/hooks/useAuth'
 import { useStatistics } from '@/shared/hooks/useStatistics'
 import { useQuizHistory } from '@/shared/hooks/useQuiz'
 import { StatsCard } from '@/features/statistics/components/StatsCard'
+import { SkeletonStats } from '@/features/statistics/components/SkeletonStats'
 
 export default function StatisticsPage() {
   const router = useRouter()
@@ -47,7 +48,7 @@ export default function StatisticsPage() {
             <Button 
               size="lg"
               onClick={() => router.push('/premium')}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500"
+              className="bg-linear-to-r from-yellow-400 to-orange-500"
             >
               Upgrade to Premium
             </Button>
@@ -58,11 +59,7 @@ export default function StatisticsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading statistics...</div>
-      </div>
-    )
+    return <SkeletonStats />
   }
 
   if (!stats) {
