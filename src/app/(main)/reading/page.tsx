@@ -52,7 +52,6 @@ const LEVEL_INFO: Record<
 function LevelCard({ level }: { level: Level }) {
   const isPremium = useAuthStore((state) => state.isPremium());
   const { data: readings, isLoading } = useReadingByLevel(level);
-  console.log('readings',readings);
   const totalTexts = readings?.length ?? 0;
   const freeTexts = Math.min(10, totalTexts);
 

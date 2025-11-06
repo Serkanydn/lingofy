@@ -112,7 +112,6 @@ export default function ReadingLevelPage({
   const { level: paramLevel } = use(params);
   const level = paramLevel.toUpperCase() as Level;
   const { data: readings, isLoading } = useReadingByLevel(level);
-  console.log('readings',readings);
   const isPremium = useAuthStore((state) => state.isPremium());
   const [showPaywall, setShowPaywall] = useState(false);
 
