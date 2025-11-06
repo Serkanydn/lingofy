@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../lib/supabase/client'
+import { authService } from "@/features/auth/services"
+import { statisticsService } from "../services"
 
 export interface UserStatistics {
   user_id: string
@@ -18,20 +19,10 @@ export function useStatistics() {
   return useQuery({
     queryKey: ['statistics'],
     queryFn: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const user = await authService.getCurrentUser();
+      if (!user) throw new Error('Not authenticated');
 
-      if (!user) throw new Error('Not authenticated')
-
-      const { data, error } = await supabase
-        .from('user_statistics')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
-      if (error) throw error
-      return data as UserStatistics
+      return statisticsService.getUserStatistics(user.id);
     },
   })
 }
@@ -40,14 +31,10 @@ export function useQuizHistory() {
   return useQuery({
     queryKey: ['quiz-history'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_quiz_results')
-        .select('*')
-        .order('completed_at', { ascending: false })
-        .limit(20)
+      const user = await authService.getCurrentUser();
+      if (!user) throw new Error('Not authenticated');
 
-      if (error) throw error
-      return data
+      return statisticsService.getUserQuizHistory(user.id);
     },
   })
 }

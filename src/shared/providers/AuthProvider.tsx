@@ -1,15 +1,15 @@
 "use client";
 
 import { ReactNode, createContext, useContext, useEffect } from "react";
-import { useAuthStore } from "@/shared/hooks/useAuth";
 import { User } from "@supabase/supabase-js";
-import { AuthStore } from "@/shared/lib/store/authStore";
+import { useAuthStore } from "@/features/auth/hooks/useAuth";
+import { AuthStore, Profile } from "@/features/auth/types/auth.types";
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean;
   isPremium: boolean;
   user: User | null;
-  profile: AuthStore["profile"];
+  profile: Profile | null;
 }>({
   isAuthenticated: false,
   isPremium: false,
@@ -42,7 +42,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .single();
 
           if (profile && mounted) {
-            store.setProfile(profile);
+            const formattedProfile: Profile = {
+              id: profile.id,
+              email: profile.email,
+              full_name: profile.full_name,
+              avatar_url: profile.avatar_url,
+              is_premium: profile.is_premium,
+              premium_expires_at: profile.premium_expires_at,
+              created_at: profile.created_at
+            };
+            store.setProfile(formattedProfile);
           }
         }
       } finally {
@@ -65,8 +74,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .eq("id", session.user.id)
             .single();
 
-          if (mounted) {
-            store.setProfile(profile ?? null);
+          if (mounted && profile) {
+            const formattedProfile: Profile = {
+              id: profile.id,
+              email: profile.email,
+              full_name: profile.full_name,
+              avatar_url: profile.avatar_url,
+              is_premium: profile.is_premium,
+              premium_expires_at: profile.premium_expires_at,
+              created_at: profile.created_at
+            };
+            store.setProfile(formattedProfile);
+          } else if (mounted) {
+            store.setProfile(null);
           }
         } else {
           store.setProfile(null);

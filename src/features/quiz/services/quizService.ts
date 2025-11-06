@@ -1,4 +1,5 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
+import { QuizAnswer } from "@/features/quiz/types/quiz.types";
 
 interface Quiz {
   id: number;
@@ -51,17 +52,20 @@ export class QuizService extends BaseService<Quiz> {
     return { ...quiz, questions };
   }
 
-  async submitQuizAttempt(userId: string, quizId: number, answers: Record<number, string>) {
-    const quiz = await this.getQuizWithQuestions(quizId);
-    const score = this.calculateScore(quiz.questions, answers);
+  async submitQuizAttempt(contentId: string, userId: string, answers: QuizAnswer[]) {
+    const answersMap = Object.fromEntries(
+      answers.map(a => [a.question_id, a.selected_option.toString()])
+    );
 
-    return this.attemptsService.create({
+    const attempt = await this.attemptsService.create({
       user_id: userId,
-      quiz_id: quizId,
-      score,
-      answers,
+      quiz_id: parseInt(contentId),
+      score: 0, // Will be calculated by the database trigger
+      answers: answersMap,
       completed_at: new Date().toISOString(),
     });
+
+    return attempt;
   }
 
   async getUserAttempts(userId: string) {

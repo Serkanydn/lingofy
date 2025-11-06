@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { supabase } from '@/shared/lib/supabase/client'
+import { AuthService } from '@/features/auth/services/authService'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -16,18 +16,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const authService = new AuthService();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
     try {
       setLoading(true)
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
+      await authService.signInWithEmail(email, password);
+      
       router.push('/')
       router.refresh()
       toast.success('Successfully signed in!')
@@ -42,14 +39,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-
-      if (error) throw error
+      await authService.signInWithOAuth('google', `${window.location.origin}/auth/callback`);
     } catch (error: any) {
       toast.error('Error signing in with Google', {
         description: error.message

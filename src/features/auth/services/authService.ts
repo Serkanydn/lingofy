@@ -34,6 +34,18 @@ export class AuthService extends BaseService<AuthUser> {
     return data;
   }
 
+  async signInWithOAuth(provider: 'google' | 'github' | 'facebook', redirectTo: string) {
+    const { data, error } = await this.supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
   async signUpWithEmail(email: string, password: string) {
     const { data, error } = await this.supabase.auth.signUp({
       email,
@@ -85,3 +97,6 @@ export class AuthService extends BaseService<AuthUser> {
     return session;
   }
 }
+
+
+export const authService = new AuthService();

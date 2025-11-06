@@ -1,4 +1,4 @@
-import { quizService } from '@/features/quiz/services/quizServices'
+import { quizService } from '../services'
 import { useQuery } from '@tanstack/react-query'
 
 export function useQuiz(
