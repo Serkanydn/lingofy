@@ -36,23 +36,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
-    console.log('initialize');
+    console.log("initialize");
     try {
       // Get initial session
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      console.log("session", session);
 
       if (session?.user) {
         set({ user: session.user });
 
         // Fetch user profile
-        const { data: profile } = await supabase
+        const { data: profile } = (await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
-          .single();
+          .single()) as { data: Profile };
 
+        console.log("profile", profile);
         if (profile) {
           const formattedProfile: Profile = {
             id: profile.id,
@@ -61,7 +63,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             avatar_url: profile.avatar_url,
             is_premium: profile.is_premium,
             premium_expires_at: profile.premium_expires_at,
-            created_at: profile.created_at,
+            created_at: (profile as any).created_at,
           };
           set({ profile: formattedProfile });
         }
@@ -82,13 +84,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           if (profile) {
             const formattedProfile: Profile = {
-              id: profile.id,
-              email: profile.email,
-              full_name: profile.full_name,
-              avatar_url: profile.avatar_url,
-              is_premium: profile.is_premium,
-              premium_expires_at: profile.premium_expires_at,
-              created_at: profile.created_at,
+              id: (profile as any).id,
+              email: (profile as any).email,
+              full_name: (profile as any).full_name,
+              avatar_url: (profile as any).avatar_url,
+              is_premium: (profile as any).is_premium,
+              premium_expires_at: (profile as any).premium_expires_at,
+              created_at: (profile as any).created_at,
             };
             set({ profile: formattedProfile });
           }

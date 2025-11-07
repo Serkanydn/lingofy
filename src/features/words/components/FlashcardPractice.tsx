@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { UserWord, useUpdateFlashcardPractice } from "../hooks/useWords";
+import { UserWord } from "../hooks/useWords";
 
 interface FlashcardPracticeProps {
   words: UserWord[];
@@ -21,7 +21,6 @@ interface FlashcardPracticeProps {
 export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const updatePractice = useUpdateFlashcardPractice();
 
   const currentWord = words[currentIndex];
   const progress = ((currentIndex + 1) / words.length) * 100;
@@ -31,7 +30,6 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
     } else {
-      updatePractice.mutate();
       onExit();
     }
   };
