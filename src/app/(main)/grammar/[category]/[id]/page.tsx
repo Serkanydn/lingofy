@@ -7,8 +7,8 @@ import { Separator } from '@/components/ui/separator'
 import { DifficultyLevel } from '@/shared/types/content.types'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
-import { useGrammarDetail, useGrammarQuiz } from '@/shared/hooks/useGrammar'
 import { QuizContainer } from '@/features/quiz/components/QuizContainer'
+import { useGrammarDetail, useGrammarQuiz } from '@/features/grammar/hooks/useGrammar'
 
 export default function GrammarTopicPage({ 
   params 
@@ -91,7 +91,7 @@ export default function GrammarTopicPage({
           {/* Mini Text */}
           <div>
             <h3 className="text-xl font-semibold mb-3">📖 Practice Text</h3>
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
+            <div className="bg-linear-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
               <p className="text-lg leading-relaxed whitespace-pre-wrap">
                 {topic.mini_text}
               </p>

@@ -1,54 +1,53 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
-import { useAddWord } from '@/shared/hooks/useWords'
-import { Textarea } from '@/components/ui/textarea'
-
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { useAddWord } from "../hooks/useWords";
 
 interface AddWordDialogProps {
-  open: boolean
-  onClose: () => void
-  initialWord?: string
-  sourceType?: 'reading' | 'listening'
-  sourceId?: string
+  open: boolean;
+  onClose: () => void;
+  initialWord?: string;
+  sourceType?: "reading" | "listening";
+  sourceId?: string;
 }
 
-export function AddWordDialog({ 
-  open, 
-  onClose, 
-  initialWord = '',
+export function AddWordDialog({
+  open,
+  onClose,
+  initialWord = "",
   sourceType,
-  sourceId 
+  sourceId,
 }: AddWordDialogProps) {
-  const [word, setWord] = useState(initialWord)
-  const [translation, setTranslation] = useState('')
-  const [exampleEn, setExampleEn] = useState('')
-  const [exampleTr, setExampleTr] = useState('')
-  const addWord = useAddWord()
+  const [word, setWord] = useState(initialWord);
+  const [translation, setTranslation] = useState("");
+  const [exampleEn, setExampleEn] = useState("");
+  const [exampleTr, setExampleTr] = useState("");
+  const addWord = useAddWord();
 
   useEffect(() => {
     if (open) {
-      setWord(initialWord)
+      setWord(initialWord);
     }
-  }, [open, initialWord])
+  }, [open, initialWord]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!word || !translation || !exampleEn || !exampleTr) {
-      toast.error('Please fill in all fields')
-        return
+      toast.error("Please fill in all fields");
+      return;
     }
 
     try {
@@ -59,20 +58,22 @@ export function AddWordDialog({
         example_sentence_tr: exampleTr,
         source_type: sourceType,
         source_id: sourceId,
-      })
+      });
 
-      toast.success('Word added to your collection!')
+      toast.success("Word added to your collection!");
 
       // Reset form
-      setWord('')
-      setTranslation('')
-      setExampleEn('')
-      setExampleTr('')
-      onClose()
+      setWord("");
+      setTranslation("");
+      setExampleEn("");
+      setExampleTr("");
+      onClose();
     } catch (error) {
-      toast.error('Failed to add word')
+      console.error("Error adding word:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add word";
+      toast.error(errorMessage);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -131,14 +132,24 @@ export function AddWordDialog({
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={addWord.isPending}>
-              {addWord.isPending ? 'Adding...' : 'Add Word'}
-            </Button>          </div>
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={addWord.isPending}
+            >
+              {addWord.isPending ? "Adding..." : "Add Word"}
+            </Button>{" "}
+          </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

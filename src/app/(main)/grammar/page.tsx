@@ -46,7 +46,7 @@ export default function GrammarPage() {
         ))}
       </div>
 
-      <div className="mt-12 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
+      <div className="mt-12 bg-linear-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
         <div className="flex items-start gap-4">
           <div className="text-3xl">✨</div>
           <div>

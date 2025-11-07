@@ -1,4 +1,6 @@
-import { Level, ContentType } from '@/shared/types/common.types'
+export type ContentType = 'reading' | 'listening' | 'grammar'
+
+export type QuestionType = "mc" | "fb" | "tf";
 
 export interface QuizOption {
   id: string
@@ -16,7 +18,27 @@ export type QuizQuestion = {
   explanation: string | null
   order_index: number
   points?: number
-  question_type:string
+  question_type: QuestionType
+}
+
+export type QuizContent = {
+  id: string
+  title: string
+  questions: QuizQuestion[]
+}
+
+export type UserAnswer = {
+  question_id: string
+  type: "option" | "text"
+  selectedOptionId?: string | null
+  textAnswer?: string | null
+}
+
+export type QuizState = {
+  currentQuestionIndex: number
+  userAnswers: Record<string, UserAnswer>
+  isSubmitted: boolean
+  showResults: boolean
 }
 
 export type QuizResult = {
@@ -41,6 +63,7 @@ export type QuizSubmission = {
   contentType: ContentType
   contentId: string
   score: number
+  maxScore: number
   totalQuestions: number
   answers: QuizAnswer[]
 }

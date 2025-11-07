@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { useDeleteWord, UserWord } from '@/shared/hooks/useWords'
+import { useDeleteWord, UserWord } from '../hooks/useWords'
 
 interface WordCardProps {
   word: UserWord

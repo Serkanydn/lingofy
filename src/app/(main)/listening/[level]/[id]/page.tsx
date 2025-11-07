@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, FileText } from 'lucide-react'
-import { useListeningDetail, useListeningQuiz } from '@/shared/hooks/useListening'
 import { QuizContainer } from '@/features/quiz/components/QuizContainer'
 import { ListeningPlayer } from '@/features/listening/components/ListeningPlayer'
+import { useListeningDetail, useListeningQuiz } from '@/features/listening/hooks/useListening'
 
 
 export default function ListeningDetailPage({ 

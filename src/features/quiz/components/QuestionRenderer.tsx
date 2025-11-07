@@ -3,8 +3,7 @@
 import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
 import { FillBlankQuestion } from "./FillBlankQuestion";
 import { TrueFalseQuestion } from "./TrueFalseQuestion";
-import { QuizQuestion } from '../types/quiz.types'
-import { UserAnswer } from "@/shared/types/content.types";
+import { QuizQuestion, UserAnswer } from '../types/quiz.types';
 
 interface QuestionRendererProps {
   question: QuizQuestion;

@@ -1,12 +1,12 @@
 'use client'
 
-import { useListeningByLevel } from '@/shared/hooks/useListening'
 import { Level } from '@/shared/types/common.types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Clock, Lock } from 'lucide-react'
 import Link from 'next/link'
+import { useListeningByLevel } from '@/features/listening/hooks/useListening'
 
 export default function ListeningLevelPage({ 
   params 

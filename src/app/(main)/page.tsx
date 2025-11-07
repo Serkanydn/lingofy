@@ -57,7 +57,7 @@ export default function HomePage() {
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-5xl font-bold mb-4 bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Welcome to Learn&Quiz English
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -88,7 +88,7 @@ export default function HomePage() {
             <Card className="hover:shadow-lg transition-all cursor-pointer h-full group">
               <CardHeader>
                 <div
-                  className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                  className={`w-12 h-12 rounded-lg bg-linear-to-r ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
                 >
                   <feature.icon className="h-6 w-6 text-white" />
                 </div>
@@ -112,11 +112,11 @@ export default function HomePage() {
 
       {/* Premium CTA */}
       {!isPremium && (
-        <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+        <Card className="bg-linear-to-r from-yellow-50 to-orange-50 border-yellow-200">
           <CardContent className="p-8">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full">
+                <div className="bg-linear-to-r from-yellow-400 to-orange-500 p-4 rounded-full">
                   <Crown className="h-8 w-8 text-white" />
                 </div>
                 <div>
@@ -132,7 +132,7 @@ export default function HomePage() {
               <Link href="/premium">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
+                  className="bg-linear-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
                 >
                   <Crown className="mr-2 h-5 w-5" />
                   Learn More

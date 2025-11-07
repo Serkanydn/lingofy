@@ -1,9 +1,11 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Book, Headphones, Bookmark, Trophy, Crown } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const features = [
   {
@@ -37,8 +39,14 @@ const features = [
 ];
 
 export default function Home() {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen bg-linear-to-b from-background to-muted">
       {/* Hero Section */}
       <section className="container mx-auto px-4 pt-20 pb-16">
         <div className="max-w-5xl mx-auto text-center">

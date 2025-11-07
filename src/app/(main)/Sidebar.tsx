@@ -98,7 +98,7 @@ export function Sidebar() {
 
         {isPremium && (
           <div className="p-4 border-t">
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-3">
+            <div className="bg-linear-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Crown className="h-4 w-4 text-yellow-600" />
                 <span className="font-semibold text-sm">Premium Active</span>

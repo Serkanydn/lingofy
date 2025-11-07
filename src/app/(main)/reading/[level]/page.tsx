@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, Lock, BookOpen } from "lucide-react";
 import { ReadingContent } from "@/features/reading/types/reading.types";
-import { Level } from "@/shared/types/common.types";
  import { useState } from "react";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useReadingByLevel } from "@/features/reading/hooks/useReading";
+import { Level } from "@/shared/types/common.types";
 
 interface ReadingCardProps {
   reading: ReadingContent;
@@ -114,7 +114,7 @@ export default function ReadingLevelPage({
   const { data: readings, isLoading } = useReadingByLevel(level);
   const { user, profile, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
-
+console.log('readings',readings);
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">

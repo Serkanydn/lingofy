@@ -1,6 +1,6 @@
 "use client";
 
-import { QuizContent, QuizState, UserAnswer } from "@/types/content.types";
+import { QuizContent, QuizState, UserAnswer } from "../types/quiz.types";
 import { useState } from "react";
 import { QuizResult } from "./QuizResult";
 import { ArrowLeft, Send } from "lucide-react";
@@ -34,7 +34,7 @@ export function QuizContainer({
     ((quizState.currentQuestionIndex + 1) / totalQuestions) * 100;
 
   const handleAnswer = (answer: UserAnswer) => {
-    setQuizState((prev) => ({
+    setQuizState((prev: QuizState) => ({
       ...prev,
       userAnswers: {
         ...prev.userAnswers,

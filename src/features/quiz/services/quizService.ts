@@ -1,47 +1,15 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { QuizAnswer } from "@/features/quiz/types/quiz.types";
-
-interface Quiz {
-  id: number;
-  title: string;
-  description: string;
-  content_id: string;
-  type: 'grammar' | 'vocabulary' | 'reading' | 'listening';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  questions: QuizQuestion[];
-  time_limit?: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface QuizQuestion {
-  id: number;
-  quiz_id: number;
-  question: string;
-  options: string[];
-  correct_answer: string;
-  explanation: string;
-}
-
-interface QuizAttempt {
-  id: number;
-  user_id: string;
-  quiz_id: number;
-  score: number;
-  max_score: number;
-  percentage: number;
-  answers: QuizAnswer[];
-  completed_at: string;
-}
+import { Quiz, QuizAttempt, QuizQuestion } from '../types/service.types';
+import { QuizAnswer } from '../types/quiz.types';
 
 export class QuizService extends BaseService<Quiz> {
   private questionsService: BaseService<QuizQuestion>;
   private attemptsService: BaseService<QuizAttempt>;
 
   constructor() {
-    super("quizzes");
+    super("quiz_questions");
     this.questionsService = new BaseService<QuizQuestion>("quiz_questions");
-    this.attemptsService = new BaseService<QuizAttempt>("quiz_attempts");
+    this.attemptsService = new BaseService<QuizAttempt>("user_quiz_attempts");
   }
 
   async getQuizWithQuestions(quizId: number) {
@@ -78,8 +46,8 @@ export class QuizService extends BaseService<Quiz> {
 
   async getUserAttempts(userId: string) {
     const { data, error } = await this.supabase
-      .from("quiz_attempts")
-      .select("*, quizzes(*)")
+      .from("user_quiz_attempts")
+      .select("*")
       .eq("user_id", userId)
       .order("completed_at", { ascending: false });
 
@@ -87,19 +55,36 @@ export class QuizService extends BaseService<Quiz> {
     return data;
   }
 
-  private calculateScore(questions: QuizQuestion[], answers: Record<number, string>): number {
+  private calculateScore(questions: QuizQuestion[], answers: QuizAnswer[]): number {
     const totalQuestions = questions.length;
-    const correctAnswers = questions.filter(q => answers[q.id] === q.correct_answer).length;
+    const correctAnswers = answers.filter(answer => {
+      const question = questions.find(q => q.id.toString() === answer.question_id);
+      return question && question.correct_answer === answer.selected_option.toString();
+    }).length;
     return (correctAnswers / totalQuestions) * 100;
   }
 
   async getQuizByContent(contentType: 'reading' | 'listening' | 'grammar', contentId: string) {
-    const { data, error } = await this.supabase
-      .from("quizzes")
-      .select("*, quiz_questions(*)")
-      .eq("type", contentType)
+    // First get the quiz_content for this content
+    const { data: quizContent, error: quizError } = await this.supabase
+      .from("quiz_content")
+      .select("id")
+      .eq("content_type", contentType)
       .eq("content_id", contentId)
-      .single();
+      .maybeSingle();
+
+    if (quizError) throw quizError;
+    if (!quizContent) return [];
+
+    // Then get the questions with their options for this quiz
+    const { data, error } = await this.supabase
+      .from("quiz_questions")
+      .select(`
+        *,
+        options:quiz_options(*)
+      `)
+      .eq("quiz_content_id", quizContent.id)
+      .order("order_index", { ascending: true });
 
     if (error) throw error;
     return data;
@@ -107,16 +92,8 @@ export class QuizService extends BaseService<Quiz> {
 
   async getUserQuizHistory(userId: string) {
     const { data, error } = await this.supabase
-      .from("quiz_attempts")
-      .select(`
-        *,
-        quizzes (
-          id,
-          title,
-          type,
-          difficulty
-        )
-      `)
+      .from("user_quiz_attempts")
+      .select("*")
       .eq("user_id", userId)
       .order("completed_at", { ascending: false });
 
@@ -126,7 +103,7 @@ export class QuizService extends BaseService<Quiz> {
 
   async hasAttempted(userId: string, quizContentId: string) {
     const { data, error } = await this.supabase
-      .from("quiz_attempts")
+      .from("user_quiz_attempts")
       .select("id")
       .eq("user_id", userId)
       .eq("quiz_id", quizContentId)

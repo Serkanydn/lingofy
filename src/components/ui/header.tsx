@@ -38,7 +38,6 @@ export function Header() {
     router.refresh();
   };
 
-  console.log("user", user);
   const mainMenuItems = [
     { href: "/reading", name: "Reading", icon: BookOpen },
     { href: "/listening", name: "Listening", icon: Headphones },

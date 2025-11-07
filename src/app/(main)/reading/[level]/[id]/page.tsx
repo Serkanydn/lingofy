@@ -21,8 +21,17 @@ export default function ReadingDetailPage() {
   const router = useRouter();
   const { user, profile, isPremium } = useAuth();
   const { data: reading, isLoading } = useReadingDetail(contentId);
-  const { data: quiz } = useQuiz("reading", contentId);
+  const { data: quizQuestions } = useQuiz("reading", contentId);
   const submitQuiz = useQuizSubmit();
+
+  // Transform quiz questions array to QuizContent object
+  const quiz = quizQuestions && quizQuestions.length > 0 ? {
+    id: contentId,
+    title: reading?.title || "Quiz",
+    questions: quizQuestions
+  } : null;
+
+  console.log('quiz',quiz);
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [showAddWord, setShowAddWord] = useState(false);

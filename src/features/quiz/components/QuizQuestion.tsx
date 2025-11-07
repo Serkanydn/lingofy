@@ -1,10 +1,10 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { QuizQuestion as QuizQuestionType } from '@/types/content.types'
+import type { QuizQuestion } from '../types/quiz.types'
 
 interface QuizQuestionProps {
-  question: QuizQuestionType
+  question: QuizQuestion
   onAnswer: (answerIndex: number) => void
 }
 

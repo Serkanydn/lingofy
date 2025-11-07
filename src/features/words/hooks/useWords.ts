@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authService } from "@/features/auth/services";
 import { wordsService } from "../services";
 import { statisticsService } from "@/features/statistics/services";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export interface UserWord {
   id: string;
@@ -26,10 +27,14 @@ export function useUserWords() {
 
 export function useAddWord() {
   const queryClient = useQueryClient();
+  const user = useAuth().user!;
 
   return useMutation({
     mutationFn: async (word: Omit<UserWord, "id" | "created_at">) => {
-      return wordsService.create(word);
+      return wordsService.create({
+        ...word,
+        user_id: user.id,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-words"] });
@@ -47,22 +52,6 @@ export function useDeleteWord() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-words"] });
-    },
-  });
-}
-
-export function useUpdateFlashcardPractice() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("Not authenticated");
-
-      await statisticsService.incrementFlashcardCount(user.id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["statistics"] });
     },
   });
 }

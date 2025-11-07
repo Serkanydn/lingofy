@@ -2,8 +2,7 @@
 
 import { CheckCircle2, XCircle } from "lucide-react";
 import { quizValidator } from "../utils/quizValidator";
-import { QuizQuestion } from "../types/quiz.types";
-import { UserAnswer } from "@/shared/types/content.types";
+import { QuizQuestion, UserAnswer } from "../types/quiz.types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 

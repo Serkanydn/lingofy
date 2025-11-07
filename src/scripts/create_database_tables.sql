@@ -21,7 +21,7 @@ create table if not exists reading_content (
 create table if not exists quiz_questions (
   id uuid primary key default uuid_generate_v4(),
   content_type content_type not null,
-  content_id uuid not null,
+  content_id uuid not null,my 
   question_text text not null,
   options text[] not null,
   correct_answer integer not null,

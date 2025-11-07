@@ -34,9 +34,7 @@ export function useGrammarQuiz(topicId: string) {
   return useQuery({
     queryKey: ["quiz", "grammar", topicId],
     queryFn: async () => {
-      const { exercises } = await grammarService.getRuleWithExercises(
-        Number(topicId)
-      );
+      const { exercises } = await grammarService.getRuleWithExercises(topicId);
       return exercises;
     },
   });

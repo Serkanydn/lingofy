@@ -110,7 +110,7 @@ export function ListeningPlayer({ audioUrls, duration }: ListeningPlayerProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-primary/5 to-primary/10 border rounded-lg p-6 space-y-6">
+    <div className="bg-linear-to-br from-primary/5 to-primary/10 border rounded-lg p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-primary/20 p-3 rounded-full">

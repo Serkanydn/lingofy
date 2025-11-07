@@ -1,51 +1,27 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-
-import { Level } from "@/shared/types/common.types";
-
-interface ReadingText {
-  id: string;
-  title: string;
-  content: string;
-  level: Level;
-  word_count: number;
-  audio_urls: string[];
-  is_premium: boolean;
-  order_index: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface ReadingQuestion {
-  id: number;
-  text_id: number;
-  question: string;
-  options: string[];
-  correct_answer: string;
-  explanation: string;
-}
+import { ReadingText, ReadingQuestion } from "../types/service.types";
+import type { Level } from "@/shared/types/common.types";
 
 export class ReadingService extends BaseService<ReadingText> {
   private questionsService: BaseService<ReadingQuestion>;
 
   constructor() {
-    super("reading_texts");
-    this.questionsService = new BaseService<ReadingQuestion>(
-      "reading_questions"
-    );
+    super("reading_content");
+    this.questionsService = new BaseService<ReadingQuestion>("reading_quiz");
   }
 
   async getTextWithQuestions(textId: string) {
     const text = await this.getById(textId);
     const { data: questions, error } = await this.supabase
-      .from("reading_questions")
+      .from("reading_quiz")
       .select("*")
-      .eq("text_id", textId);
+      .eq("content_id", textId);
 
     if (error) throw error;
     return { ...text, questions };
   }
 
-  async getTextsByLevel(level: string) {
+  async getTextsByLevel(level: Level) {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select("*")
@@ -53,6 +29,16 @@ export class ReadingService extends BaseService<ReadingText> {
 
     if (error) throw error;
     return data as ReadingText[];
+  }
+
+  async getTextCountByLevel(level: Level) {
+    const { count, error } = await this.supabase
+      .from(this.tableName)
+      .select("*", { count: "exact", head: true })
+      .eq("level", level);
+
+    if (error) throw error;
+    return count;
   }
 
   async getTextsByCategory(category: string) {

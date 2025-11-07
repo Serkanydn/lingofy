@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/shared/lib/supabase/client";
 import { Profile } from "../types/auth.types";
@@ -37,8 +36,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
-    let cleanup: (() => void) | undefined;
-
+    console.log('initialize');
     try {
       // Get initial session
       const {
@@ -98,17 +96,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({ profile: null });
         }
       });
-
-      cleanup = () => subscription.unsubscribe();
     } catch (error) {
       console.error("Auth initialization failed:", error);
     } finally {
       set({ isLoading: false });
-    }
-
-    // Setup cleanup in useEffect
-    if (cleanup) {
-      useEffect(() => cleanup, []);
     }
   },
 

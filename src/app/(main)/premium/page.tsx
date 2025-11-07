@@ -86,7 +86,7 @@ export default function PremiumPage() {
         <Card className="text-center">
           <CardHeader>
             <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full">
+              <div className="bg-linear-to-r from-yellow-400 to-orange-500 p-4 rounded-full">
                 <Crown className="h-12 w-12 text-white" />
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function PremiumPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
         <div className="flex justify-center mb-4">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full">
+          <div className="bg-linear-to-r from-yellow-400 to-orange-500 p-3 rounded-full">
             <Crown className="h-10 w-10 text-white" />
           </div>
         </div>
@@ -162,7 +162,7 @@ export default function PremiumPage() {
           }`}
           onClick={() => setSelectedPlan('yearly')}
         >
-          <Badge className="absolute -top-3 right-4 bg-gradient-to-r from-yellow-400 to-orange-500">
+          <Badge className="absolute -top-3 right-4 bg-linear-to-r from-yellow-400 to-orange-500">
             Save {PRICING.yearly.discount}
           </Badge>
           <CardHeader>
@@ -197,7 +197,7 @@ export default function PremiumPage() {
       <div className="text-center mb-12">
         <Button 
           size="lg" 
-          className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-lg px-12"
+          className="bg-linear-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-lg px-12"
           onClick={handleSubscribe}
           disabled={loading}
         >

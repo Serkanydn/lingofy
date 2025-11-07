@@ -10,7 +10,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { QuestionRenderer } from "./QuestionRenderer";
-import { QuizContent, UserAnswer } from "@/shared/types/content.types";
+import { QuizContent, UserAnswer } from "../types/quiz.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +45,7 @@ export function QuizResult({
       <Card className="text-center border-2">
         <CardHeader className="pb-4">
           <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full">
+            <div className="bg-linear-to-r from-yellow-400 to-orange-500 p-4 rounded-full">
               <Trophy className="h-12 w-12 text-white" />
             </div>
           </div>

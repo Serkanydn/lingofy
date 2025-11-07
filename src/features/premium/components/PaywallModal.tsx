@@ -39,7 +39,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full">
+            <div className="bg-linear-to-r from-yellow-400 to-orange-500 p-3 rounded-full">
               <Crown className="h-8 w-8 text-white" />
             </div>
           </div>
@@ -62,7 +62,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
           ))}
         </div>
 
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div className="bg-linear-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold">Special Offer</p>
@@ -78,7 +78,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
           <Button variant="outline" onClick={onClose} className="flex-1">
             Maybe Later
           </Button>
-          <Button onClick={handleUpgrade} className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600">
+          <Button onClick={handleUpgrade} className="flex-1 bg-linear-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600">
             <Crown className="mr-2 h-4 w-4" />
             Upgrade Now
           </Button>

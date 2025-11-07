@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Level } from "@/shared/types/common.types";
 import type { ReadingContent } from "../types/reading.types";
 import type {
   QuizQuestion,
@@ -9,6 +8,7 @@ import type {
 import { readingService } from "../services";
 import { quizService } from "@/features/quiz/services";
 import { authService } from "@/features/auth/services";
+import { Level } from "@/shared/types/common.types";
 
 /**
  * Hook to fetch reading content list by level
@@ -21,6 +21,16 @@ export function useReadingByLevel(level: Level) {
     },
   });
 }
+
+export function useReadingByLevelCount(level: Level) {
+  return useQuery({
+    queryKey: ["reading_level_count", level],
+    queryFn: async () => {
+      return readingService.getTextCountByLevel(level);
+    },
+  });
+}
+
 
 /**
  * Hook to fetch reading content details by id
@@ -42,7 +52,7 @@ export function useReadingQuiz(contentId: string) {
     queryKey: ["quiz", "reading", contentId],
     queryFn: async () => {
       const { questions } = await readingService.getTextWithQuestions(
-        Number(contentId)
+        contentId
       );
       return questions;
     },
@@ -63,7 +73,10 @@ export function useSubmitQuiz() {
       const result = await quizService.submitQuizAttempt(
         submission.contentId,
         user.id,
-        submission.answers
+        submission.answers,
+        submission.score,
+        submission.maxScore,
+        (submission.score / submission.maxScore) * 100
       );
 
       return {
