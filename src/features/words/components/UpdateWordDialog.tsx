@@ -20,76 +20,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddWord, useWordCategories, useAssignWordToCategory } from "../hooks/useWords";
+import { useUpdateWord, useWordCategories, useAssignWordToCategory, UserWord } from "../hooks/useWords";
 
-interface AddWordDialogProps {
+interface UpdateWordDialogProps {
   open: boolean;
   onClose: () => void;
-  initialWord?: string;
-  sourceType?: "reading" | "listening";
-  sourceId?: string;
+  word: UserWord;
 }
 
-export function AddWordDialog({
+export function UpdateWordDialog({
   open,
   onClose,
-  initialWord = "",
-  sourceType,
-  sourceId,
-}: AddWordDialogProps) {
-  const [word, setWord] = useState(initialWord);
-  const [translation, setTranslation] = useState("");
-  const [exampleEn, setExampleEn] = useState("");
-  const [exampleTr, setExampleTr] = useState("");
-  const [categoryId, setCategoryId] = useState<string>("none");
-  const addWord = useAddWord();
+  word,
+}: UpdateWordDialogProps) {
+  const [wordText, setWordText] = useState(word.word);
+  const [translation, setTranslation] = useState(word.translation);
+  const [exampleEn, setExampleEn] = useState(word.example_sentence_en);
+  const [exampleTr, setExampleTr] = useState(word.example_sentence_tr);
+  const [categoryId, setCategoryId] = useState<string>((word as any).category_id || "none");
+  const updateWord = useUpdateWord();
   const assignToCategory = useAssignWordToCategory();
   const { data: categories } = useWordCategories();
 
   useEffect(() => {
     if (open) {
-      setWord(initialWord);
+      setWordText(word.word);
+      setTranslation(word.translation);
+      setExampleEn(word.example_sentence_en);
+      setExampleTr(word.example_sentence_tr);
+      setCategoryId((word as any).category_id || "none");
     }
-  }, [open, initialWord]);
+  }, [open, word]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!word || !translation || !exampleEn || !exampleTr) {
+    if (!wordText || !translation || !exampleEn || !exampleTr) {
       toast.error("Please fill in all fields");
       return;
     }
 
     try {
-      const newWord = await addWord.mutateAsync({
-        word,
-        translation,
-        example_sentence_en: exampleEn,
-        example_sentence_tr: exampleTr,
-        source_type: sourceType,
-        source_id: sourceId,
+      await updateWord.mutateAsync({
+        id: word.id,
+        updates: {
+          word: wordText,
+          translation,
+          example_sentence_en: exampleEn,
+          example_sentence_tr: exampleTr,
+        },
       });
 
-      // Assign the word to the selected category (or leave uncategorized)
-      if (categoryId && categoryId !== "none") {
+      // Update category if changed
+      const currentCategoryId = (word as any).category_id || "none";
+      if (categoryId !== currentCategoryId) {
         await assignToCategory.mutateAsync({
-          wordId: newWord.id,
-          categoryId,
+          wordId: word.id,
+          categoryId: categoryId === "none" ? null : categoryId,
         });
       }
 
-      toast.success("Word added to your collection!");
-
-      // Reset form
-      setWord("");
-      setTranslation("");
-      setExampleEn("");
-      setExampleTr("");
-      setCategoryId("none");
+      toast.success("Word updated successfully!");
       onClose();
     } catch (error) {
-      console.error("Error adding word:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to add word";
+      console.error("Error updating word:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update word";
       toast.error(errorMessage);
     }
   };
@@ -98,9 +93,9 @@ export function AddWordDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Word</DialogTitle>
+          <DialogTitle>Update Word</DialogTitle>
           <DialogDescription>
-            Add a new word to your personal vocabulary collection
+            Update the word in your vocabulary collection
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -108,8 +103,8 @@ export function AddWordDialog({
             <Label htmlFor="word">English Word *</Label>
             <Input
               id="word"
-              value={word}
-              onChange={(e) => setWord(e.target.value)}
+              value={wordText}
+              onChange={(e) => setWordText(e.target.value)}
               placeholder="e.g., excellent"
               required
             />
@@ -128,7 +123,7 @@ export function AddWordDialog({
 
           <div className="space-y-2 w-full">
             <Label htmlFor="category">Category</Label>
-            <Select value={categoryId} onValueChange={setCategoryId} >
+            <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a category (optional)" />
               </SelectTrigger>
@@ -185,10 +180,10 @@ export function AddWordDialog({
             <Button
               type="submit"
               className="flex-1"
-              disabled={addWord.isPending}
+              disabled={updateWord.isPending}
             >
-              {addWord.isPending ? "Adding..." : "Add Word"}
-            </Button>{" "}
+              {updateWord.isPending ? "Updating..." : "Update Word"}
+            </Button>
           </div>
         </form>
       </DialogContent>

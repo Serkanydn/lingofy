@@ -3,7 +3,14 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Volume2, Trash2 } from 'lucide-react'
+import { Volume2, Trash2, Folder, Edit } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 import {
   AlertDialog,
@@ -15,7 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { useDeleteWord, UserWord } from '../hooks/useWords'
+import { useDeleteWord, UserWord, useWordCategories, useAssignWordToCategory } from '../hooks/useWords'
+import { UpdateWordDialog } from './UpdateWordDialog'
 
 interface WordCardProps {
   word: UserWord
@@ -23,7 +31,10 @@ interface WordCardProps {
 
 export function WordCard({ word }: WordCardProps) {
   const [showDelete, setShowDelete] = useState(false)
+  const [showUpdate, setShowUpdate] = useState(false)
   const deleteWord = useDeleteWord()
+  const { data: categories } = useWordCategories()
+  const assignToCategory = useAssignWordToCategory()
 
   const handleSpeak = () => {
     const utterance = new SpeechSynthesisUtterance(word.word)
@@ -35,6 +46,13 @@ export function WordCard({ word }: WordCardProps) {
   const handleDelete = async () => {
     await deleteWord.mutateAsync(word.id)
     setShowDelete(false)
+  }
+
+  const handleCategoryChange = (categoryId: string) => {
+    assignToCategory.mutate({
+      wordId: word.id,
+      categoryId: categoryId === "none" ? null : categoryId,
+    })
   }
 
   return (
@@ -56,14 +74,24 @@ export function WordCard({ word }: WordCardProps) {
               </div>
               <p className="text-lg text-muted-foreground">{word.translation}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-destructive hover:text-destructive"
-              onClick={() => setShowDelete(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-blue-600 hover:text-blue-700"
+                onClick={() => setShowUpdate(true)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setShowDelete(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -82,6 +110,32 @@ export function WordCard({ word }: WordCardProps) {
               Added from {word.source_type}
             </div>
           )}
+
+          <div className="mt-4 flex items-center gap-2">
+            <Folder className="h-4 w-4 text-muted-foreground" />
+            <Select
+              value={(word as any).category_id || "none"}
+              onValueChange={handleCategoryChange}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="No category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No category</SelectItem>
+                {categories?.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: category.color }}
+                      />
+                      {category.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
@@ -101,6 +155,12 @@ export function WordCard({ word }: WordCardProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <UpdateWordDialog
+        open={showUpdate}
+        onClose={() => setShowUpdate(false)}
+        word={word}
+      />
     </>
   )
 }
