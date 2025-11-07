@@ -6,7 +6,7 @@ export class GrammarService extends BaseService<GrammarRule> {
   private exercisesService: BaseService<GrammarExercise>;
 
   constructor() {
-    super("grammar_rules");
+    super("grammar_topics");
     this.exercisesService = new BaseService<GrammarExercise>("grammar_exercises");
   }
 

@@ -1,54 +1,56 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { DifficultyLevel } from '@/shared/types/content.types'
-import Link from 'next/link'
-import { ArrowLeft, CheckCircle2 } from 'lucide-react'
-import { QuizContainer } from '@/features/quiz/components/QuizContainer'
-import { useGrammarDetail, useGrammarQuiz } from '@/features/grammar/hooks/useGrammar'
+import { useState } from "react";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { QuizContainer } from "@/features/quiz/components/QuizContainer";
+import {
+  useGrammarDetail,
+  useGrammarQuiz,
+} from "@/features/grammar/hooks/useGrammar";
 
-export default function GrammarTopicPage({ 
-  params 
-}: { 
-  params: { category: string; id: string } 
+export default function GrammarTopicPage({
+  params,
+}: {
+  params: Promise<{ category: string; id: string }>;
 }) {
-  const { data: topic, isLoading } = useGrammarDetail(params.id)
-  const { data: quizQuestions } = useGrammarQuiz(params.id)
-  const [showQuiz, setShowQuiz] = useState(false)
+  // ✅ Unwrap the async params with React.use()
+  const { category, id } = React.use(params);
+  const { data: topic, isLoading } = useGrammarDetail(id);
+  const { data: quizQuestions } = useGrammarQuiz(id);
+  const [showQuiz, setShowQuiz] = useState(false);
 
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
 
   if (!topic) {
-    return <div className="container mx-auto px-4 py-8">Topic not found</div>
+    return <div className="container mx-auto px-4 py-8">Topic not found</div>;
   }
 
   if (showQuiz && quizQuestions) {
     return (
       <QuizContainer
         quiz={{
-          id: params.id,
-          content_type: 'grammar',
-          content_id: params.id,
+          id: id,
           title: topic.title,
-          difficulty_level: 'intermediate', // Default difficulty level for grammar
-          questions: quizQuestions
+          questions: quizQuestions,
         }}
         onExit={() => setShowQuiz(false)}
         onComplete={(score, maxScore) => {
-          setShowQuiz(false)
+          setShowQuiz(false);
         }}
       />
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link href={`/grammar/${params.category}`}>
+      <Link href={`/grammar/${category}`}>
         <Button variant="ghost" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Topics
@@ -75,7 +77,7 @@ export default function GrammarTopicPage({
             <h3 className="text-xl font-semibold mb-3">💡 Examples</h3>
             <div className="space-y-3">
               {topic.examples.map((example, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-start gap-3 bg-muted/50 rounded-lg p-4"
                 >
@@ -100,7 +102,7 @@ export default function GrammarTopicPage({
 
           <Separator />
 
-          <Button 
+          <Button
             className="w-full"
             size="lg"
             onClick={() => setShowQuiz(true)}
@@ -110,5 +112,5 @@ export default function GrammarTopicPage({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

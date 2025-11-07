@@ -14,12 +14,12 @@ export const GRAMMAR_CATEGORIES = {
     description: 'Understand zero, first, second and third conditionals',
     icon: '🤔'
   },
-  'passive-voice': {
+  'passive_voice': {
     name: 'Passive Voice',
     description: 'Learn how to form and use passive voice correctly',
     icon: '🔄'
   },
-  'reported-speech': {
+  'reported_speech': {
     name: 'Reported Speech',
     description: 'Convert direct speech to reported speech properly',
     icon: '💬'
@@ -34,9 +34,14 @@ export const GRAMMAR_CATEGORIES = {
     description: 'Learn common prepositions and their usage',
     icon: '📍'
   },
-  'phrasal-verbs': {
+  'phrasal_verbs': {
     name: 'Phrasal Verbs',
     description: 'Study commonly used phrasal verbs and their meanings',
     icon: '🔤'
+  },
+  'tricky_topics': {
+    name: 'Tricky Topics',
+    description: 'Master challenging grammar topics and common mistakes',
+    icon: '🎯'
   }
 } as const
