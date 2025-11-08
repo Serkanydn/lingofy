@@ -9,22 +9,8 @@ alter table quiz_options enable row level security;
 alter table quiz_content enable row level security;
 alter table user_quiz_attempts enable row level security;
 alter table profiles enable row level security;
-
--- Create user_words table if it doesn't exist
-create table if not exists user_words (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  word text not null,
-  definition text,
-  example_sentence text,
-  source_type text,
-  source_id uuid,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
--- Enable RLS on user_words
 alter table user_words enable row level security;
+
 
 -- Create indexes
 create index if not exists idx_user_words_user_id on user_words(user_id);

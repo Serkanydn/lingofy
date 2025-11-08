@@ -1,43 +1,45 @@
-import { useQuery } from '@tanstack/react-query'
-import { Level } from '@/shared/types/common.types'
-import { listeningService } from '../services'
+import { useQuery } from "@tanstack/react-query";
+import { Level } from "@/shared/types/common.types";
+import { listeningService } from "../services";
 
 export interface ListeningContent {
-  id: string
-  title: string
-  level: Level
-  description: string
-  audio_urls: string[]
-  duration_seconds: number
-  transcript: string
-  is_premium: boolean
-  order_index: number
+  id: string;
+  title: string;
+  level: Level;
+  description: string;
+  audio_urls: string[];
+  duration_seconds: number;
+  transcript: string;
+  is_premium: boolean;
+  order_index: number;
 }
 
 export function useListeningByLevel(level: Level) {
   return useQuery({
-    queryKey: ['listening', level],
+    queryKey: ["listening", level],
     queryFn: async () => {
       return listeningService.getExercisesByLevel(level);
     },
-  })
+  });
 }
 
 export function useListeningDetail(id: string) {
   return useQuery({
-    queryKey: ['listening', id],
+    queryKey: ["listening", id],
     queryFn: async () => {
       return listeningService.getById(id);
     },
-  })
+  });
 }
 
 export function useListeningQuiz(contentId: string) {
   return useQuery({
-    queryKey: ['quiz', 'listening', contentId],
+    queryKey: ["quiz", "listening", contentId],
     queryFn: async () => {
-      const { questions } = await listeningService.getExerciseWithQuestions(Number(contentId));
+      const { questions } = await listeningService.getExerciseWithQuestions(
+        contentId
+      );
       return questions;
     },
-  })
+  });
 }

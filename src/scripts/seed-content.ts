@@ -1,221 +1,372 @@
-import { createClient } from '@supabase/supabase-js'
-import * as dotenv from 'dotenv'
+import { createClient } from "@supabase/supabase-js";
+import * as dotenv from "dotenv";
 
-dotenv.config({ path: '.env.local' })
+dotenv.config({ path: ".env.local" });
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+);
 
-// Sample Reading Content
-const readingContent = [
-  // A1 Level
+// 1 Reading per Level with 3 Questions Each
+const readingContentWithQuizzes = [
+  // ====== A1 LEVEL ======
   {
-    title: 'My Daily Routine',
-    level: 'A1',
-    content: `I wake up at 7 o'clock every morning. I brush my teeth and wash my face. Then I have breakfast with my family.\n\nI eat bread, cheese, and eggs. I drink orange juice. After breakfast, I go to school. School starts at 8:30.\n\nI come home at 3 PM. I do my homework and watch TV. I go to bed at 10 PM. This is my daily routine.`,
-    audio_urls: ['https://your-cdn.com/audio/a1-daily-routine-1.mp3', 'https://your-cdn.com/audio/a1-daily-routine-2.mp3'],
-    is_premium: false,
-    order_index: 1,
+    reading: {
+      title: "My Daily Routine",
+      level: "A1",
+      content: `I wake up at 7 o'clock every morning. I brush my teeth and wash my face. Then I have breakfast with my family.\n\nI eat bread, cheese, and eggs. I drink orange juice. After breakfast, I go to school. School starts at 8:30.\n\nI come home at 3 PM. I do my homework and watch TV. I go to bed at 10 PM. This is my daily routine.`,
+      audio_urls: ["https://your-cdn.com/audio/a1-daily-routine.mp3"],
+      is_premium: false,
+      order_index: 1,
+    },
+    quiz: {
+      title: "My Daily Routine - Quiz",
+      questions: [
+        {
+          question_type: "mc",
+          question_text: "What time does the person wake up?",
+          points: 10,
+          order_index: 1,
+          options: [
+            { text: "6 o'clock", is_correct: false },
+            { text: "7 o'clock", is_correct: true },
+            { text: "8 o'clock", is_correct: false },
+            { text: "9 o'clock", is_correct: false },
+          ],
+        },
+        {
+          question_type: "mc",
+          question_text: "What does the person eat for breakfast?",
+          points: 10,
+          order_index: 2,
+          options: [
+            { text: "Bread, cheese, and eggs", is_correct: true },
+            { text: "Rice and fish", is_correct: false },
+            { text: "Pasta and salad", is_correct: false },
+            { text: "Soup and bread", is_correct: false },
+          ],
+        },
+        {
+          question_type: "tf",
+          question_text: "The person goes to bed at 10 PM.",
+          points: 5,
+          order_index: 3,
+          options: [
+            { text: "True", is_correct: true },
+            { text: "False", is_correct: false },
+          ],
+        },
+      ],
+    },
   },
-  {
-    title: 'At the Supermarket',
-    level: 'A1',
-    content: `Today I go to the supermarket. I need to buy food for the week.\n\nI buy apples, bananas, and oranges. I also buy milk, bread, and eggs. The vegetables are fresh and cheap.\n\nI pay at the cashier. The total is 50 lira. I take my bags and go home. Shopping is easy!`,
-    audio_urls: ['https://your-cdn.com/audio/a1-supermarket.mp3'],
-    is_premium: false,
-    order_index: 2,
-  },
-  // Add more A1 content (10 free, 20 premium)
-  
-  // B1 Level
-  {
-    title: 'Remote Work Benefits',
-    level: 'B1',
-    content: `Remote work has become increasingly popular in recent years. Many companies now allow their employees to work from home, which offers several advantages.\n\nFirst, remote work saves commuting time. Workers don't need to spend hours in traffic or crowded public transportation. This extra time can be used for personal activities or rest.\n\nSecond, it provides flexibility. Employees can create their own schedules and work during their most productive hours. They can also balance work with family responsibilities more easily.\n\nHowever, remote work also has challenges. Some people feel isolated and miss the social interaction of an office. Communication can be more difficult when teams are not physically together.`,
-    audio_urls: ['https://your-cdn.com/audio/b1-remote-work.mp3'],
-    is_premium: true,
-    order_index: 15,
-  },
-]
 
-// Sample Quiz Questions
-const quizQuestions = [
+  // ====== A2 LEVEL ======
   {
-    questions_type: 'reading',
-    quiz_content_id: null, // Will be set after content insertion
-    question_text: 'What time does the person wake up?',
-    options: ['6 o\'clock', '7 o\'clock', '8 o\'clock', '9 o\'clock'],
-    correct_answer: 1,
-    explanation: 'The text states "I wake up at 7 o\'clock every morning."',
-    order_index: 1,
+    reading: {
+      title: "A Weekend Trip",
+      level: "A2",
+      content: `Last weekend, my family and I went to the beach. We left early in the morning at 6 AM. The weather was perfect - sunny and warm.\n\nWhen we arrived, we found a nice spot near the water. My brother and I went swimming while our parents relaxed under an umbrella. The water was cool and refreshing.\n\nFor lunch, we had sandwiches and fruit. In the afternoon, we built a sandcastle together. It was really fun! We stayed until sunset and then drove home. Everyone was tired but happy.`,
+      audio_urls: ["https://your-cdn.com/audio/a2-weekend-trip.mp3"],
+      is_premium: false,
+      order_index: 2,
+    },
+    quiz: {
+      title: "A Weekend Trip - Quiz",
+      questions: [
+        {
+          question_type: "mc",
+          question_text: "Where did the family go?",
+          points: 10,
+          order_index: 1,
+          options: [
+            { text: "To the beach", is_correct: true },
+            { text: "To the mountains", is_correct: false },
+            { text: "To a museum", is_correct: false },
+            { text: "To a park", is_correct: false },
+          ],
+        },
+        {
+          question_type: "tf",
+          question_text: "The weather was rainy.",
+          points: 5,
+          order_index: 2,
+          options: [
+            { text: "True", is_correct: false },
+            { text: "False", is_correct: true },
+          ],
+        },
+        {
+          question_type: "fb",
+          question_text: "For lunch, they had sandwiches and _____.",
+          points: 5,
+          order_index: 3,
+          options: [{ text: "fruit", is_correct: true }],
+        },
+      ],
+    },
   },
-  {
-    questions_type: 'reading',
-    quiz_content_id: null,
-    question_text: 'What does the person eat for breakfast?',
-    options: ['Bread, cheese, and eggs', 'Rice and fish', 'Pasta and salad', 'Soup and bread'],
-    correct_answer: 0,
-    explanation: 'The text mentions "I eat bread, cheese, and eggs."',
-    order_index: 2,
-  },
-]
 
-// Sample Grammar Topics
-const grammarTopics = [
+  // ====== B1 LEVEL ======
   {
-    category: 'tenses',
-    title: 'Present Simple',
-    explanation: 'We use the present simple to talk about habits, routines, and general truths. For positive sentences with he/she/it, we add -s or -es to the verb.',
-    examples: [
-      'I work in an office every day.',
-      'She speaks three languages fluently.',
-      'The sun rises in the east.',
-      'Water boils at 100 degrees Celsius.',
-      'They don\'t like spicy food.',
-      'Does he play tennis on weekends?',
-    ],
-    mini_text: 'My brother works as a teacher. He teaches English at a high school. Every morning, he wakes up at 6 AM and prepares his lessons. He loves his job because he enjoys helping students learn. His students like him very much.',
-    order_index: 1,
+    reading: {
+      title: "Remote Work Benefits",
+      level: "B1",
+      content: `Remote work has become increasingly popular in recent years. Many companies now allow their employees to work from home, which offers several advantages.\n\nFirst, remote work saves commuting time. Workers don't need to spend hours in traffic or crowded public transportation. This extra time can be used for personal activities or rest.\n\nSecond, it provides flexibility. Employees can create their own schedules and work during their most productive hours. They can also balance work with family responsibilities more easily.\n\nHowever, remote work also has challenges. Some people feel isolated and miss the social interaction of an office. Communication can be more difficult when teams are not physically together.`,
+      audio_urls: ["https://your-cdn.com/audio/b1-remote-work.mp3"],
+      is_premium: false,
+      order_index: 3,
+    },
+    quiz: {
+      title: "Remote Work Benefits - Quiz",
+      questions: [
+        {
+          question_type: "mc",
+          question_text: "What is the main advantage mentioned first?",
+          points: 10,
+          order_index: 1,
+          options: [
+            { text: "Saves commuting time", is_correct: true },
+            { text: "Higher salary", is_correct: false },
+            { text: "Better office space", is_correct: false },
+            { text: "More vacation days", is_correct: false },
+          ],
+        },
+        {
+          question_type: "mc",
+          question_text: "What challenge does remote work have?",
+          points: 10,
+          order_index: 2,
+          options: [
+            { text: "People feel isolated", is_correct: true },
+            { text: "Lower pay", is_correct: false },
+            { text: "Longer hours", is_correct: false },
+            { text: "No technology", is_correct: false },
+          ],
+        },
+        {
+          question_type: "tf",
+          question_text: "Remote work provides flexibility in scheduling.",
+          points: 5,
+          order_index: 3,
+          options: [
+            { text: "True", is_correct: true },
+            { text: "False", is_correct: false },
+          ],
+        },
+      ],
+    },
   },
-  {
-    category: 'tricky-topics',
-    title: 'Much vs Many',
-    explanation: 'Use "much" with uncountable nouns (things you cannot count individually). Use "many" with countable nouns (things you can count). In questions and negatives, both are common. In positive sentences, we often use "a lot of" instead.',
-    examples: [
-      'How much water do you drink daily?',
-      'How many books do you read per month?',
-      'There isn\'t much time left.',
-      'There aren\'t many people here today.',
-      'I don\'t have much money right now.',
-      'She doesn\'t have many friends in this city.',
-    ],
-    mini_text: 'When I go shopping, I always think carefully. I don\'t have much money, so I can\'t buy many things. I usually buy much rice and pasta because they are cheap. I don\'t buy many snacks because they are expensive. How much do you spend on groceries?',
-    order_index: 1,
-  },
-]
 
-// Sample Listening Content
-const listeningContent = [
+  // ====== B2 LEVEL ======
   {
-    title: 'Weather Forecast',
-    level: 'A2',
-    description: 'Listen to a simple weather forecast',
-    audio_urls: ['https://your-cdn.com/audio/a2-weather.mp3'],
-    duration_seconds: 90,
-    transcript: `Good morning! Here is today's weather forecast.\n\nIt will be sunny in the morning with temperatures around 20 degrees. In the afternoon, some clouds will appear, but it will stay dry.\n\nTomorrow, we expect rain in the morning. Please take an umbrella if you go out. Temperatures will be cooler, around 15 degrees.\n\nHave a great day!`,
-    is_premium: false,
-    order_index: 1,
+    reading: {
+      title: "The History of Coffee",
+      level: "B2",
+      content: `Coffee is one of the most consumed beverages in the world, but its origins trace back to ancient Ethiopia. According to legend, a goat herder named Kaldi discovered coffee when he noticed his goats became energetic after eating berries from a certain tree.\n\nThe cultivation of coffee began in Yemen in the 15th century. From there, it spread to the Middle East and eventually reached Europe in the 17th century. Initially, coffee was met with suspicion in Europe, with some calling it the "bitter invention of Satan." However, Pope Clement VIII blessed the drink, leading to its widespread acceptance.\n\nCoffee houses became important social hubs, particularly in England and France. They were places where people gathered to discuss politics, business, and literature. In fact, many historical revolutions and intellectual movements were born in coffee houses.\n\nToday, coffee is a global industry worth billions of dollars. Brazil is the largest producer, followed by Vietnam and Colombia. The way we consume coffee has evolved dramatically, from traditional Turkish coffee to modern espresso-based drinks.`,
+      audio_urls: ["https://your-cdn.com/audio/b2-coffee-history.mp3"],
+      is_premium: false,
+      order_index: 4,
+    },
+    quiz: {
+      title: "The History of Coffee - Quiz",
+      questions: [
+        {
+          question_type: "mc",
+          question_text: "Who is believed to have discovered coffee?",
+          points: 10,
+          order_index: 1,
+          options: [
+            { text: "A goat herder named Kaldi", is_correct: true },
+            { text: "Pope Clement VIII", is_correct: false },
+            { text: "A Turkish merchant", is_correct: false },
+            { text: "A Brazilian farmer", is_correct: false },
+          ],
+        },
+        {
+          question_type: "mc",
+          question_text: "Where did coffee cultivation first begin?",
+          points: 10,
+          order_index: 2,
+          options: [
+            { text: "Ethiopia", is_correct: false },
+            { text: "Yemen", is_correct: true },
+            { text: "Brazil", is_correct: false },
+            { text: "Turkey", is_correct: false },
+          ],
+        },
+        {
+          question_type: "tf",
+          question_text:
+            "Coffee houses became places for social and intellectual gatherings.",
+          points: 5,
+          order_index: 3,
+          options: [
+            { text: "True", is_correct: true },
+            { text: "False", is_correct: false },
+          ],
+        },
+      ],
+    },
   },
-]
 
-async function seedContent() {
+  // ====== C1 LEVEL ======
+  {
+    reading: {
+      title: "The Philosophy of Minimalism",
+      level: "C1",
+      content: `In an era characterized by rampant consumerism and material excess, minimalism has emerged as both a lifestyle choice and a philosophical stance. At its core, minimalism advocates for intentional living - making deliberate choices about what we allow into our lives and focusing on what truly adds value.\n\nThe movement gained significant traction in the early 21st century, partly as a reaction to the 2008 financial crisis. People began questioning the notion that happiness could be purchased and accumulated. Minimalists argue that by reducing physical possessions, we create mental and emotional space for more meaningful pursuits.\n\nHowever, critics contend that minimalism is often a privilege of the wealthy. The ability to "live with less" presupposes that one has enough to begin with. Moreover, the aestheticized version of minimalism promoted on social media - pristine white spaces and carefully curated belongings - has become another form of conspicuous consumption, where people spend considerable money to achieve a "minimal" look.\n\nThe debate extends beyond personal choice to environmental implications. While reducing consumption appears environmentally beneficial, the frequent purging and replacing of items to maintain a minimal aesthetic can paradoxically increase waste. True minimalism, proponents argue, should focus on longevity and sustainability, not just aesthetic simplicity.\n\nUltimately, minimalism's value may lie not in adherence to any particular lifestyle prescription, but in its invitation to examine our relationship with material goods and consider what constitutes a meaningful life.`,
+      audio_urls: ["https://your-cdn.com/audio/c1-minimalism.mp3"],
+      is_premium: false,
+      order_index: 5,
+    },
+    quiz: {
+      title: "The Philosophy of Minimalism - Quiz",
+      questions: [
+        {
+          question_type: "mc",
+          question_text:
+            "According to the text, what is minimalism fundamentally about?",
+          points: 10,
+          order_index: 1,
+          options: [
+            {
+              text: "Making intentional choices about what adds value to life",
+              is_correct: true,
+            },
+            { text: "Simply owning fewer possessions", is_correct: false },
+            { text: "Following social media trends", is_correct: false },
+            { text: "Saving money at all costs", is_correct: false },
+          ],
+        },
+        {
+          question_type: "mc",
+          question_text:
+            "What criticism of minimalism is mentioned in the text?",
+          points: 10,
+          order_index: 2,
+          options: [
+            {
+              text: "It is often a privilege of the wealthy",
+              is_correct: true,
+            },
+            { text: "It is too complicated", is_correct: false },
+            { text: "It requires too much time", is_correct: false },
+            { text: "It is unpopular", is_correct: false },
+          ],
+        },
+        {
+          question_type: "tf",
+          question_text:
+            "Frequent purging of items to maintain minimalism can paradoxically increase waste.",
+          points: 5,
+          order_index: 3,
+          options: [
+            { text: "True", is_correct: true },
+            { text: "False", is_correct: false },
+          ],
+        },
+      ],
+    },
+  },
+];
+
+async function seedSimpleContent() {
   try {
-    console.log('Starting content seed...')
+    console.log("Starting simple seed (1 text per level)...\n");
 
-    // Insert Reading Content
-    console.log('Inserting reading content...')
-    const { data: readingData, error: readingError } = await supabase
-      .from('reading_content')
-      .insert(readingContent)
-      .select()
+    // ====== READING CONTENT ======
+    console.log("=== Seeding Reading Content ===");
+    for (const item of readingContentWithQuizzes) {
+      // Insert reading content
+      const { data: reading, error: readingError } = await supabase
+        .from("reading_content")
+        .insert(item.reading)
+        .select()
+        .single();
 
-    if (readingError) {
-      console.error('Error inserting reading content:', readingError)
-      if (readingError.code === 'PGRST204') {
-        console.error('Schema error - Please ensure the reading_content table exists with correct columns')
-        console.error('Required columns: title (text), level (text), content (text), audio_urls (text[]), is_premium (boolean), order_index (integer)')
+      if (readingError) {
+        console.error(
+          `Error inserting reading "${item.reading.title}":`,
+          readingError
+        );
+        continue;
       }
-      return
-    }
 
-    console.log(`Inserted ${readingData.length} reading items`)
+      console.log(`✓ Reading inserted: ${reading.title} (${reading.level})`);
 
-    // Insert Quiz Questions for readings
-    if (readingData.length > 0) {
-      console.log('Inserting quiz questions...')
-      
-      // Create questions for each reading content
-      const allQuestions = readingData.flatMap((reading, readingIndex) => {
-        // For the first reading, use the sample questions
-        if (readingIndex === 0) {
-          return quizQuestions.map(q => ({
-            ...q,
-            quiz_content_id: reading.id,
-          }))
-        }
-        
-        // For other readings, generate basic comprehension questions
-        const basicQuestions = [
-          {
-            questions_type: 'reading' as const,
-            quiz_content_id: reading.id,
-            question_text: `What is this text about?`,
-            options: [`The main topic is ${reading.title.toLowerCase()}`, 'Shopping', 'Weather', 'Travel'],
-            correct_answer: 0,
-            explanation: `The text discusses ${reading.title.toLowerCase()}.`,
-            order_index: 1,
-          }
-        ]
-        
-        return basicQuestions
-      })
-
-      const { error: quizError } = await supabase
-        .from('quiz_questions')
-        .insert(allQuestions)
+      // Insert quiz content
+      const { data: quizContent, error: quizError } = await supabase
+        .from("quiz_content")
+        .insert({
+          content_id: reading.id,
+          title: item.quiz.title,
+        })
+        .select()
+        .single();
 
       if (quizError) {
-        console.error('Error inserting quiz questions:', quizError)
-        // Check if it's a schema error and log more details
-        if (quizError.code === 'PGRST204') {
-          console.error('Schema error - Please ensure the quiz_questions table exists with correct columns')
-          console.error('Required columns: quiz_content_id (uuid), questions_type (text), question_text (text), options (text[]), correct_answer (integer), explanation (text), order_index (integer)')
+        console.error(
+          `Error inserting quiz for "${item.reading.title}":`,
+          quizError
+        );
+        continue;
+      }
+
+      // Insert questions and options
+      for (const questionData of item.quiz.questions) {
+        const { data: question, error: questionError } = await supabase
+          .from("quiz_questions")
+          .insert({
+            quiz_content_id: quizContent.id,
+            question_type: questionData.question_type,
+            question_text: questionData.question_text,
+            points: questionData.points,
+            order_index: questionData.order_index,
+          })
+          .select()
+          .single();
+
+        if (questionError) {
+          console.error(`Error inserting question:`, questionError);
+          continue;
         }
-      } else {
-        console.log(`Inserted ${allQuestions.length} quiz questions`)
+
+        // Insert options
+        const optionsToInsert = questionData.options.map((opt) => ({
+          question_id: question.id,
+          text: opt.text,
+          is_correct: opt.is_correct,
+        }));
+
+        const { error: optionsError } = await supabase
+          .from("quiz_options")
+          .insert(optionsToInsert);
+
+        if (optionsError) {
+          console.error(`Error inserting options:`, optionsError);
+        }
       }
+
+      // Link quiz to reading
+      await supabase
+        .from("reading_content")
+        .update({ quiz_content_id: quizContent.id })
+        .eq("id", reading.id);
+
+      console.log(`  ✓ Quiz linked: ${item.quiz.questions.length} questions`);
+      console.log(
+        `  ✓ Level: ${reading.level} | Premium: ${reading.is_premium}\n`
+      );
     }
 
-    // Insert Grammar Topics
-    console.log('Inserting grammar topics...')
-    const { data: grammarData, error: grammarError } = await supabase
-      .from('grammar_topics')
-      .insert(grammarTopics)
-      .select()
-
-    if (grammarError) {
-      console.error('Error inserting grammar topics:', grammarError)
-      if (grammarError.code === 'PGRST204') {
-        console.error('Schema error - Please ensure the grammar_topics table exists with correct columns')
-        console.error('Required columns: category (text), title (text), explanation (text), examples (text[]), mini_text (text), order_index (integer)')
-      }
-    } else {
-      console.log(`Inserted ${grammarData.length} grammar topics`)
-    }
-
-    // Insert Listening Content
-    console.log('Inserting listening content...')
-    const { data: listeningData, error: listeningError } = await supabase
-      .from('listening_content')
-      .insert(listeningContent)
-      .select()
-
-    if (listeningError) {
-      console.error('Error inserting listening content:', listeningError)
-      if (listeningError.code === 'PGRST204') {
-        console.error('Schema error - Please ensure the listening_content table exists with correct columns')
-        console.error('Required columns: title (text), level (text), description (text), audio_urls (text[]), duration_seconds (integer), transcript (text), is_premium (boolean), order_index (integer)')
-      }
-    } else {
-      console.log(`Inserted ${listeningData.length} listening items`)
-    }
-
-    console.log('Content seed completed successfully!')
+    console.log("=== SEED COMPLETED SUCCESSFULLY ===");
+    console.log(`Total Reading Content: ${readingContentWithQuizzes.length}`);
+    console.log("Levels covered: A1, A2, B1, B2, C1");
+    console.log("Questions per text: 3");
   } catch (error) {
-    console.error('Seed error:', error)
+    console.error("Fatal seed error:", error);
   }
 }
 
-seedContent()
+seedSimpleContent();

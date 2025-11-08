@@ -3,7 +3,7 @@ import { WordCategory } from "../hooks/useWords";
 
 export class CategoryService extends BaseService<WordCategory> {
   constructor() {
-    super("word_categories");
+    super("user_word_categories");
   }
 
   async getCategories(userId: string): Promise<WordCategory[]> {

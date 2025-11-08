@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -39,8 +40,8 @@ export function AddWordDialog({
 }: AddWordDialogProps) {
   const [word, setWord] = useState(initialWord);
   const [translation, setTranslation] = useState("");
-  const [exampleEn, setExampleEn] = useState("");
-  const [exampleTr, setExampleTr] = useState("");
+  const [description, setDescription] = useState("");
+  const [exampleSentences, setExampleSentences] = useState<string[]>([""]);
   const [categoryId, setCategoryId] = useState<string>("none");
   const addWord = useAddWord();
   const assignToCategory = useAssignWordToCategory();
@@ -55,8 +56,8 @@ export function AddWordDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!word || !translation || !exampleEn || !exampleTr) {
-      toast.error("Please fill in all fields");
+    if (!word || !translation || !description || exampleSentences.filter(s => s.trim()).length === 0) {
+      toast.error("Please fill in all required fields and at least one example");
       return;
     }
 
@@ -64,8 +65,8 @@ export function AddWordDialog({
       const newWord = await addWord.mutateAsync({
         word,
         translation,
-        example_sentence_en: exampleEn,
-        example_sentence_tr: exampleTr,
+        description,
+        example_sentences: exampleSentences.filter(s => s.trim()),
         source_type: sourceType,
         source_id: sourceId,
       });
@@ -83,8 +84,8 @@ export function AddWordDialog({
       // Reset form
       setWord("");
       setTranslation("");
-      setExampleEn("");
-      setExampleTr("");
+      setDescription("");
+      setExampleSentences([""]);
       setCategoryId("none");
       onClose();
     } catch (error) {
@@ -116,12 +117,13 @@ export function AddWordDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="translation">Turkish Translation *</Label>
-            <Input
-              id="translation"
-              value={translation}
-              onChange={(e) => setTranslation(e.target.value)}
-              placeholder="e.g., mükemmel"
+            <Label htmlFor="description">Description *</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g., An adjective meaning very good or of high quality"
+              rows={2}
               required
             />
           </div>
@@ -150,27 +152,45 @@ export function AddWordDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="exampleEn">Example Sentence (English) *</Label>
-            <Textarea
-              id="exampleEn"
-              value={exampleEn}
-              onChange={(e) => setExampleEn(e.target.value)}
-              placeholder="e.g., She did an excellent job on the project."
-              rows={2}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="exampleTr">Example Sentence (Turkish) *</Label>
-            <Textarea
-              id="exampleTr"
-              value={exampleTr}
-              onChange={(e) => setExampleTr(e.target.value)}
-              placeholder="e.g., Projede mükemmel bir iş çıkardı."
-              rows={2}
-              required
-            />
+            <div className="flex items-center justify-between">
+              <Label>Example Sentences *</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setExampleSentences([...exampleSentences, ""])}
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                Add Example
+              </Button>
+            </div>
+            {exampleSentences.map((example, index) => (
+              <div key={index} className="flex gap-2">
+                <Textarea
+                  value={example}
+                  onChange={(e) => {
+                    const updated = [...exampleSentences];
+                    updated[index] = e.target.value;
+                    setExampleSentences(updated);
+                  }}
+                  placeholder={`Example ${index + 1}: She did an excellent job on the project.`}
+                  rows={2}
+                  required={index === 0}
+                />
+                {exampleSentences.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setExampleSentences(exampleSentences.filter((_, i) => i !== index));
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="flex gap-3 pt-4">

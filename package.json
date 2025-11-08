@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "setup-db": "ts-node --project tsconfig.seed.json ./src/scripts/setup-database.ts",
-    "seed": "ts-node --project tsconfig.seed.json ./src/scripts/seed-content-new-2.ts"
+    "seed": "ts-node --project tsconfig.seed.json ./src/scripts/seed-content-new-2.ts",
+    "seed-grammar": "ts-node --project tsconfig.seed.json ./src/scripts/seed-grammar-topics.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

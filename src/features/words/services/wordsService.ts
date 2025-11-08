@@ -5,8 +5,8 @@ interface UserWord {
   user_id: string;
   word: string;
   translation: string;
-  example_sentence_en: string;
-  example_sentence_tr: string;
+  description: string;
+  example_sentences: string[];
   audio_url?: string;
   source_type?: "reading" | "listening";
   source_id?: string;

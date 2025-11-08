@@ -91,13 +91,22 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
                     <Volume2 className="h-6 w-6" />
                   </Button>
                 </div>
+                {currentWord.description && (
+                  <p className="text-muted-foreground text-lg italic">
+                    {currentWord.description}
+                  </p>
+                )}
                 <p className="text-muted-foreground text-lg">
                   Click to see translation
                 </p>
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <p className="text-blue-900 text-lg leading-relaxed">
-                    {currentWord.example_sentence_en}
-                  </p>
+                <div className="space-y-3 mt-8">
+                  {currentWord.example_sentences?.map((example, index) => (
+                    <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                      <p className="text-blue-900 text-lg leading-relaxed">
+                        {example}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (
@@ -106,14 +115,14 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
                 <h2 className="text-5xl font-bold text-primary">
                   {currentWord.translation}
                 </h2>
+                {currentWord.description && (
+                  <p className="text-muted-foreground text-lg italic">
+                    {currentWord.description}
+                  </p>
+                )}
                 <p className="text-muted-foreground text-lg">
                   Click to flip back
                 </p>
-                <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
-                  <p className="text-green-900 text-lg leading-relaxed">
-                    {currentWord.example_sentence_tr}
-                  </p>
-                </div>
               </div>
             )}
           </CardContent>

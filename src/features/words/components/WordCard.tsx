@@ -73,6 +73,9 @@ export function WordCard({ word }: WordCardProps) {
                 </Button>
               </div>
               <p className="text-lg text-muted-foreground">{word.translation}</p>
+              {word.description && (
+                <p className="text-sm text-muted-foreground mt-2 italic">{word.description}</p>
+              )}
             </div>
             <div className="flex gap-1">
               <Button
@@ -95,14 +98,12 @@ export function WordCard({ word }: WordCardProps) {
           </div>
 
           <div className="space-y-3">
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-              <p className="text-sm font-medium text-blue-900 mb-1">English:</p>
-              <p className="text-blue-800">{word.example_sentence_en}</p>
-            </div>
-            <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded">
-              <p className="text-sm font-medium text-green-900 mb-1">Türkçe:</p>
-              <p className="text-green-800">{word.example_sentence_tr}</p>
-            </div>
+            {word.example_sentences?.map((example, index) => (
+              <div key={index} className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                <p className="text-sm font-medium text-blue-900 mb-1">Example {word.example_sentences.length > 1 ? index + 1 : ''}:</p>
+                <p className="text-blue-800">{example}</p>
+              </div>
+            ))}
           </div>
 
           {word.source_type && (
