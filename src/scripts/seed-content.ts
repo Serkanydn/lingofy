@@ -319,7 +319,6 @@ async function seedSimpleContent() {
           .from("quiz_questions")
           .insert({
             quiz_content_id: quizContent.id,
-            question_type: questionData.question_type,
             question_text: questionData.question_text,
             points: questionData.points,
             order_index: questionData.order_index,

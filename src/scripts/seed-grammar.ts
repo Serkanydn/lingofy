@@ -338,7 +338,7 @@ const grammarTopics = [
 
   // ====== PASSIVE VOICE (2 topics) ======
   {
-    category: "passive_voice",
+    category: "passive-voice",
     title: "Active vs Passive Voice",
     explanation:
       "Passive voice emphasizes the action or receiver rather than the doer. Form: be + past participle. Use when the doer is unknown, unimportant, or obvious. Active voice is generally more direct and clearer.",
@@ -391,7 +391,7 @@ const grammarTopics = [
     ],
   },
   {
-    category: "passive_voice",
+    category: "passive-voice",
     title: "Passive with Modals",
     explanation:
       "Modal verbs in passive voice follow the pattern: modal + be + past participle. Common in formal writing and when discussing rules, possibilities, or obligations without specifying who performs the action.",
@@ -1029,8 +1029,6 @@ async function seedGrammarTopics() {
         .insert({
           content_id: insertedTopic.id,
           title: topic.title + "- Quiz",
-          difficulty_level: "",
-          word_count: 0,
         })
         .select()
         .single();
@@ -1046,7 +1044,6 @@ async function seedGrammarTopics() {
           .from("quiz_questions")
           .insert({
             quiz_content_id: quizContent.id,
-            question_type: questionData.type,
             question_text: questionData.question,
             points: questionData.points,
             order_index: questionData.order_index,
