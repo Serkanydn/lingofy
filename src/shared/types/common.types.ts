@@ -6,7 +6,7 @@ export type GrammarCategory =
   | 'tenses' 
   | 'modals' 
   | 'conditionals' 
-  | 'passive_voice' 
+  | 'passive-voice' 
   | 'reported-speech' 
   | 'articles' 
   | 'prepositions' 

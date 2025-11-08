@@ -14,7 +14,7 @@ export const GRAMMAR_CATEGORIES = {
     description: 'Understand zero, first, second and third conditionals',
     icon: '🤔'
   },
-  'passive_voice': {
+  'passive-voice': {
     name: 'Passive Voice',
     description: 'Learn how to form and use passive voice correctly',
     icon: '🔄'
