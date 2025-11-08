@@ -7,7 +7,7 @@ export interface ListeningContent {
   title: string;
   level: Level;
   description: string;
-  audio_urls: string[];
+  audio_url: string;
   duration_seconds: number;
   transcript: string;
   is_premium: boolean;

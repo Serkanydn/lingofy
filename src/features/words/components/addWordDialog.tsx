@@ -21,7 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddWord, useWordCategories, useAssignWordToCategory } from "../hooks/useWords";
+import {
+  useAddWord,
+  useWordCategories,
+  useAssignWordToCategory,
+} from "../hooks/useWords";
 
 interface AddWordDialogProps {
   open: boolean;
@@ -39,7 +43,6 @@ export function AddWordDialog({
   sourceId,
 }: AddWordDialogProps) {
   const [word, setWord] = useState(initialWord);
-  const [translation, setTranslation] = useState("");
   const [description, setDescription] = useState("");
   const [exampleSentences, setExampleSentences] = useState<string[]>([""]);
   const [categoryId, setCategoryId] = useState<string>("none");
@@ -56,17 +59,26 @@ export function AddWordDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!word || !translation || !description || exampleSentences.filter(s => s.trim()).length === 0) {
-      toast.error("Please fill in all required fields and at least one example");
+    console.log("word", word);
+    console.log("description", description);
+    console.log("exampleSentences", exampleSentences);
+
+    if (
+      !word ||
+      !description ||
+      exampleSentences.filter((s) => s.trim()).length === 0
+    ) {
+      toast.error(
+        "Please fill in all required fields and at least one example"
+      );
       return;
     }
 
     try {
       const newWord = await addWord.mutateAsync({
         word,
-        translation,
         description,
-        example_sentences: exampleSentences.filter(s => s.trim()),
+        example_sentences: exampleSentences.filter((s) => s.trim()),
         source_type: sourceType,
         source_id: sourceId,
       });
@@ -83,14 +95,14 @@ export function AddWordDialog({
 
       // Reset form
       setWord("");
-      setTranslation("");
       setDescription("");
       setExampleSentences([""]);
       setCategoryId("none");
       onClose();
     } catch (error) {
       console.error("Error adding word:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to add word";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to add word";
       toast.error(errorMessage);
     }
   };
@@ -130,7 +142,7 @@ export function AddWordDialog({
 
           <div className="space-y-2 w-full">
             <Label htmlFor="category">Category</Label>
-            <Select value={categoryId} onValueChange={setCategoryId} >
+            <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a category (optional)" />
               </SelectTrigger>
@@ -173,7 +185,9 @@ export function AddWordDialog({
                     updated[index] = e.target.value;
                     setExampleSentences(updated);
                   }}
-                  placeholder={`Example ${index + 1}: She did an excellent job on the project.`}
+                  placeholder={`Example ${
+                    index + 1
+                  }: She did an excellent job on the project.`}
                   rows={2}
                   required={index === 0}
                 />
@@ -183,7 +197,9 @@ export function AddWordDialog({
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      setExampleSentences(exampleSentences.filter((_, i) => i !== index));
+                      setExampleSentences(
+                        exampleSentences.filter((_, i) => i !== index)
+                      );
                     }}
                   >
                     <Trash2 className="h-4 w-4" />

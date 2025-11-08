@@ -41,6 +41,7 @@ const navigation = [
     href: "/my-words",
     icon: BookMarked,
     requiresAuth: true,
+    requiresPremium: true,
   },
   {
     name: "Statistics",

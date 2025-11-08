@@ -76,7 +76,7 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
         >
           <CardContent className="p-12 flex flex-col items-center justify-center min-h-[400px] relative">
             {!isFlipped ? (
-              // Front - English
+              // Front 
               <div className="text-center space-y-6">
                 <div className="flex items-center justify-center gap-4">
                   <h2 className="text-5xl font-bold">{currentWord.word}</h2>
@@ -91,17 +91,16 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
                     <Volume2 className="h-6 w-6" />
                   </Button>
                 </div>
-                {currentWord.description && (
-                  <p className="text-muted-foreground text-lg italic">
-                    {currentWord.description}
-                  </p>
-                )}
+
                 <p className="text-muted-foreground text-lg">
                   Click to see translation
                 </p>
                 <div className="space-y-3 mt-8">
                   {currentWord.example_sentences?.map((example, index) => (
-                    <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <div
+                      key={index}
+                      className="bg-blue-50 border border-blue-200 rounded-lg p-6"
+                    >
                       <p className="text-blue-900 text-lg leading-relaxed">
                         {example}
                       </p>
@@ -110,11 +109,21 @@ export function FlashcardPractice({ words, onExit }: FlashcardPracticeProps) {
                 </div>
               </div>
             ) : (
-              // Back - Turkish
+              // Back 
               <div className="text-center space-y-6 rotate-y-180">
-                <h2 className="text-5xl font-bold text-primary">
-                  {currentWord.translation}
-                </h2>
+                <div className="flex items-center justify-center gap-4">
+                  <h2 className="text-5xl font-bold">{currentWord.word}</h2>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSpeak();
+                    }}
+                  >
+                    <Volume2 className="h-6 w-6" />
+                  </Button>
+                </div>
                 {currentWord.description && (
                   <p className="text-muted-foreground text-lg italic">
                     {currentWord.description}

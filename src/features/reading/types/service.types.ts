@@ -14,7 +14,7 @@ export interface ReadingText {
   content: string;
   level: Level;
   word_count: number;
-  audio_urls: string[];
+  audio_url: string
   is_premium: boolean;
   order_index: number;
   created_at: string;

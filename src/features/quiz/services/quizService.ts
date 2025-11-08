@@ -1,6 +1,6 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { Quiz, QuizAttempt, QuizQuestion } from '../types/service.types';
-import { QuizAnswer } from '../types/quiz.types';
+import { Quiz, QuizAttempt, QuizQuestion } from "../types/service.types";
+import { QuizAnswer } from "../types/quiz.types";
 
 export class QuizService extends BaseService<Quiz> {
   private questionsService: BaseService<QuizQuestion>;
@@ -24,11 +24,11 @@ export class QuizService extends BaseService<Quiz> {
   }
 
   async submitQuizAttempt(
-    quizContentId: string, 
-    userId: string, 
-    answers: QuizAnswer[], 
-    totalScore: number, 
-    maxScore: number, 
+    quizContentId: string,
+    userId: string,
+    answers: QuizAnswer[],
+    totalScore: number,
+    maxScore: number,
     percentage: number
   ) {
     const attempt = await this.attemptsService.create({
@@ -55,21 +55,28 @@ export class QuizService extends BaseService<Quiz> {
     return data;
   }
 
-  private calculateScore(questions: QuizQuestion[], answers: QuizAnswer[]): number {
+  private calculateScore(
+    questions: QuizQuestion[],
+    answers: QuizAnswer[]
+  ): number {
     const totalQuestions = questions.length;
-    const correctAnswers = answers.filter(answer => {
-      const question = questions.find(q => q.id.toString() === answer.question_id);
-      return question && question.correct_answer === answer.selected_option.toString();
+    const correctAnswers = answers.filter((answer) => {
+      const question = questions.find(
+        (q) => q.id.toString() === answer.question_id
+      );
+      return (
+        question &&
+        question.correct_answer === answer.selected_option.toString()
+      );
     }).length;
     return (correctAnswers / totalQuestions) * 100;
   }
 
-  async getQuizByContent(contentType: 'reading' | 'listening' | 'grammar', contentId: string) {
+  async getQuizByContent(contentId: string) {
     // First get the quiz_content for this content
     const { data: quizContent, error: quizError } = await this.supabase
       .from("quiz_content")
       .select("id")
-      .eq("content_type", contentType)
       .eq("content_id", contentId)
       .maybeSingle();
 
@@ -79,10 +86,12 @@ export class QuizService extends BaseService<Quiz> {
     // Then get the questions with their options for this quiz
     const { data, error } = await this.supabase
       .from("quiz_questions")
-      .select(`
+      .select(
+        `
         *,
         options:quiz_options(*)
-      `)
+      `
+      )
       .eq("quiz_content_id", quizContent.id)
       .order("order_index", { ascending: true });
 
@@ -90,12 +99,11 @@ export class QuizService extends BaseService<Quiz> {
     return data;
   }
 
-    async getQuizByContentId(contentType: 'reading' | 'listening' | 'grammar', id: string) {
+  async getQuizByContentId(id: string) {
     // First get the quiz_content for this content
     const { data: quizContent, error: quizError } = await this.supabase
       .from("quiz_content")
       .select("id")
-      .eq("content_type", contentType)
       .eq("id", id)
       .maybeSingle();
 
@@ -105,17 +113,18 @@ export class QuizService extends BaseService<Quiz> {
     // Then get the questions with their options for this quiz
     const { data, error } = await this.supabase
       .from("quiz_questions")
-      .select(`
+      .select(
+        `
         *,
         options:quiz_options(*)
-      `)
+      `
+      )
       .eq("quiz_content_id", quizContent.id)
       .order("order_index", { ascending: true });
 
     if (error) throw error;
     return data;
   }
-
 
   async getUserQuizHistory(userId: string) {
     const { data, error } = await this.supabase

@@ -20,8 +20,9 @@ export function QuestionRenderer({
   isSubmitted,
   showFeedback,
 }: QuestionRendererProps) {
-  switch (question.question_type) {
-    case "mc":
+  console.log('question',question);
+  switch (question.type) {
+    case "multiple_choice":
       return (
         <MultipleChoiceQuestion
           question={question}
@@ -32,7 +33,7 @@ export function QuestionRenderer({
         />
       );
 
-    case "fb":
+    case "fill_blank":
       return (
         <FillBlankQuestion
           question={question}
@@ -43,7 +44,7 @@ export function QuestionRenderer({
         />
       );
 
-    case "tf":
+    case "true_false":
       return (
         <TrueFalseQuestion
           question={question}

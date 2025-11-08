@@ -1,13 +1,10 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { Level } from '@/shared/types/common.types';
-import { ListeningExercise, ListeningQuestion } from '../types/service.types';
+import { Level } from "@/shared/types/common.types";
+import { ListeningExercise, ListeningQuestion } from "../types/service.types";
 
 export class ListeningService extends BaseService<ListeningExercise> {
-  private questionsService: BaseService<ListeningQuestion>;
-
   constructor() {
-    super("listening_exercises");
-    this.questionsService = new BaseService<ListeningQuestion>("listening_questions");
+    super("listening_content");
   }
 
   async getExerciseWithQuestions(exerciseId: string) {

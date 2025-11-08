@@ -1,124 +1,111 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
-import { Slider } from '@/components/ui/slider'
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react'
-import { Howl } from 'howler'
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
+import { Howl } from "howler";
 
 interface AudioPlayerProps {
-  audioUrls: string[]
+  audioUrl: string;
 }
 
-export function AudioPlayer({ audioUrls }: AudioPlayerProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const soundRef = useRef<Howl | null>(null)
-  const progressInterval = useRef<NodeJS.Timeout>()
+export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const soundRef = useRef<Howl | null>(null);
+  const progressInterval = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    loadAudio(currentIndex)
+    loadAudio(currentIndex);
     return () => {
       if (soundRef.current) {
-        soundRef.current.unload()
+        soundRef.current.unload();
       }
       if (progressInterval.current) {
-        clearInterval(progressInterval.current)
+        clearInterval(progressInterval.current);
       }
-    }
-  }, [currentIndex])
+    };
+  }, [currentIndex]);
 
   const loadAudio = (index: number) => {
     if (soundRef.current) {
-      soundRef.current.unload()
+      soundRef.current.unload();
     }
 
     soundRef.current = new Howl({
-      src: [audioUrls[index]],
+      src: audioUrl,
       html5: true,
       onload: () => {
-        setDuration(soundRef.current?.duration() || 0)
+        setDuration(soundRef.current?.duration() || 0);
       },
       onplay: () => {
-        startProgressUpdate()
+        startProgressUpdate();
       },
       onend: () => {
-        setIsPlaying(false)
-        setProgress(0)
+        setIsPlaying(false);
+        setProgress(0);
         if (progressInterval.current) {
-          clearInterval(progressInterval.current)
+          clearInterval(progressInterval.current);
         }
       },
-    })
-  }
+    });
+  };
 
   const startProgressUpdate = () => {
     if (progressInterval.current) {
-      clearInterval(progressInterval.current)
+      clearInterval(progressInterval.current);
     }
     progressInterval.current = setInterval(() => {
       if (soundRef.current) {
-        setProgress(soundRef.current.seek() as number)
+        setProgress(soundRef.current.seek() as number);
       }
-    }, 100)
-  }
+    }, 100);
+  };
 
   const togglePlay = () => {
-    if (!soundRef.current) return
+    if (!soundRef.current) return;
 
     if (isPlaying) {
-      soundRef.current.pause()
+      soundRef.current.pause();
       if (progressInterval.current) {
-        clearInterval(progressInterval.current)
+        clearInterval(progressInterval.current);
       }
     } else {
-      soundRef.current.play()
+      soundRef.current.play();
     }
-    setIsPlaying(!isPlaying)
-  }
+    setIsPlaying(!isPlaying);
+  };
 
   const handleRestart = () => {
     if (soundRef.current) {
-      soundRef.current.seek(0)
-      setProgress(0)
+      soundRef.current.seek(0);
+      setProgress(0);
     }
-  }
+  };
 
   const handleSeek = (value: number[]) => {
     if (soundRef.current) {
-      soundRef.current.seek(value[0])
-      setProgress(value[0])
+      soundRef.current.seek(value[0]);
+      setProgress(value[0]);
     }
-  }
+  };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="bg-card border rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Volume2 className="h-5 w-5 text-primary" />
-          <span className="font-medium">Audio {currentIndex + 1} of {audioUrls.length}</span>
+          <span className="font-medium">Audio</span>
         </div>
-        {audioUrls.length > 1 && (
-          <div className="flex gap-2">
-            {audioUrls.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex ? 'bg-primary' : 'bg-muted'
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="space-y-2">
@@ -145,9 +132,9 @@ export function AudioPlayer({ audioUrls }: AudioPlayerProps) {
           ) : (
             <Play className="h-5 w-5 mr-2" />
           )}
-          {isPlaying ? 'Pause' : 'Play'}
+          {isPlaying ? "Pause" : "Play"}
         </Button>
       </div>
     </div>
-  )
+  );
 }

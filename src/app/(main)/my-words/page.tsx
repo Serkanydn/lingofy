@@ -20,7 +20,11 @@ import {
   FolderPlus,
   Edit2,
   Trash2,
+  Lock,
 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Dialog,
@@ -39,6 +43,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function MyWordsPage() {
+  const router = useRouter();
+  const { user, profile, isPremium } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -48,6 +54,35 @@ export default function MyWordsPage() {
   const { data: allWords } = useUserWords();
   const { data: words, isLoading } = useUserWords(selectedCategory);
   const { data: categories } = useWordCategories();
+
+  if (!isPremium) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-2xl mx-auto text-center">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <div className="bg-muted p-4 rounded-full">
+                <Lock className="h-12 w-12 text-muted-foreground" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">My Words is a Premium Feature</CardTitle>
+            <CardDescription className="text-base">
+              Upgrade to Premium to save and organize your vocabulary
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              size="lg"
+              onClick={() => router.push('/premium')}
+              className="bg-linear-to-r from-yellow-400 to-orange-500"
+            >
+              Upgrade to Premium
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const filteredWords = words?.filter((word) => {
     const matchesSearch =

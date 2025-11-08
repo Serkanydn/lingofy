@@ -22,7 +22,6 @@ export default function ReadingDetailPage() {
   const { user, profile, isPremium } = useAuth();
   const { data: reading, isLoading } = useReadingDetail(contentId);
   const { data: quizQuestions } = useQuizFromId(
-    "reading",
     reading?.quiz_content_id || ""
   );
   const submitQuiz = useQuizSubmit();
@@ -103,7 +102,7 @@ export default function ReadingDetailPage() {
           <CardTitle className="text-3xl mt-2">{reading.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <AudioPlayer audioUrls={reading.audio_urls} />
+          <AudioPlayer audioUrl={reading.audio_url} />
 
           <div
             className="prose prose-lg max-w-none"

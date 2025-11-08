@@ -1,6 +1,6 @@
 export type ContentType = 'reading' | 'listening' | 'grammar'
 
-export type QuestionType = "mc" | "fb" | "tf";
+export type QuestionType = "multiple_choice" | "fill_blank" | "true_false";
 
 export interface QuizOption {
   id: string
@@ -18,7 +18,7 @@ export type QuizQuestion = {
   explanation: string | null
   order_index: number
   points?: number
-  question_type: QuestionType
+  type: QuestionType
 }
 
 export type QuizContent = {

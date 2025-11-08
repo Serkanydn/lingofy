@@ -27,7 +27,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "I _____ to London three times in my life.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "have been", is_correct: true },
           { text: "was", is_correct: false },
@@ -39,7 +39,7 @@ const grammarTopics = [
       },
       {
         question: "She _____ her keys yesterday and couldn't find them.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "has lost", is_correct: false },
           { text: "lost", is_correct: true },
@@ -51,7 +51,7 @@ const grammarTopics = [
       },
       {
         question: "They _____ each other since 2010.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "knew", is_correct: false },
           { text: "have known", is_correct: true },
@@ -81,7 +81,7 @@ const grammarTopics = [
       {
         question:
           'A: "I don\'t have any money." B: "Don\'t worry, I _____ lend you some."',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "will", is_correct: true },
           { text: "am going to", is_correct: false },
@@ -93,7 +93,7 @@ const grammarTopics = [
       },
       {
         question: "Look at those dark clouds! It _____ storm soon.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "will", is_correct: false },
           { text: "is going to", is_correct: true },
@@ -106,7 +106,7 @@ const grammarTopics = [
       {
         question:
           "We have already bought the tickets. We _____ fly to Spain next month.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "will", is_correct: false },
           { text: "are going to", is_correct: true },
@@ -137,7 +137,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "You _____ drive without a license. It's illegal.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "must not", is_correct: true },
           { text: "don't have to", is_correct: false },
@@ -149,7 +149,7 @@ const grammarTopics = [
       },
       {
         question: "I _____ get up early tomorrow because it's Saturday.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "must not", is_correct: false },
           { text: "don't have to", is_correct: true },
@@ -162,7 +162,7 @@ const grammarTopics = [
       {
         question:
           "All students _____ wear a uniform at our school. It's a rule.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "must", is_correct: false },
           { text: "have to", is_correct: true },
@@ -191,7 +191,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "You look tired. You _____ get some rest.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "should", is_correct: true },
           { text: "would", is_correct: false },
@@ -203,7 +203,7 @@ const grammarTopics = [
       },
       {
         question: "If I had more time, I _____ learn to play the guitar.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "should", is_correct: false },
           { text: "would", is_correct: true },
@@ -215,7 +215,7 @@ const grammarTopics = [
       },
       {
         question: "_____ you mind opening the window?",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "Should", is_correct: false },
           { text: "Would", is_correct: true },
@@ -246,7 +246,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "If it _____ sunny tomorrow, we will go to the beach.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "is", is_correct: true },
           { text: "will be", is_correct: false },
@@ -258,7 +258,7 @@ const grammarTopics = [
       },
       {
         question: "If I _____ you, I would apologize.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "am", is_correct: false },
           { text: "was", is_correct: false },
@@ -270,7 +270,7 @@ const grammarTopics = [
       },
       {
         question: "She _____ help you if you ask her.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "will", is_correct: true },
           { text: "would", is_correct: false },
@@ -299,7 +299,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "If I _____ about the meeting, I would have attended.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "knew", is_correct: false },
           { text: "had known", is_correct: true },
@@ -311,7 +311,7 @@ const grammarTopics = [
       },
       {
         question: "She _____ the exam if she had studied more.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "would pass", is_correct: false },
           { text: "would have passed", is_correct: true },
@@ -323,7 +323,7 @@ const grammarTopics = [
       },
       {
         question: "If they _____ me, I would have helped them.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "asked", is_correct: false },
           { text: "would ask", is_correct: false },
@@ -354,7 +354,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "The letter _____ yesterday.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "was sent", is_correct: true },
           { text: "sent", is_correct: false },
@@ -366,7 +366,7 @@ const grammarTopics = [
       },
       {
         question: "English _____ in many countries.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "speaks", is_correct: false },
           { text: "is spoken", is_correct: true },
@@ -378,7 +378,7 @@ const grammarTopics = [
       },
       {
         question: "The house _____ in 1995.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "built", is_correct: false },
           { text: "is built", is_correct: false },
@@ -407,7 +407,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "The work _____ finished by tomorrow.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "must", is_correct: false },
           { text: "must be", is_correct: true },
@@ -419,7 +419,7 @@ const grammarTopics = [
       },
       {
         question: "The door _____ locked at night.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "should", is_correct: false },
           { text: "should be", is_correct: true },
@@ -431,7 +431,7 @@ const grammarTopics = [
       },
       {
         question: "The problem _____ solved with more time.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "can", is_correct: false },
           { text: "can be", is_correct: true },
@@ -462,7 +462,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: 'Direct: "I am happy." Reported: She said she _____ happy.',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "is", is_correct: false },
           { text: "was", is_correct: true },
@@ -475,7 +475,7 @@ const grammarTopics = [
       {
         question:
           'Direct: "I will call you." Reported: He said he _____ call me.',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "will", is_correct: false },
           { text: "would", is_correct: true },
@@ -488,7 +488,7 @@ const grammarTopics = [
       {
         question:
           'Direct: "Where do you work?" Reported: She asked me where I _____.',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "work", is_correct: false },
           { text: "worked", is_correct: true },
@@ -518,7 +518,7 @@ const grammarTopics = [
       {
         question:
           'Direct: "Can you help me?" Reported: He asked _____ help him.',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "if I can", is_correct: false },
           { text: "if I could", is_correct: true },
@@ -531,7 +531,7 @@ const grammarTopics = [
       {
         question:
           'Direct: "Please sit down." Reported: She asked me _____ down.',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "sit", is_correct: false },
           { text: "to sit", is_correct: true },
@@ -544,7 +544,7 @@ const grammarTopics = [
       {
         question:
           'Direct: "Don\'t touch that!" Reported: He told me _____ that.',
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "don't touch", is_correct: false },
           { text: "not touch", is_correct: false },
@@ -575,7 +575,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "I need _____ pen. Do you have one?",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "a", is_correct: true },
           { text: "an", is_correct: false },
@@ -587,7 +587,7 @@ const grammarTopics = [
       },
       {
         question: "_____ moon orbits around the Earth.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "A", is_correct: false },
           { text: "An", is_correct: false },
@@ -599,7 +599,7 @@ const grammarTopics = [
       },
       {
         question: "She wants to be _____ engineer.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "a", is_correct: false },
           { text: "an", is_correct: true },
@@ -629,7 +629,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "I have _____ breakfast at 8 AM every day.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "a", is_correct: false },
           { text: "an", is_correct: false },
@@ -641,7 +641,7 @@ const grammarTopics = [
       },
       {
         question: "She speaks _____ Japanese very well.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "a", is_correct: false },
           { text: "an", is_correct: false },
@@ -653,7 +653,7 @@ const grammarTopics = [
       },
       {
         question: "_____ children need love and attention.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "A", is_correct: false },
           { text: "An", is_correct: false },
@@ -685,7 +685,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "The meeting is _____ 3 PM.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "in", is_correct: false },
           { text: "on", is_correct: false },
@@ -697,7 +697,7 @@ const grammarTopics = [
       },
       {
         question: "I was born _____ 1998.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "in", is_correct: true },
           { text: "on", is_correct: false },
@@ -709,7 +709,7 @@ const grammarTopics = [
       },
       {
         question: "We have a party _____ Saturday.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "in", is_correct: false },
           { text: "on", is_correct: true },
@@ -739,7 +739,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "The keys are _____ the table.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "in", is_correct: false },
           { text: "on", is_correct: true },
@@ -751,7 +751,7 @@ const grammarTopics = [
       },
       {
         question: "She is waiting _____ the station.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "in", is_correct: false },
           { text: "on", is_correct: false },
@@ -763,7 +763,7 @@ const grammarTopics = [
       },
       {
         question: "They live _____ New York.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "in", is_correct: true },
           { text: "on", is_correct: false },
@@ -795,7 +795,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "I need to _____ this word in the dictionary.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "look up", is_correct: true },
           { text: "look at", is_correct: false },
@@ -807,7 +807,7 @@ const grammarTopics = [
       },
       {
         question: "Don't _____ ! Keep trying!",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "give in", is_correct: false },
           { text: "give up", is_correct: true },
@@ -819,7 +819,7 @@ const grammarTopics = [
       },
       {
         question: "What time do you usually _____ in the morning?",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "wake up", is_correct: true },
           { text: "wake down", is_correct: false },
@@ -849,7 +849,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "We _____ of sugar. Can you buy some?",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "ran into", is_correct: false },
           { text: "ran out", is_correct: true },
@@ -861,7 +861,7 @@ const grammarTopics = [
       },
       {
         question: "I need to _____ the answer to this problem.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "figure out", is_correct: true },
           { text: "figure in", is_correct: false },
@@ -873,7 +873,7 @@ const grammarTopics = [
       },
       {
         question: "She _____ at the gym three times a week.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "works off", is_correct: false },
           { text: "works in", is_correct: false },
@@ -904,7 +904,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "I _____ smoke, but I quit five years ago.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "used to", is_correct: true },
           { text: "am used to", is_correct: false },
@@ -916,7 +916,7 @@ const grammarTopics = [
       },
       {
         question: "She _____ living alone now. It's normal for her.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "used to", is_correct: false },
           { text: "is used to", is_correct: true },
@@ -928,7 +928,7 @@ const grammarTopics = [
       },
       {
         question: "I am slowly _____ my new job.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "used to", is_correct: false },
           { text: "am used to", is_correct: false },
@@ -957,7 +957,7 @@ const grammarTopics = [
     quizzes: [
       {
         question: "I need to _____ a phone call.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "make", is_correct: true },
           { text: "do", is_correct: false },
@@ -969,7 +969,7 @@ const grammarTopics = [
       },
       {
         question: "Can you _____ me a favor?",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "make", is_correct: false },
           { text: "do", is_correct: true },
@@ -981,7 +981,7 @@ const grammarTopics = [
       },
       {
         question: "I have to _____ my homework tonight.",
-        type: "mc",
+        type: "multiple_choice",
         options: [
           { text: "make", is_correct: false },
           { text: "do", is_correct: true },
@@ -1012,6 +1012,7 @@ async function seedGrammarTopics() {
           examples: topic.examples,
           mini_text: topic.mini_text,
           order_index: topic.order_index,
+          is_premium: false,
         })
         .select()
         .single();
@@ -1047,6 +1048,7 @@ async function seedGrammarTopics() {
             question_text: questionData.question,
             points: questionData.points,
             order_index: questionData.order_index,
+            type: questionData.type,
           })
           .select()
           .single();
@@ -1071,6 +1073,15 @@ async function seedGrammarTopics() {
           console.error(`Error inserting options:`, optionsError);
         }
       }
+
+      // Link quiz to reading
+      await supabase
+        .from("grammar_topics")
+        .update({ quiz_content_id: quizContent.id })
+        .eq("id", insertedTopic.id);
+
+      console.log(`  ✓ Quiz linked: ${topic.quizzes.length} questions`);
+      console.log(`  ✓  Premium: ${insertedTopic.is_premium}\n`);
     }
 
     console.log("\n✅ All grammar topics seeded successfully!");

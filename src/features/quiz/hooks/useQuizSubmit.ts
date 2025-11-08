@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { QuizAttempt } from "@/shared/types/content.types";
 import { QuizAnswer } from "../types/quiz.types";
 import { quizService } from "../services";
-import { authService } from "@/features/auth/services";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 

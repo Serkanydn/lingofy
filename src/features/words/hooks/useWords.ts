@@ -7,7 +7,6 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 export interface UserWord {
   id: string;
   word: string;
-  translation: string;
   description: string;
   example_sentences: string[];
   audio_url?: string;
@@ -33,16 +32,16 @@ export function useUserWords(categoryId?: string | null) {
     queryKey: ["user-words", categoryId],
     queryFn: async () => {
       const words = await wordsService.getAll();
-      
+
       // Filter by category if specified
       if (categoryId === undefined || categoryId === null) {
         return words;
       }
-      
+
       if (categoryId === "uncategorized") {
         return words.filter((w: any) => !w.category_id);
       }
-      
+
       return words.filter((w: any) => w.category_id === categoryId);
     },
   });
@@ -84,7 +83,13 @@ export function useUpdateWord() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<UserWord, "id" | "created_at" | "user_id">> }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Omit<UserWord, "id" | "created_at" | "user_id">>;
+    }) => {
       return wordsService.update(id, updates);
     },
     onSuccess: () => {
@@ -111,7 +116,15 @@ export function useCreateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ name, color, icon }: { name: string; color: string; icon?: string }) => {
+    mutationFn: async ({
+      name,
+      color,
+      icon,
+    }: {
+      name: string;
+      color: string;
+      icon?: string;
+    }) => {
       const user = await authService.getCurrentUser();
       if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
@@ -127,7 +140,13 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pick<WordCategory, "name" | "color" | "icon">> }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Pick<WordCategory, "name" | "color" | "icon">>;
+    }) => {
       const user = await authService.getCurrentUser();
       if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
@@ -160,7 +179,13 @@ export function useAssignWordToCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ wordId, categoryId }: { wordId: string; categoryId: string | null }) => {
+    mutationFn: async ({
+      wordId,
+      categoryId,
+    }: {
+      wordId: string;
+      categoryId: string | null;
+    }) => {
       const user = await authService.getCurrentUser();
       if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");

@@ -21,7 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUpdateWord, useWordCategories, useAssignWordToCategory, UserWord } from "../hooks/useWords";
+import {
+  useUpdateWord,
+  useWordCategories,
+  useAssignWordToCategory,
+  UserWord,
+} from "../hooks/useWords";
 
 interface UpdateWordDialogProps {
   open: boolean;
@@ -35,10 +40,13 @@ export function UpdateWordDialog({
   word,
 }: UpdateWordDialogProps) {
   const [wordText, setWordText] = useState(word.word);
-  const [translation, setTranslation] = useState(word.translation);
   const [description, setDescription] = useState(word.description);
-  const [exampleSentences, setExampleSentences] = useState<string[]>(word.example_sentences || [""]);
-  const [categoryId, setCategoryId] = useState<string>((word as any).category_id || "none");
+  const [exampleSentences, setExampleSentences] = useState<string[]>(
+    word.example_sentences || [""]
+  );
+  const [categoryId, setCategoryId] = useState<string>(
+    (word as any).category_id || "none"
+  );
   const updateWord = useUpdateWord();
   const assignToCategory = useAssignWordToCategory();
   const { data: categories } = useWordCategories();
@@ -46,7 +54,6 @@ export function UpdateWordDialog({
   useEffect(() => {
     if (open) {
       setWordText(word.word);
-      setTranslation(word.translation);
       setDescription(word.description);
       setExampleSentences(word.example_sentences || [""]);
       setCategoryId((word as any).category_id || "none");
@@ -56,8 +63,14 @@ export function UpdateWordDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!wordText || !translation || !description || exampleSentences.filter(s => s.trim()).length === 0) {
-      toast.error("Please fill in all required fields and at least one example");
+    if (
+      !wordText ||
+      !description ||
+      exampleSentences.filter((s) => s.trim()).length === 0
+    ) {
+      toast.error(
+        "Please fill in all required fields and at least one example"
+      );
       return;
     }
 
@@ -66,9 +79,8 @@ export function UpdateWordDialog({
         id: word.id,
         updates: {
           word: wordText,
-          translation,
           description,
-          example_sentences: exampleSentences.filter(s => s.trim()),
+          example_sentences: exampleSentences.filter((s) => s.trim()),
         },
       });
 
@@ -85,7 +97,8 @@ export function UpdateWordDialog({
       onClose();
     } catch (error) {
       console.error("Error updating word:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to update word";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update word";
       toast.error(errorMessage);
     }
   };
@@ -168,7 +181,9 @@ export function UpdateWordDialog({
                     updated[index] = e.target.value;
                     setExampleSentences(updated);
                   }}
-                  placeholder={`Example ${index + 1}: She did an excellent job on the project.`}
+                  placeholder={`Example ${
+                    index + 1
+                  }: She did an excellent job on the project.`}
                   rows={2}
                   required={index === 0}
                 />
@@ -178,7 +193,9 @@ export function UpdateWordDialog({
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      setExampleSentences(exampleSentences.filter((_, i) => i !== index));
+                      setExampleSentences(
+                        exampleSentences.filter((_, i) => i !== index)
+                      );
                     }}
                   >
                     <Trash2 className="h-4 w-4" />

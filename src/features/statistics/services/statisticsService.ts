@@ -4,7 +4,6 @@ import { Level, GrammarCategory } from "@/shared/types/common.types";
 interface StatisticsData {
   id: string;
   user_id: string;
-  content_type: 'grammar' | 'reading' | 'listening';
   total_attempts: number;
   successful_attempts: number;
   time_spent: number;

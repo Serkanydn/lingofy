@@ -1,61 +1,63 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import Link from 'next/link'
-import { ArrowLeft, FileText } from 'lucide-react'
-import { QuizContainer } from '@/features/quiz/components/QuizContainer'
-import { ListeningPlayer } from '@/features/listening/components/ListeningPlayer'
-import { useListeningDetail, useListeningQuiz } from '@/features/listening/hooks/useListening'
+import { useState, use } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
+import { ArrowLeft, FileText } from "lucide-react";
+import { QuizContainer } from "@/features/quiz/components/QuizContainer";
+import { ListeningPlayer } from "@/features/listening/components/ListeningPlayer";
+import {
+  useListeningDetail,
+  useListeningQuiz,
+} from "@/features/listening/hooks/useListening";
 
-
-export default function ListeningDetailPage({ 
-  params 
-}: { 
-  params: { level: string; id: string } 
+export default function ListeningDetailPage({
+  params,
+}: {
+  params: Promise<{ level: string; id: string }>;
 }) {
-  const { data: listening, isLoading } = useListeningDetail(params.id)
-  const { data: quizQuestions } = useListeningQuiz(params.id)
-  const [showQuiz, setShowQuiz] = useState(false)
-  const [showTranscript, setShowTranscript] = useState(false)
+  const { level, id } = use(params)
+  const { data: listening, isLoading } = useListeningDetail(id);
+  const { data: quizQuestions } = useListeningQuiz(id);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
 
   if (!listening) {
-    return <div className="container mx-auto px-4 py-8">Listening not found</div>
+    return (
+      <div className="container mx-auto px-4 py-8">Listening not found</div>
+    );
   }
 
   if (showQuiz && quizQuestions) {
     return (
       <QuizContainer
         quiz={{
-          id: params.id,
-          content_type: 'listening',
-          content_id: params.id,
+          id: id,
           title: listening.title,
-          difficulty_level: listening.level,
-          questions: quizQuestions
+          questions: quizQuestions,
         }}
         onExit={() => setShowQuiz(false)}
         onComplete={(score, maxScore) => {
-          setShowQuiz(false)
-          setShowTranscript(true)
+          setShowQuiz(false);
+          setShowTranscript(true);
         }}
       />
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link href={`/listening/${params.level}`}>
+      <Link href={`/listening/${level}`}>
         <Button variant="ghost" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to {params.level} Listening
+          Back to {level} Listening
         </Button>
       </Link>
 
@@ -64,28 +66,32 @@ export default function ListeningDetailPage({
           <div className="flex items-center justify-between">
             <Badge>{listening.level}</Badge>
             <span className="text-sm text-muted-foreground">
-              {Math.floor(listening.duration_seconds / 60)}:{String(listening.duration_seconds % 60).padStart(2, '0')} min
+              {Math.floor(listening.duration_seconds / 60)}:
+              {String(listening.duration_seconds % 60).padStart(2, "0")} min
             </span>
           </div>
           <CardTitle className="text-3xl mt-2">{listening.title}</CardTitle>
           {listening.description && (
-            <p className="text-muted-foreground mt-2">{listening.description}</p>
+            <p className="text-muted-foreground mt-2">
+              {listening.description}
+            </p>
           )}
         </CardHeader>
         <CardContent className="space-y-6">
           <ListeningPlayer
-            audioUrls={listening.audio_urls} 
+            audioUrl={listening.audio_url}
             duration={listening.duration_seconds}
           />
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              💡 <strong>Tip:</strong> Listen carefully and try to understand the main ideas. 
-              You can adjust the playback speed if needed. Take the quiz when you're ready!
+              💡 <strong>Tip:</strong> Listen carefully and try to understand
+              the main ideas. You can adjust the playback speed if needed. Take
+              the quiz when you're ready!
             </p>
           </div>
 
-          <Button 
+          <Button
             className="w-full"
             size="lg"
             onClick={() => setShowQuiz(true)}
@@ -102,11 +108,13 @@ export default function ListeningDetailPage({
                   <h3 className="text-xl font-semibold">Transcript</h3>
                 </div>
                 <div className="prose prose-lg max-w-none bg-muted/50 p-6 rounded-lg">
-                  {listening.transcript.split('\n\n').map((paragraph, index) => (
-                    <p key={index} className="mb-4 leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
+                  {listening.transcript
+                    .split("\n\n")
+                    .map((paragraph, index) => (
+                      <p key={index} className="mb-4 leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ))}
                 </div>
               </div>
             </>
@@ -125,5 +133,5 @@ export default function ListeningDetailPage({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

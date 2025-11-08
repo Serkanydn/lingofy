@@ -24,10 +24,7 @@ export default function GrammarTopicPage({
 
   const { data: topic, isLoading } = useGrammarDetail(id);
   console.log("topic", topic?.quiz_content_id);
-  const { data: quizQuestions } = useQuizFromId(
-    "reading",
-    topic?.quiz_content_id || ""
-  );
+  const { data: quizQuestions } = useQuizFromId(topic?.quiz_content_id || "");
 
   const [showQuiz, setShowQuiz] = useState(false);
 

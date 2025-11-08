@@ -1,5 +1,6 @@
 'use client'
 
+import { use } from 'react'
 import { Level } from '@/shared/types/common.types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,9 +12,10 @@ import { useListeningByLevel } from '@/features/listening/hooks/useListening'
 export default function ListeningLevelPage({ 
   params 
 }: { 
-  params: { level: Level } 
+  params: Promise<{ level: Level }> 
 }) {
-  const { data: listeningContent, isLoading } = useListeningByLevel(params.level)
+  const { level } = use(params)
+  const { data: listeningContent, isLoading } = useListeningByLevel(level)
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>
@@ -33,14 +35,14 @@ export default function ListeningLevelPage({
           </Button>
         </Link>
 
-        <h1 className="text-4xl font-bold mb-2">{params.level} Listening</h1>
+        <h1 className="text-4xl font-bold mb-2">{level} Listening</h1>
         <p className="text-xl text-muted-foreground mb-8">
-          Practice your listening skills with {params.level} level audio content.
+          Practice your listening skills with {level} level audio content.
         </p>
 
         <div className="grid gap-6">
           {listeningContent.map((content) => (
-            <Link key={content.id} href={`/listening/${params.level}/${content.id}`}>
+            <Link key={content.id} href={`/listening/${level}/${content.id}`}>
               <Card className="transition-all hover:shadow-md">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
