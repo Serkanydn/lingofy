@@ -9,6 +9,7 @@ export interface ReadingQuestion {
 
 export interface ReadingText {
   id: string;
+  quiz_content_id: string;
   title: string;
   content: string;
   level: Level;

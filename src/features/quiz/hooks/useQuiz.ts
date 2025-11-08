@@ -27,3 +27,14 @@ export function useHasAttempted(userId: string, quizContentId: string) {
     enabled: !!userId && !!quizContentId,
   })
 }
+
+export function useQuizFromId(
+  contentType: 'reading' | 'listening' | 'grammar',
+  contentId: string
+) {
+  return useQuery({
+    queryKey: ['quiz', contentType, contentId],
+    queryFn: () => quizService.getQuizByContentId(contentType, contentId),
+    enabled: !!contentId,
+  })
+}

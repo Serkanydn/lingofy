@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { GrammarCategory } from "@/shared/types/common.types";
 import { grammarService } from "../services";
+import { quizService } from "@/features/quiz/services";
 
 export interface GrammarTopic {
   id: string;
@@ -30,12 +31,33 @@ export function useGrammarDetail(id: string) {
   });
 }
 
-export function useGrammarQuiz(topicId: string) {
+export function useGrammarQuiz(topicId?: string) {
   return useQuery({
     queryKey: ["quiz", "grammar", topicId],
     queryFn: async () => {
-      const { exercises } = await grammarService.getRuleWithExercises(topicId);
-      return exercises;
+      const data = await quizService.getById(topicId!);
+      console.log('data',data);
+
+      return data
+    
+
     },
+    enabled: topicId !== undefined,
+  });
+}
+
+
+export function useGrammarQuizv2(topicId?: string) {
+  return useQuery({
+    queryKey: ["quiz", "grammar", topicId],
+    queryFn: async () => {
+      const data = await grammarService.getRuleWithExercises(topicId!);
+      console.log('data-------',data);
+
+      return data
+    
+
+    },
+    enabled: topicId !== undefined,
   });
 }

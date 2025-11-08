@@ -1,21 +1,18 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { Level, GrammarCategory } from '@/shared/types/common.types';
-import { GrammarRule, GrammarExercise } from '../types/service.types';
+import { Level, GrammarCategory } from "@/shared/types/common.types";
+import { GrammarRule, GrammarExercise } from "../types/service.types";
 
 export class GrammarService extends BaseService<GrammarRule> {
-  private exercisesService: BaseService<GrammarExercise>;
-
   constructor() {
     super("grammar_topics");
-    this.exercisesService = new BaseService<GrammarExercise>("grammar_exercises");
   }
 
   async getRuleWithExercises(ruleId: string) {
     const rule = await this.getById(ruleId);
     const { data: exercises, error } = await this.supabase
-      .from("grammar_exercises")
+      .from("quiz_content")
       .select("*")
-      .eq("rule_id", ruleId);
+      .eq("id", ruleId);
 
     if (error) throw error;
     return { rule, exercises };

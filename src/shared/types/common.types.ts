@@ -7,8 +7,8 @@ export type GrammarCategory =
   | 'modals' 
   | 'conditionals' 
   | 'passive_voice' 
-  | 'reported_speech' 
+  | 'reported-speech' 
   | 'articles' 
   | 'prepositions' 
-  | 'phrasal_verbs'
-  | 'tricky_topics';
+  | 'phrasal-verbs'
+  | 'tricky-topics';

@@ -427,7 +427,7 @@ const grammarTopics = [
 
   // ====== REPORTED SPEECH (2 topics) ======
   {
-    category: 'reported_speech',
+    category: 'reported-speech',
     title: 'Direct vs Indirect Speech',
     explanation: 'Reported speech (indirect speech) is used to tell someone what another person said without using their exact words. The tense usually shifts back one step, pronouns change, and time/place references may need adjustment.',
     examples: [
@@ -478,7 +478,7 @@ const grammarTopics = [
     ]
   },
   {
-    category: 'reported_speech',
+    category: 'reported-speech',
     title: 'Reporting Questions and Commands',
     explanation: 'When reporting questions, use "asked" + question word + statement word order (no inversion). For yes/no questions, use "asked if/whether". For commands, use "told/asked + object + (not) to + infinitive".',
     examples: [
@@ -742,7 +742,7 @@ const grammarTopics = [
 
   // ====== PHRASAL VERBS (2 topics) ======
   {
-    category: 'phrasal_verbs',
+    category: 'phrasal-verbs',
     title: 'Common Phrasal Verbs with UP',
     explanation: 'Phrasal verbs with "up" often indicate completion, increase, or upward movement. The meaning can be literal or idiomatic. Many cannot be translated word-by-word.',
     examples: [
@@ -794,7 +794,7 @@ const grammarTopics = [
     ]
   },
   {
-    category: 'phrasal_verbs',
+    category: 'phrasal-verbs',
     title: 'Common Phrasal Verbs with OUT',
     explanation: 'Phrasal verbs with "out" often suggest movement away from something, completion, or discovery. They can be separable or inseparable depending on the specific verb.',
     examples: [
@@ -848,7 +848,7 @@ const grammarTopics = [
 
   // ====== TRICKY TOPICS (2 topics) ======
   {
-    category: 'tricky_topics',
+    category: 'tricky-topics',
     title: 'Used To vs Be Used To vs Get Used To',
     explanation: '"Used to" describes past habits or states (no longer true). "Be used to" means be accustomed to something (followed by noun/-ing form). "Get used to" means become accustomed to something (process of adapting).',
     examples: [
@@ -899,7 +899,7 @@ const grammarTopics = [
     ]
   },
   {
-    category: 'tricky_topics',
+    category: 'tricky-topics',
     title: 'Make vs Do',
     explanation: 'Use "make" for creating, producing, or constructing something. Use "do" for activities, actions, or tasks (especially general ones). Many collocations must be memorized.',
     examples: [

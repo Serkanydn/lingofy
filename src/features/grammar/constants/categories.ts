@@ -19,7 +19,7 @@ export const GRAMMAR_CATEGORIES = {
     description: 'Learn how to form and use passive voice correctly',
     icon: '🔄'
   },
-  'reported_speech': {
+  'reported-speech': {
     name: 'Reported Speech',
     description: 'Convert direct speech to reported speech properly',
     icon: '💬'
@@ -34,12 +34,12 @@ export const GRAMMAR_CATEGORIES = {
     description: 'Learn common prepositions and their usage',
     icon: '📍'
   },
-  'phrasal_verbs': {
+  'phrasal-verbs': {
     name: 'Phrasal Verbs',
     description: 'Study commonly used phrasal verbs and their meanings',
     icon: '🔤'
   },
-  'tricky_topics': {
+  'tricky-topics': {
     name: 'Tricky Topics',
     description: 'Master challenging grammar topics and common mistakes',
     icon: '🎯'

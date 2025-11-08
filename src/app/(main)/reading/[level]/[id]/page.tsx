@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useQuiz } from "@/features/quiz/hooks/useQuiz";
+import { useQuiz, useQuizFromId } from "@/features/quiz/hooks/useQuiz";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
 import { useReadingDetail } from "@/features/reading/hooks/useReading";
 
@@ -21,17 +21,23 @@ export default function ReadingDetailPage() {
   const router = useRouter();
   const { user, profile, isPremium } = useAuth();
   const { data: reading, isLoading } = useReadingDetail(contentId);
-  const { data: quizQuestions } = useQuiz("reading", contentId);
+  const { data: quizQuestions } = useQuizFromId(
+    "reading",
+    reading?.quiz_content_id || ""
+  );
   const submitQuiz = useQuizSubmit();
 
   // Transform quiz questions array to QuizContent object
-  const quiz = quizQuestions && quizQuestions.length > 0 ? {
-    id: contentId,
-    title: reading?.title || "Quiz",
-    questions: quizQuestions
-  } : null;
+  const quiz =
+    quizQuestions && quizQuestions.length > 0
+      ? {
+          id: contentId,
+          title: reading?.title || "Quiz",
+          questions: quizQuestions,
+        }
+      : null;
 
-  console.log('quiz',quiz);
+  console.log("quiz", quiz);
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [showAddWord, setShowAddWord] = useState(false);

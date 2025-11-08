@@ -80,7 +80,7 @@ const grammarTopics = [
     order_index: 1,
   },
   {
-    category: 'tricky_topics',
+    category: 'tricky-topics',
     title: 'Much vs Many',
     explanation: 'Use "much" with uncountable nouns (things you cannot count individually). Use "many" with countable nouns (things you can count). In questions and negatives, both are common. In positive sentences, we often use "a lot of" instead.',
     examples: [

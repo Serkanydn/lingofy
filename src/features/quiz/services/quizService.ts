@@ -90,6 +90,33 @@ export class QuizService extends BaseService<Quiz> {
     return data;
   }
 
+    async getQuizByContentId(contentType: 'reading' | 'listening' | 'grammar', id: string) {
+    // First get the quiz_content for this content
+    const { data: quizContent, error: quizError } = await this.supabase
+      .from("quiz_content")
+      .select("id")
+      .eq("content_type", contentType)
+      .eq("id", id)
+      .maybeSingle();
+
+    if (quizError) throw quizError;
+    if (!quizContent) return [];
+
+    // Then get the questions with their options for this quiz
+    const { data, error } = await this.supabase
+      .from("quiz_questions")
+      .select(`
+        *,
+        options:quiz_options(*)
+      `)
+      .eq("quiz_content_id", quizContent.id)
+      .order("order_index", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  }
+
+
   async getUserQuizHistory(userId: string) {
     const { data, error } = await this.supabase
       .from("user_quiz_attempts")

@@ -12,6 +12,7 @@ import {
   useGrammarDetail,
   useGrammarQuiz,
 } from "@/features/grammar/hooks/useGrammar";
+import { useQuiz, useQuizFromId } from "@/features/quiz/hooks/useQuiz";
 
 export default function GrammarTopicPage({
   params,
@@ -20,10 +21,17 @@ export default function GrammarTopicPage({
 }) {
   // ✅ Unwrap the async params with React.use()
   const { category, id } = React.use(params);
+
   const { data: topic, isLoading } = useGrammarDetail(id);
-  const { data: quizQuestions } = useGrammarQuiz(id);
+  console.log("topic", topic?.quiz_content_id);
+  const { data: quizQuestions } = useQuizFromId(
+    "reading",
+    topic?.quiz_content_id || ""
+  );
+
   const [showQuiz, setShowQuiz] = useState(false);
 
+  console.log("quizQuestions", quizQuestions);
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>;
   }
@@ -99,16 +107,19 @@ export default function GrammarTopicPage({
               </p>
             </div>
           </div>
+          {!!quizQuestions?.length && (
+            <>
+              <Separator />
 
-          <Separator />
-
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => setShowQuiz(true)}
-          >
-            Take Quiz
-          </Button>
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => setShowQuiz(true)}
+              >
+                Take Quiz
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

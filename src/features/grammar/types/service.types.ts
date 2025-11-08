@@ -20,6 +20,7 @@ export interface GrammarRule {
   order_index: number;
   created_at: string;
   updated_at: string;
+  quiz_content_id: string;
 }
 
-import { Level, GrammarCategory } from '@/shared/types/common.types';
+import { Level, GrammarCategory } from "@/shared/types/common.types";
