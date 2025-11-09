@@ -62,7 +62,7 @@ The admin panel is accessible at `/admin` route.
    - `grammar_topics` - Grammar content
    - `reading_content` - Reading texts
    - `listening_content` - Audio lessons
-   - `user_quiz_attempts` - Quiz statistics
+   - `user_question_attempts` - Quiz statistics
 
 3. **Navigate to admin panel:**
    ```

@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_grammar_topics_category_order
 
 -- Index for quiz content lookup
 CREATE INDEX IF NOT EXISTS idx_grammar_topics_quiz_content 
-  ON public.grammar_topics(quiz_content_id);
+  ON public.grammar_topics(content_id);
 
 -- =====================================================
 -- LISTENING CONTENT INDEXES
@@ -45,7 +45,7 @@ CREATE INDEX IF NOT EXISTS idx_listening_content_order
 
 -- Index for quiz content lookup
 CREATE INDEX IF NOT EXISTS idx_listening_content_quiz_content 
-  ON public.listening_content(quiz_content_id);
+  ON public.listening_content(content_id);
 
 -- =====================================================
 -- READING CONTENT INDEXES
@@ -69,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_reading_content_order
 
 -- Index for quiz content lookup
 CREATE INDEX IF NOT EXISTS idx_reading_content_quiz_content 
-  ON public.reading_content(quiz_content_id);
+  ON public.reading_content(content_id);
 
 -- =====================================================
 -- QUIZ CONTENT INDEXES
@@ -88,24 +88,24 @@ CREATE INDEX IF NOT EXISTS idx_quiz_content_created
 -- =====================================================
 
 -- Index for quiz content lookup (most common query)
-CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_content 
-  ON public.quiz_questions(quiz_content_id);
+CREATE INDEX IF NOT EXISTS idx_questions_quiz_content 
+  ON public.questions(content_id);
 
 -- Composite index for quiz content + ordering
-CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_order 
-  ON public.quiz_questions(quiz_content_id, points DESC);
+CREATE INDEX IF NOT EXISTS idx_questions_quiz_order 
+  ON public.questions(content_id, points DESC);
 
 -- =====================================================
 -- QUIZ OPTIONS INDEXES
 -- =====================================================
 
 -- Index for question lookup (join with questions)
-CREATE INDEX IF NOT EXISTS idx_quiz_options_question 
-  ON public.quiz_options(question_id);
+CREATE INDEX IF NOT EXISTS idx_question_options_question 
+  ON public.question_options(question_id);
 
 -- Index for finding correct answers quickly
-CREATE INDEX IF NOT EXISTS idx_quiz_options_correct 
-  ON public.quiz_options(question_id, is_correct) 
+CREATE INDEX IF NOT EXISTS idx_question_options_correct 
+  ON public.question_options(question_id, is_correct) 
   WHERE is_correct = true;
 
 -- =====================================================
@@ -161,24 +161,24 @@ CREATE INDEX IF NOT EXISTS idx_user_word_categories_user_order
 -- =====================================================
 
 -- Index for user's attempts lookup
-CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_user 
-  ON public.user_quiz_attempts(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_question_attempts_user 
+  ON public.user_question_attempts(user_id);
 
 -- Index for quiz content lookup
-CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_quiz 
-  ON public.user_quiz_attempts(quiz_content_id);
+CREATE INDEX IF NOT EXISTS idx_user_question_attempts_quiz 
+  ON public.user_question_attempts(content_id);
 
 -- Composite index for user + quiz (finding user's attempts on specific quiz)
-CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_user_quiz 
-  ON public.user_quiz_attempts(user_id, quiz_content_id);
+CREATE INDEX IF NOT EXISTS idx_user_question_attempts_user_quiz 
+  ON public.user_question_attempts(user_id, content_id);
 
 -- Index for recent attempts
-CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_recent 
-  ON public.user_quiz_attempts(user_id, completed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_question_attempts_recent 
+  ON public.user_question_attempts(user_id, completed_at DESC);
 
 -- Index for high scores
-CREATE INDEX IF NOT EXISTS idx_user_quiz_attempts_score 
-  ON public.user_quiz_attempts(user_id, percentage DESC);
+CREATE INDEX IF NOT EXISTS idx_user_question_attempts_score 
+  ON public.user_question_attempts(user_id, percentage DESC);
 
 -- =====================================================
 -- PROFILES INDEXES
@@ -233,11 +233,11 @@ CREATE INDEX IF NOT EXISTS idx_user_statistics_level
 -- ANALYZE public.listening_content;
 -- ANALYZE public.reading_content;
 -- ANALYZE public.quiz_content;
--- ANALYZE public.quiz_questions;
--- ANALYZE public.quiz_options;
+-- ANALYZE public.questions;
+-- ANALYZE public.question_options;
 -- ANALYZE public.user_words;
 -- ANALYZE public.user_word_categories;
--- ANALYZE public.user_quiz_attempts;
+-- ANALYZE public.user_question_attempts;
 -- ANALYZE public.profiles;
 -- ANALYZE public.user_statistics;
 

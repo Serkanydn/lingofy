@@ -25,7 +25,7 @@ const readingContentWithQuizzes = [
       questions: [
         {
           question_type: "multiple_choice",
-          question_text: "What time does the person wake up?",
+          text: "What time does the person wake up?",
           points: 10,
           order_index: 1,
           options: [
@@ -37,7 +37,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "multiple_choice",
-          question_text: "What does the person eat for breakfast?",
+          text: "What does the person eat for breakfast?",
           points: 10,
           order_index: 2,
           options: [
@@ -49,7 +49,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "true_false",
-          question_text: "The person goes to bed at 10 PM.",
+          text: "The person goes to bed at 10 PM.",
           points: 5,
           order_index: 3,
           options: [
@@ -76,7 +76,7 @@ const readingContentWithQuizzes = [
       questions: [
         {
           question_type: "multiple_choice",
-          question_text: "Where did the family go?",
+          text: "Where did the family go?",
           points: 10,
           order_index: 1,
           options: [
@@ -88,7 +88,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "true_false",
-          question_text: "The weather was rainy.",
+          text: "The weather was rainy.",
           points: 5,
           order_index: 2,
           options: [
@@ -98,7 +98,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "fill_blank",
-          question_text: "For lunch, they had sandwiches and _____.",
+          text: "For lunch, they had sandwiches and _____.",
           points: 5,
           order_index: 3,
           options: [{ text: "fruit", is_correct: true }],
@@ -122,7 +122,7 @@ const readingContentWithQuizzes = [
       questions: [
         {
           question_type: "multiple_choice",
-          question_text: "What is the main advantage mentioned first?",
+          text: "What is the main advantage mentioned first?",
           points: 10,
           order_index: 1,
           options: [
@@ -134,7 +134,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "multiple_choice",
-          question_text: "What challenge does remote work have?",
+          text: "What challenge does remote work have?",
           points: 10,
           order_index: 2,
           options: [
@@ -146,7 +146,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "true_false",
-          question_text: "Remote work provides flexibility in scheduling.",
+          text: "Remote work provides flexibility in scheduling.",
           points: 5,
           order_index: 3,
           options: [
@@ -173,7 +173,7 @@ const readingContentWithQuizzes = [
       questions: [
         {
           question_type: "multiple_choice",
-          question_text: "Who is believed to have discovered coffee?",
+          text: "Who is believed to have discovered coffee?",
           points: 10,
           order_index: 1,
           options: [
@@ -185,7 +185,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "multiple_choice",
-          question_text: "Where did coffee cultivation first begin?",
+          text: "Where did coffee cultivation first begin?",
           points: 10,
           order_index: 2,
           options: [
@@ -197,7 +197,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "true_false",
-          question_text:
+          text:
             "Coffee houses became places for social and intellectual gatherings.",
           points: 5,
           order_index: 3,
@@ -225,7 +225,7 @@ const readingContentWithQuizzes = [
       questions: [
         {
           question_type: "multiple_choice",
-          question_text:
+          text:
             "According to the text, what is minimalism fundamentally about?",
           points: 10,
           order_index: 1,
@@ -241,7 +241,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "multiple_choice",
-          question_text:
+          text:
             "What criticism of minimalism is mentioned in the text?",
           points: 10,
           order_index: 2,
@@ -257,7 +257,7 @@ const readingContentWithQuizzes = [
         },
         {
           question_type: "true_false",
-          question_text:
+          text:
             "Frequent purging of items to maintain minimalism can paradoxically increase waste.",
           points: 5,
           order_index: 3,
@@ -295,31 +295,13 @@ async function seedSimpleContent() {
 
       console.log(`✓ Reading inserted: ${reading.title} (${reading.level})`);
 
-      // Insert quiz content
-      const { data: quizContent, error: quizError } = await supabase
-        .from("quiz_content")
-        .insert({
-          content_id: reading.id,
-          title: item.quiz.title,
-        })
-        .select()
-        .single();
-
-      if (quizError) {
-        console.error(
-          `Error inserting quiz for "${item.reading.title}":`,
-          quizError
-        );
-        continue;
-      }
-
       // Insert questions and options
       for (const questionData of item.quiz.questions) {
         const { data: question, error: questionError } = await supabase
-          .from("quiz_questions")
+          .from("questions")
           .insert({
-            quiz_content_id: quizContent.id,
-            question_text: questionData.question_text,
+            content_id: reading.id,
+            text: questionData.text,
             points: questionData.points,
             order_index: questionData.order_index,
             type: questionData.question_type,
@@ -340,19 +322,13 @@ async function seedSimpleContent() {
         }));
 
         const { error: optionsError } = await supabase
-          .from("quiz_options")
+          .from("question_options")
           .insert(optionsToInsert);
 
         if (optionsError) {
           console.error(`Error inserting options:`, optionsError);
         }
       }
-
-      // Link quiz to reading
-      await supabase
-        .from("reading_content")
-        .update({ quiz_content_id: quizContent.id })
-        .eq("id", reading.id);
 
       console.log(`  ✓ Quiz linked: ${item.quiz.questions.length} questions`);
       console.log(

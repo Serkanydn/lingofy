@@ -9,6 +9,8 @@ import Link from "next/link";
 import { ArrowLeft, FileText } from "lucide-react";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { ListeningPlayer } from "@/features/listening/components/ListeningPlayer";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
 import {
   useListeningDetail,
   useListeningQuiz,
@@ -20,10 +22,44 @@ export default function ListeningDetailPage({
   params: Promise<{ level: string; id: string }>;
 }) {
   const { level, id } = use(params)
+  const { user } = useAuth();
   const { data: listening, isLoading } = useListeningDetail(id);
   const { data: quizQuestions } = useListeningQuiz(id);
+  const submitQuiz = useQuizSubmit();
   const [showQuiz, setShowQuiz] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
+
+  const handleQuizComplete = async (
+    score: number,
+    maxScore: number,
+    userAnswers: Record<string, { question_id: string; type: "option" | "text"; selectedOptionId?: string | null; textAnswer?: string | null }>
+  ) => {
+    if (!user || !quizQuestions) return;
+
+    // Transform userAnswers to QuizAnswer format
+    const answers = Object.values(userAnswers).map((answer) => {
+      const question = quizQuestions.find((q) => q.id === answer.question_id);
+      const selectedOption = question?.options.find((opt: { id: string; is_correct: boolean }) => opt.id === answer.selectedOptionId);
+      
+      return {
+        question_id: answer.question_id,
+        selected_option: answer.selectedOptionId ? parseInt(answer.selectedOptionId) : 0,
+        is_correct: selectedOption?.is_correct || false,
+        time_taken: 0,
+      };
+    });
+
+    await submitQuiz.mutateAsync({
+      content_id: id,
+      answers,
+      score: score,
+      max_score: maxScore,
+      percentage: (score / maxScore) * 100,
+    });
+
+    setShowQuiz(false);
+    setShowTranscript(true);
+  };
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>;
@@ -44,10 +80,7 @@ export default function ListeningDetailPage({
           questions: quizQuestions,
         }}
         onExit={() => setShowQuiz(false)}
-        onComplete={(score, maxScore) => {
-          setShowQuiz(false);
-          setShowTranscript(true);
-        }}
+        onComplete={handleQuizComplete}
       />
     );
   }

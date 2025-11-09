@@ -13,7 +13,7 @@ import { QuestionRenderer } from "./QuestionRenderer";
 interface QuizContainerProps {
   quiz: QuizContent;
   onExit: () => void;
-  onComplete: (score: number, maxScore: number) => void;
+  onComplete: (score: number, maxScore: number, userAnswers: Record<string, UserAnswer>) => void;
 }
 
 export function QuizContainer({
@@ -73,7 +73,7 @@ export function QuizContainer({
       showResults: true,
     }));
 
-    onComplete(totalScore, maxScore);
+    onComplete(totalScore, maxScore, quizState.userAnswers);
   };
 
   const handleRetry = () => {

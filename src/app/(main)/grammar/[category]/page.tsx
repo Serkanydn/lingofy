@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { GRAMMAR_CATEGORIES } from "@/features/grammar/constants/categories";
-import { useGrammarByCategory } from "@/features/grammar/hooks/useGrammar";
+import { useGrammarByCategory, useGrammarAttempts } from "@/features/grammar/hooks/useGrammar";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
 
 export default function GrammarCategoryPage({
   params,
@@ -25,6 +27,16 @@ export default function GrammarCategoryPage({
   const categoryKey = category as keyof typeof GRAMMAR_CATEGORIES;
   const categoryInfo = GRAMMAR_CATEGORIES[categoryKey];
   const { data: topics, isLoading } = useGrammarByCategory(categoryKey);
+  const { user } = useAuth();
+
+  // Fetch user attempts for all topics in this category
+  const contentIds = topics?.map((t) => t.id) || [];
+  const { data: attempts } = useGrammarAttempts(contentIds, user?.id);
+
+  // Create a map of content_id to score for quick lookup
+  const scoreMap = new Map(
+    attempts?.map((attempt) => [attempt.content_id, attempt.percentage]) || []
+  );
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>;
@@ -64,6 +76,11 @@ export default function GrammarCategoryPage({
                       Topic {index + 1}
                     </span>
                   </div>
+                  {scoreMap.get(topic.id) !== undefined && (
+                    <Badge variant="secondary" className="font-semibold">
+                      {Math.round(scoreMap.get(topic.id)!)}%
+                    </Badge>
+                  )}
                 </div>
                 <CardTitle className="mt-2 line-clamp-2">
                   {topic.title}

@@ -50,7 +50,7 @@ export function FillBlankQuestion({
   const correctAnswer = quizValidator.getCorrectAnswerText(question);
 
   // Split question text by underscores to show blanks
-  const parts = question.question_text.split("_____");
+  const parts = question.text.split("_____");
 
   return (
     <div className="space-y-6">

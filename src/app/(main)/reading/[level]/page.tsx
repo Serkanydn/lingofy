@@ -16,7 +16,7 @@ import { ReadingContent } from "@/features/reading/types/reading.types";
  import { useState } from "react";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useReadingByLevel } from "@/features/reading/hooks/useReading";
+import { useReadingByLevel, useReadingAttempts } from "@/features/reading/hooks/useReading";
 import { Level } from "@/shared/types/common.types";
 
 interface ReadingCardProps {
@@ -25,6 +25,7 @@ interface ReadingCardProps {
   index: number;
   isPremium: boolean;
   onPremiumClick: () => void;
+  score?: number;
 }
 
 function ReadingCard({
@@ -33,6 +34,7 @@ function ReadingCard({
   index,
   isPremium,
   onPremiumClick,
+  score,
 }: ReadingCardProps) {
   const isLocked = reading.is_premium && !isPremium;
 
@@ -66,7 +68,7 @@ function ReadingCard({
 
   return (
     <Link href={`/reading/${level}/${reading.id}`}>
-      <Card className="hover:shadow-lg transition-shadow h-full cursor-pointer">
+      <Card className="hover:shadow-lg transition-shadow h-full cursor-pointer relative">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -75,6 +77,11 @@ function ReadingCard({
                 Text {index + 1}
               </span>
             </div>
+            {score !== undefined && (
+              <Badge variant="secondary" className="font-semibold">
+                {Math.round(score)}%
+              </Badge>
+            )}
           </div>
           <CardTitle className="mt-2 line-clamp-2">{reading.title}</CardTitle>
           <CardDescription className="line-clamp-3">
@@ -114,6 +121,16 @@ export default function ReadingLevelPage({
   const { data: readings, isLoading } = useReadingByLevel(level);
   const { user, profile, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
+
+  // Fetch user attempts for all reading texts in this level
+  const contentIds = readings?.map((r) => r.id) || [];
+  const { data: attempts } = useReadingAttempts(contentIds, user?.id);
+
+  // Create a map of content_id to score for quick lookup
+  const scoreMap = new Map(
+    attempts?.map((attempt) => [attempt.content_id, attempt.percentage]) || []
+  );
+
 console.log('readings',readings);
   if (isLoading) {
     return (
@@ -163,6 +180,7 @@ console.log('readings',readings);
             index={index}
             isPremium={isPremium}
             onPremiumClick={() => setShowPaywall(true)}
+            score={scoreMap.get(reading.id)}
           />
         ))}
       </div>

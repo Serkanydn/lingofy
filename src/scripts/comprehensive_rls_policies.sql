@@ -8,9 +8,9 @@ ALTER TABLE public.grammar_topics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.listening_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reading_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.quiz_content ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.quiz_questions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.quiz_options ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_quiz_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.question_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_question_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_words ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_word_categories ENABLE ROW LEVEL SECURITY;
@@ -46,13 +46,13 @@ CREATE POLICY "Anyone can read quiz content"
 
 -- Quiz Questions - Public Read
 CREATE POLICY "Anyone can read quiz questions"
-  ON public.quiz_questions
+  ON public.questions
   FOR SELECT
   USING (true);
 
 -- Quiz Options - Public Read
 CREATE POLICY "Anyone can read quiz options"
-  ON public.quiz_options
+  ON public.question_options
   FOR SELECT
   USING (true);
 
@@ -143,19 +143,19 @@ CREATE POLICY "Users can delete own word categories"
 
 -- Users can view their own quiz attempts
 CREATE POLICY "Users can view own quiz attempts"
-  ON public.user_quiz_attempts
+  ON public.user_question_attempts
   FOR SELECT
   USING (auth.uid() = user_id);
 
 -- Users can insert their own quiz attempts
 CREATE POLICY "Users can insert own quiz attempts"
-  ON public.user_quiz_attempts
+  ON public.user_question_attempts
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Users can update their own quiz attempts
 CREATE POLICY "Users can update own quiz attempts"
-  ON public.user_quiz_attempts
+  ON public.user_question_attempts
   FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);

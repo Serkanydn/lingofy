@@ -21,10 +21,11 @@ export default function ReadingDetailPage() {
   const router = useRouter();
   const { user, profile, isPremium } = useAuth();
   const { data: reading, isLoading } = useReadingDetail(contentId);
-  const { data: quizQuestions } = useQuizFromId(
-    reading?.quiz_content_id || ""
-  );
+  console.log('reading',reading);
+  const { data: quizQuestions } = useQuizFromId(reading?.id || "");
   const submitQuiz = useQuizSubmit();
+
+  console.log('quizQuestions',quizQuestions);
 
   // Transform quiz questions array to QuizContent object
   const quiz =
@@ -50,13 +51,30 @@ export default function ReadingDetailPage() {
     }
   };
 
-  const handleQuizComplete = async (score: number, maxScore: number) => {
+  const handleQuizComplete = async (
+    score: number,
+    maxScore: number,
+    userAnswers: Record<string, { question_id: string; type: "option" | "text"; selectedOptionId?: string | null; textAnswer?: string | null }>
+  ) => {
     if (!user || !quiz) return;
 
+    // Transform userAnswers to QuizAnswer format
+    const answers = Object.values(userAnswers).map((answer) => {
+      const question = quiz.questions.find((q) => q.id === answer.question_id);
+      const selectedOption = question?.options.find((opt: { id: string; is_correct: boolean }) => opt.id === answer.selectedOptionId);
+      
+      return {
+        question_id: answer.question_id,
+        selected_option: answer.selectedOptionId ? parseInt(answer.selectedOptionId) : 0,
+        is_correct: selectedOption?.is_correct || false,
+        time_taken: 0,
+      };
+    });
+
     await submitQuiz.mutateAsync({
-      quiz_content_id: quiz.id,
-      answers: [],
-      total_score: score,
+      content_id: quiz.id,
+      answers,
+      score: score,
       max_score: maxScore,
       percentage: (score / maxScore) * 100,
     });

@@ -36,28 +36,24 @@ export function useGrammarQuiz(topicId?: string) {
     queryKey: ["quiz", "grammar", topicId],
     queryFn: async () => {
       const data = await quizService.getById(topicId!);
-      console.log('data',data);
+      console.log("data", data);
 
-      return data
-    
-
+      return data;
     },
     enabled: topicId !== undefined,
   });
 }
 
-
-export function useGrammarQuizv2(topicId?: string) {
+/**
+ * Hook to fetch user attempts for grammar topics
+ */
+export function useGrammarAttempts(contentIds: string[], userId?: string) {
   return useQuery({
-    queryKey: ["quiz", "grammar", topicId],
+    queryKey: ["grammar", "attempts", contentIds, userId],
     queryFn: async () => {
-      const data = await grammarService.getRuleWithExercises(topicId!);
-      console.log('data-------',data);
-
-      return data
-    
-
+      if (!userId || contentIds.length === 0) return [];
+      return quizService.getUserAttemptsByContentIds(userId, contentIds);
     },
-    enabled: topicId !== undefined,
+    enabled: !!userId && contentIds.length > 0,
   });
 }

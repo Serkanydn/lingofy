@@ -5,33 +5,32 @@ import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface QuizSubmitParams {
-  quiz_content_id: string;
+  content_id: string;
   answers: QuizAnswer[];
-  total_score: number;
+  score: number;
   max_score: number;
   percentage: number;
 }
 
 export function useQuizSubmit() {
   const queryClient = useQueryClient();
-
+  const { user } = useAuth();
+  
   return useMutation({
     mutationFn: async ({
-      quiz_content_id,
+      content_id,
       answers,
-      total_score,
+      score,
       max_score,
       percentage,
     }: QuizSubmitParams) => {
-      const { user } = useAuth();
-
       if (!user) throw new Error("Not authenticated");
 
       return await quizService.submitQuizAttempt(
-        quiz_content_id,
+        content_id,
         user.id,
         answers,
-        total_score,
+        score,
         max_score,
         percentage
       );
@@ -42,6 +41,7 @@ export function useQuizSubmit() {
       queryClient.invalidateQueries({ queryKey: ["quiz-history"] });
       queryClient.invalidateQueries({ queryKey: ["statistics"] });
       queryClient.invalidateQueries({ queryKey: ["quiz-attempted"] });
+      queryClient.invalidateQueries({ queryKey: ["reading", "attempts"] });
     },
     onError: (error) => {
       toast.error("Failed to submit quiz. Please try again.");

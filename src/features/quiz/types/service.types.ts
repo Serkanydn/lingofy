@@ -2,7 +2,7 @@ import { QuizAnswer } from './quiz.types';
 
 export interface QuizQuestion {
   id: number;
-  quiz_id: number;
+  content_id: string;
   question: string;
   options: string[];
   correct_answer: string;
@@ -12,7 +12,7 @@ export interface QuizQuestion {
 export interface QuizAttempt {
   id: number;
   user_id: string;
-  quiz_id: number;
+  content_id: string;
   score: number;
   max_score: number;
   percentage: number;

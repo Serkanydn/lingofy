@@ -39,7 +39,7 @@ export function TrueFalseQuestion({
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <h3 className="text-xl font-semibold leading-relaxed flex-1">
-          {question.question_text}
+          {question.text}
         </h3>
         <div className="ml-4 text-sm font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">
           {question.points} pts

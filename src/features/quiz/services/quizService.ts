@@ -3,21 +3,21 @@ import { Quiz, QuizAttempt, QuizQuestion } from "../types/service.types";
 import { QuizAnswer } from "../types/quiz.types";
 
 export class QuizService extends BaseService<Quiz> {
-  private questionsService: BaseService<QuizQuestion>;
   private attemptsService: BaseService<QuizAttempt>;
 
   constructor() {
-    super("quiz_questions");
-    this.questionsService = new BaseService<QuizQuestion>("quiz_questions");
-    this.attemptsService = new BaseService<QuizAttempt>("user_quiz_attempts");
+    super("questions");
+    this.attemptsService = new BaseService<QuizAttempt>(
+      "user_question_attempts"
+    );
   }
 
   async getQuizWithQuestions(quizId: number) {
     const quiz = await this.getById(quizId);
     const { data: questions, error } = await this.supabase
-      .from("quiz_questions")
+      .from("questions")
       .select("*")
-      .eq("quiz_id", quizId);
+      .eq("content_id", quizId);
 
     if (error) throw error;
     return { ...quiz, questions };
@@ -33,7 +33,7 @@ export class QuizService extends BaseService<Quiz> {
   ) {
     const attempt = await this.attemptsService.create({
       user_id: userId,
-      quiz_id: parseInt(quizContentId),
+      content_id: quizContentId,
       score: totalScore,
       max_score: maxScore,
       percentage: percentage,
@@ -46,7 +46,7 @@ export class QuizService extends BaseService<Quiz> {
 
   async getUserAttempts(userId: string) {
     const { data, error } = await this.supabase
-      .from("user_quiz_attempts")
+      .from("user_question_attempts")
       .select("*")
       .eq("user_id", userId)
       .order("completed_at", { ascending: false });
@@ -72,27 +72,17 @@ export class QuizService extends BaseService<Quiz> {
     return (correctAnswers / totalQuestions) * 100;
   }
 
-  async getQuizByContent(contentId: string) {
-    // First get the quiz_content for this content
-    const { data: quizContent, error: quizError } = await this.supabase
-      .from("quiz_content")
-      .select("id")
-      .eq("content_id", contentId)
-      .maybeSingle();
-
-    if (quizError) throw quizError;
-    if (!quizContent) return [];
-
+  async getQuizByContent(id: string) {
     // Then get the questions with their options for this quiz
     const { data, error } = await this.supabase
-      .from("quiz_questions")
+      .from("questions")
       .select(
         `
         *,
-        options:quiz_options(*)
+        options:question_options(*)
       `
       )
-      .eq("quiz_content_id", quizContent.id)
+      .eq("content_id", id)
       .order("order_index", { ascending: true });
 
     if (error) throw error;
@@ -100,26 +90,16 @@ export class QuizService extends BaseService<Quiz> {
   }
 
   async getQuizByQuizId(id: string) {
-    // First get the quiz_content for this content
-    const { data: quizContent, error: quizError } = await this.supabase
-      .from("quiz_content")
-      .select("id")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (quizError) throw quizError;
-    if (!quizContent) return [];
-
     // Then get the questions with their options for this quiz
     const { data, error } = await this.supabase
-      .from("quiz_questions")
+      .from("questions")
       .select(
         `
         *,
-        options:quiz_options(*)
+        options:question_options(*)
       `
       )
-      .eq("quiz_content_id", quizContent.id)
+      .eq("content_id", id)
       .order("order_index", { ascending: true });
 
     if (error) throw error;
@@ -127,26 +107,17 @@ export class QuizService extends BaseService<Quiz> {
   }
 
   async getQuizByContentId(id: string) {
-    // First get the quiz_content for this content
-    const { data: quizContent, error: quizError } = await this.supabase
-      .from("quiz_content")
-      .select("*")
-      .eq("content_id", id)
-      .maybeSingle();
-
-    if (quizError) throw quizError;
-    if (!quizContent) return [];
-
+    console.log("id", id);
     // Then get the questions with their options for this quiz
     const { data, error } = await this.supabase
-      .from("quiz_questions")
+      .from("questions")
       .select(
         `
         *,
-        options:quiz_options(*)
+        options:question_options(*)
       `
       )
-      .eq("quiz_content_id", quizContent.id)
+      .eq("content_id", id)
       .order("order_index", { ascending: true });
 
     if (error) throw error;
@@ -155,7 +126,7 @@ export class QuizService extends BaseService<Quiz> {
 
   async getUserQuizHistory(userId: string) {
     const { data, error } = await this.supabase
-      .from("user_quiz_attempts")
+      .from("user_question_attempts")
       .select("*")
       .eq("user_id", userId)
       .order("completed_at", { ascending: false });
@@ -166,13 +137,34 @@ export class QuizService extends BaseService<Quiz> {
 
   async hasAttempted(userId: string, quizContentId: string) {
     const { data, error } = await this.supabase
-      .from("user_quiz_attempts")
+      .from("user_question_attempts")
       .select("id")
       .eq("user_id", userId)
-      .eq("quiz_id", quizContentId)
+      .eq("content_id", quizContentId)
       .maybeSingle();
 
     if (error) throw error;
     return !!data;
+  }
+
+  async getUserAttemptsByContentIds(userId: string, contentIds: string[]) {
+    const { data, error } = await this.supabase
+      .from("user_question_attempts")
+      .select("content_id, percentage, score, max_score, completed_at")
+      .eq("user_id", userId)
+      .in("content_id", contentIds)
+      .order("completed_at", { ascending: false });
+
+    if (error) throw error;
+
+    // Return only the latest attempt for each content_id
+    const latestAttempts = new Map();
+    data?.forEach((attempt) => {
+      if (!latestAttempts.has(attempt.content_id)) {
+        latestAttempts.set(attempt.content_id, attempt);
+      }
+    });
+
+    return Array.from(latestAttempts.values());
   }
 }

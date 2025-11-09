@@ -83,7 +83,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
       order_index: parseInt(orderIndex),
       is_premium: isPremium,
       updated_at: new Date().toISOString(),
-      quiz_content_id: crypto.randomUUID(),
+      content_id: crypto.randomUUID(),
     });
 
     // Reset form

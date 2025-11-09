@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X } from "lucide-react";
-import { useUpdateGrammarQuestion } from "@/features/admin/hooks/useGrammarQuestions";
 
 interface EditQuestionDialogProps {
   open: boolean;
@@ -22,13 +21,16 @@ interface EditQuestionDialogProps {
   topicId: string;
 }
 
-export function EditQuestionDialog({ open, onClose, question, topicId }: EditQuestionDialogProps) {
+export function EditQuestionDialog({
+  open,
+  onClose,
+  question,
+  topicId,
+}: EditQuestionDialogProps) {
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [explanation, setExplanation] = useState("");
-
-  const updateQuestion = useUpdateGrammarQuestion(topicId);
 
   useEffect(() => {
     if (question) {
@@ -60,8 +62,8 @@ export function EditQuestionDialog({ open, onClose, question, topicId }: EditQue
 
     if (!question) return;
 
-    const filteredOptions = options.filter(opt => opt.trim() !== "");
-    
+    const filteredOptions = options.filter((opt) => opt.trim() !== "");
+
     if (filteredOptions.length < 2) {
       alert("Please provide at least 2 options");
       return;
@@ -71,16 +73,6 @@ export function EditQuestionDialog({ open, onClose, question, topicId }: EditQue
       alert("Correct answer must be one of the options");
       return;
     }
-
-    await updateQuestion.mutateAsync({
-      id: question.id,
-      data: {
-        question: questionText,
-        options: filteredOptions,
-        correct_answer: correctAnswer,
-        explanation,
-      },
-    });
 
     onClose();
   };
@@ -92,9 +84,7 @@ export function EditQuestionDialog({ open, onClose, question, topicId }: EditQue
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Quiz Question</DialogTitle>
-          <DialogDescription>
-            Update the question details
-          </DialogDescription>
+          <DialogDescription>Update the question details</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -176,13 +166,6 @@ export function EditQuestionDialog({ open, onClose, question, topicId }: EditQue
               className="flex-1"
             >
               Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={updateQuestion.isPending}
-            >
-              {updateQuestion.isPending ? "Updating..." : "Update Question"}
             </Button>
           </div>
         </form>

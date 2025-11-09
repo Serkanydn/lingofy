@@ -4,10 +4,10 @@
 alter table reading_content enable row level security;
 alter table listening_content enable row level security;
 alter table grammar_topics enable row level security;
-alter table quiz_questions enable row level security;
-alter table quiz_options enable row level security;
+alter table questions enable row level security;
+alter table question_options enable row level security;
 alter table quiz_content enable row level security;
-alter table user_quiz_attempts enable row level security;
+alter table user_question_attempts enable row level security;
 alter table profiles enable row level security;
 alter table user_words enable row level security;
 
@@ -30,11 +30,11 @@ create policy "Public can read grammar topics"
   using (true);
 
 create policy "Public can read quiz questions"
-  on quiz_questions for select
+  on questions for select
   using (true);
 
 create policy "Public can read quiz options"
-  on quiz_options for select
+  on question_options for select
   using (true);
 
 create policy "Public can read quiz content"
@@ -73,13 +73,13 @@ create policy "Users can delete their own words"
 
 -- User-specific policies for quiz attempts
 create policy "Users can view their own quiz attempts"
-  on user_quiz_attempts for select
+  on user_question_attempts for select
   using (auth.uid() = user_id);
 
 create policy "Users can insert their own quiz attempts"
-  on user_quiz_attempts for insert
+  on user_question_attempts for insert
   with check (auth.uid() = user_id);
 
 create policy "Users can view their own quiz attempts"
-  on user_quiz_attempts for select
+  on user_question_attempts for select
   using (auth.uid() = user_id);

@@ -66,7 +66,7 @@ export function EditReadingDialog({ open, onClose, reading }: EditReadingDialogP
         audio_url: audioUrl,
         order_index: parseInt(orderIndex),
         is_premium: isPremium,
-        quiz_content_id: reading.quiz_content_id,
+        content_id: reading.content_id,
         word_count: content.trim().split(/\s+/).length,
         updated_at: new Date().toISOString(),
       },

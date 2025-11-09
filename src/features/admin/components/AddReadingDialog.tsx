@@ -52,7 +52,7 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
       audio_url: audioUrl,
       is_premium: isPremium,
       order_index: parseInt(orderIndex),
-      quiz_content_id: crypto.randomUUID(),
+      content_id: crypto.randomUUID(),
       word_count: content.trim().split(/\s+/).length,
       updated_at: new Date().toISOString(),
     });

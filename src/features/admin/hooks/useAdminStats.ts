@@ -42,7 +42,7 @@ export function useAdminStats() {
 
       // Get total quizzes taken
       const { count: totalQuizzes } = await supabase
-        .from("user_quiz_attempts")
+        .from("user_question_attempts")
         .select("*", { count: "exact", head: true });
 
       return {

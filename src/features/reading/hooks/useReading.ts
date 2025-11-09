@@ -22,6 +22,20 @@ export function useReadingByLevel(level: Level) {
   });
 }
 
+/**
+ * Hook to fetch user attempts for reading texts
+ */
+export function useReadingAttempts(contentIds: string[], userId?: string) {
+  return useQuery({
+    queryKey: ["reading", "attempts", contentIds, userId],
+    queryFn: async () => {
+      if (!userId || contentIds.length === 0) return [];
+      return quizService.getUserAttemptsByContentIds(userId, contentIds);
+    },
+    enabled: !!userId && contentIds.length > 0,
+  });
+}
+
 export function useReadingByLevelCount(level: Level) {
   return useQuery({
     queryKey: ["reading_level_count", level],

@@ -7,16 +7,6 @@ export class GrammarService extends BaseService<GrammarRule> {
     super("grammar_topics");
   }
 
-  async getRuleWithExercises(ruleId: string) {
-    const rule = await this.getById(ruleId);
-    const { data: exercises, error } = await this.supabase
-      .from("quiz_content")
-      .select("*")
-      .eq("id", ruleId);
-
-    if (error) throw error;
-    return { rule, exercises };
-  }
 
   async getRulesByLevel(level: Level) {
     const { data, error } = await this.supabase

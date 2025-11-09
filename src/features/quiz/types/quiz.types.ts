@@ -12,7 +12,7 @@ export type QuizQuestion = {
   id: string
   content_id: string
   content_type: ContentType
-  question_text: string
+  text: string
   options: QuizOption[]
   correct_answer: number
   explanation: string | null

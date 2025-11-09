@@ -12,7 +12,7 @@ export function QuizQuestion({ question, onAnswer }: QuizQuestionProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold leading-relaxed">
-        {question.question_text}
+        {question.text}
       </h3>
 
       <div className="grid gap-3">

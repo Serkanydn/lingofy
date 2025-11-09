@@ -1024,28 +1024,13 @@ async function seedGrammarTopics() {
 
       console.log(`✓ Created topic: ${topic.title}`);
 
-      // Insert quiz content
-      const { data: quizContent, error: quizError } = await supabase
-        .from("quiz_content")
-        .insert({
-          content_id: insertedTopic.id,
-          title: topic.title + "- Quiz",
-        })
-        .select()
-        .single();
-
-      if (quizError) {
-        console.error(`Error inserting quiz for "${topic.title}":`, quizError);
-        continue;
-      }
-
       // Insert questions and options
       for (const questionData of topic.quizzes) {
         const { data: question, error: questionError } = await supabase
-          .from("quiz_questions")
+          .from("questions")
           .insert({
-            quiz_content_id: quizContent.id,
-            question_text: questionData.question,
+            content_id: insertedTopic.id,
+            text: questionData.question,
             points: questionData.points,
             order_index: questionData.order_index,
             type: questionData.type,
@@ -1066,19 +1051,13 @@ async function seedGrammarTopics() {
         }));
 
         const { error: optionsError } = await supabase
-          .from("quiz_options")
+          .from("question_options")
           .insert(optionsToInsert);
 
         if (optionsError) {
           console.error(`Error inserting options:`, optionsError);
         }
       }
-
-      // Link quiz to reading
-      await supabase
-        .from("grammar_topics")
-        .update({ quiz_content_id: quizContent.id })
-        .eq("id", insertedTopic.id);
 
       console.log(`  ✓ Quiz linked: ${topic.quizzes.length} questions`);
       console.log(`  ✓  Premium: ${insertedTopic.is_premium}\n`);

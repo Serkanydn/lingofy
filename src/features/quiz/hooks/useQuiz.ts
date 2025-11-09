@@ -26,6 +26,7 @@ export function useHasAttempted(userId: string, quizContentId: string) {
 }
 
 export function useQuizFromId(contentId: string) {
+  console.log('contentId',contentId);
   return useQuery({
     queryKey: ["quiz", contentId],
     queryFn: () => quizService.getQuizByContentId(contentId),

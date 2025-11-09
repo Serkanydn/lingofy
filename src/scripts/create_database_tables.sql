@@ -11,9 +11,9 @@ CREATE TABLE public.grammar_topics (
   order_index integer,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  quiz_content_id uuid,
+  content_id uuid,
   CONSTRAINT grammar_topics_pkey PRIMARY KEY (id),
-  CONSTRAINT grammar_topics_quiz_content_id_fkey FOREIGN KEY (quiz_content_id) REFERENCES public.quiz_content(id)
+  CONSTRAINT grammar_topics_content_id_fkey FOREIGN KEY (content_id) REFERENCES public.quiz_content(id)
 );
 CREATE TABLE public.listening_content (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -27,9 +27,9 @@ CREATE TABLE public.listening_content (
   order_index integer,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  quiz_content_id uuid,
+  content_id uuid,
   CONSTRAINT listening_content_pkey PRIMARY KEY (id),
-  CONSTRAINT listening_content_quiz_content_id_fkey FOREIGN KEY (quiz_content_id) REFERENCES public.quiz_content(id)
+  CONSTRAINT listening_content_content_id_fkey FOREIGN KEY (content_id) REFERENCES public.quiz_content(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -52,23 +52,23 @@ CREATE TABLE public.quiz_content (
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT quiz_content_pkey PRIMARY KEY (id)
 );
-CREATE TABLE public.quiz_options (
+CREATE TABLE public.question_options (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   question_id uuid NOT NULL,
   text text NOT NULL,
   is_correct boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT quiz_options_pkey PRIMARY KEY (id),
-  CONSTRAINT quiz_options_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.quiz_questions(id)
+  CONSTRAINT question_options_pkey PRIMARY KEY (id),
+  CONSTRAINT question_options_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
 );
-CREATE TABLE public.quiz_questions (
+CREATE TABLE public.questions (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
-  quiz_content_id uuid NOT NULL,
-  question_text text NOT NULL,
+  content_id uuid NOT NULL,
+  text text NOT NULL,
   points integer DEFAULT 10,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT quiz_questions_pkey PRIMARY KEY (id),
-  CONSTRAINT quiz_questions_quiz_content_id_fkey FOREIGN KEY (quiz_content_id) REFERENCES public.quiz_content(id)
+  CONSTRAINT questions_pkey PRIMARY KEY (id),
+  CONSTRAINT questions_content_id_fkey FOREIGN KEY (content_id) REFERENCES public.quiz_content(id)
 );
 CREATE TABLE public.reading_content (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -80,22 +80,22 @@ CREATE TABLE public.reading_content (
   order_index integer,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  quiz_content_id uuid,
+  content_id uuid,
   CONSTRAINT reading_content_pkey PRIMARY KEY (id),
-  CONSTRAINT reading_content_quiz_content_id_fkey FOREIGN KEY (quiz_content_id) REFERENCES public.quiz_content(id)
+  CONSTRAINT reading_content_content_id_fkey FOREIGN KEY (content_id) REFERENCES public.quiz_content(id)
 );
-CREATE TABLE public.user_quiz_attempts (
+CREATE TABLE public.user_question_attempts (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   user_id uuid NOT NULL,
-  quiz_content_id uuid NOT NULL,
+  content_id uuid NOT NULL,
   answers jsonb NOT NULL,
-  total_score integer NOT NULL,
+  score integer NOT NULL,
   max_score integer NOT NULL,
   percentage numeric,
   completed_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT user_quiz_attempts_pkey PRIMARY KEY (id),
-  CONSTRAINT user_quiz_attempts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
-  CONSTRAINT user_quiz_attempts_quiz_content_id_fkey FOREIGN KEY (quiz_content_id) REFERENCES public.quiz_content(id)
+  CONSTRAINT user_question_attempts_pkey PRIMARY KEY (id),
+  CONSTRAINT user_question_attempts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT user_question_attempts_content_id_fkey FOREIGN KEY (content_id) REFERENCES public.quiz_content(id)
 );
 CREATE TABLE public.user_statistics (
   user_id uuid NOT NULL,

@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X } from "lucide-react";
-import { useCreateGrammarQuestion, useGrammarQuestions } from "@/features/admin/hooks/useGrammarQuestions";
+import { useGrammarQuestions } from "@/features/admin/hooks/useGrammarQuestions";
 
 interface AddQuestionDialogProps {
   open: boolean;
@@ -21,14 +21,17 @@ interface AddQuestionDialogProps {
   topicId: string;
 }
 
-export function AddQuestionDialog({ open, onClose, topicId }: AddQuestionDialogProps) {
+export function AddQuestionDialog({
+  open,
+  onClose,
+  topicId,
+}: AddQuestionDialogProps) {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [explanation, setExplanation] = useState("");
 
   const { data: questionsData } = useGrammarQuestions(topicId);
-  const createQuestion = useCreateGrammarQuestion(topicId);
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -49,12 +52,12 @@ export function AddQuestionDialog({ open, onClose, topicId }: AddQuestionDialogP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!questionsData?.topic?.quiz_content_id) {
+    if (!questionsData?.topic?.content_id) {
       return;
     }
 
-    const filteredOptions = options.filter(opt => opt.trim() !== "");
-    
+    const filteredOptions = options.filter((opt) => opt.trim() !== "");
+
     if (filteredOptions.length < 2) {
       alert("Please provide at least 2 options");
       return;
@@ -64,14 +67,6 @@ export function AddQuestionDialog({ open, onClose, topicId }: AddQuestionDialogP
       alert("Correct answer must be one of the options");
       return;
     }
-
-    await createQuestion.mutateAsync({
-      question,
-      options: filteredOptions,
-      correct_answer: correctAnswer,
-      explanation,
-      content_id: questionsData.topic.quiz_content_id,
-    });
 
     // Reset form
     setQuestion("");
@@ -170,13 +165,6 @@ export function AddQuestionDialog({ open, onClose, topicId }: AddQuestionDialogP
               className="flex-1"
             >
               Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={createQuestion.isPending}
-            >
-              {createQuestion.isPending ? "Creating..." : "Create Question"}
             </Button>
           </div>
         </form>
