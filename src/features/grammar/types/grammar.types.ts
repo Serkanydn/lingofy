@@ -1,9 +1,11 @@
-import { Level, GrammarCategory } from '@/shared/types/common.types'
+import { Level } from '@/shared/types/common.types'
+import { GrammarCategory } from './category.types'
 
 export type GrammarTopic = {
   id: string
   title: string
-  category: GrammarCategory
+  category_id: string
+  category?: GrammarCategory
   explanation: string
   examples: string[]
   mini_text: string
@@ -14,7 +16,7 @@ export type GrammarTopic = {
 }
 
 export type GrammarFilters = {
-  category?: GrammarCategory
+  category_id?: string
   search?: string
   isPremium?: boolean
 }
@@ -24,5 +26,6 @@ export type GrammarStats = {
   completedLessons: number
   averageScore: number
   timeSpent: number
-  category: GrammarCategory
+  category_id: string
+  category?: GrammarCategory
 }

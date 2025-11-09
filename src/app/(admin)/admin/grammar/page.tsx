@@ -97,7 +97,16 @@ export default function GrammarAdminPage() {
                     {topic.title}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{topic.category}</Badge>
+                    <Badge variant="outline">
+                      {topic.category ? (
+                        <span className="flex items-center gap-1">
+                          <span>{topic.category.icon}</span>
+                          <span>{topic.category.name}</span>
+                        </span>
+                      ) : (
+                        topic.category_id
+                      )}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge>{topic.difficulty_level}</Badge>

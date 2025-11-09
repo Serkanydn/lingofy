@@ -1,3 +1,6 @@
+import { Level } from "@/shared/types/common.types";
+import { GrammarCategory } from './category.types';
+
 export interface GrammarExercise {
   id: number;
   rule_id: number;
@@ -11,7 +14,8 @@ export interface GrammarExercise {
 export interface GrammarRule {
   id: string;
   title: string;
-  category: GrammarCategory;
+  category_id: string;
+  category?: GrammarCategory;
   explanation: string;
   examples: string[];
   mini_text: string;
@@ -22,5 +26,3 @@ export interface GrammarRule {
   updated_at: string;
   content_id: string;
 }
-
-import { Level, GrammarCategory } from "@/shared/types/common.types";

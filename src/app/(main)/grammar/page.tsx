@@ -9,9 +9,19 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
-import { GRAMMAR_CATEGORIES } from "@/features/grammar/constants/categories";
+import { useActiveGrammarCategories } from "@/features/admin/hooks/useGrammarCategories";
 
 export default function GrammarPage() {
+  const { data: categories, isLoading } = useActiveGrammarCategories();
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">Loading categories...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -23,8 +33,8 @@ export default function GrammarPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Object.entries(GRAMMAR_CATEGORIES).map(([id, category]) => (
-          <Link key={id} href={`/grammar/${id}`}>
+        {categories?.map((category) => (
+          <Link key={category.id} href={`/grammar/${category.slug}`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">

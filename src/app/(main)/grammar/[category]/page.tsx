@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import { GRAMMAR_CATEGORIES } from "@/features/grammar/constants/categories";
+import { useGrammarCategoryBySlug } from "@/features/admin/hooks/useGrammarCategories";
 import { useGrammarByCategory, useGrammarAttempts } from "@/features/grammar/hooks/useGrammar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +22,10 @@ export default function GrammarCategoryPage({
   params: Promise<{ category: string }>;
 }) {
   // ✅ Unwrap the async params with React.use()
-  const { category } = React.use(params);
+  const { category: categorySlug } = React.use(params);
 
-  const categoryKey = category as keyof typeof GRAMMAR_CATEGORIES;
-  const categoryInfo = GRAMMAR_CATEGORIES[categoryKey];
-  const { data: topics, isLoading } = useGrammarByCategory(categoryKey);
+  const { data: categoryInfo, isLoading: categoryLoading } = useGrammarCategoryBySlug(categorySlug);
+  const { data: topics, isLoading: topicsLoading } = useGrammarByCategory(categoryInfo?.id || "");
   const { user } = useAuth();
 
   // Fetch user attempts for all topics in this category
@@ -38,8 +37,12 @@ export default function GrammarCategoryPage({
     attempts?.map((attempt) => [attempt.content_id, attempt.percentage]) || []
   );
 
-  if (isLoading) {
+  if (categoryLoading || topicsLoading) {
     return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  }
+
+  if (!categoryInfo) {
+    return <div className="container mx-auto px-4 py-8">Category not found</div>;
   }
 
   return (
@@ -53,8 +56,8 @@ export default function GrammarCategoryPage({
 
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-5xl">{categoryInfo?.icon}</span>
-          <h1 className="text-4xl font-bold">{categoryInfo?.name}</h1>
+          <span className="text-5xl">{categoryInfo.icon}</span>
+          <h1 className="text-4xl font-bold">{categoryInfo.name}</h1>
         </div>
         <p className="text-muted-foreground text-lg">
           {categoryInfo.description}
@@ -66,7 +69,7 @@ export default function GrammarCategoryPage({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {topics?.map((topic, index) => (
-          <Link key={topic.id} href={`/grammar/${category}/${topic.id}`}>
+          <Link key={topic.id} href={`/grammar/${categorySlug}/${topic.id}`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">

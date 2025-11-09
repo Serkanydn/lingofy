@@ -21,21 +21,10 @@ import {
 } from "@/components/ui/select";
 import { Plus, X, FileQuestion } from "lucide-react";
 import { useUpdateGrammarTopic } from "@/features/admin/hooks/useGrammarTopics";
-import { GrammarCategory, Level } from "@/shared/types/common.types";
+import { useActiveGrammarCategories } from "@/features/admin/hooks/useGrammarCategories";
+import { Level } from "@/shared/types/common.types";
 import { GrammarRule } from "@/features/grammar/types/service.types";
 import { useRouter } from "next/navigation";
-
-const CATEGORIES: GrammarCategory[] = [
-  "tenses",
-  "modals",
-  "conditionals",
-  "passive-voice",
-  "reported-speech",
-  "articles",
-  "prepositions",
-  "phrasal-verbs",
-  "tricky-topics",
-];
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -47,7 +36,7 @@ interface EditGrammarDialogProps {
 
 export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogProps) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
   const [level, setLevel] = useState<string>("B1");
   const [explanation, setExplanation] = useState("");
   const [miniText, setMiniText] = useState("");
@@ -56,12 +45,13 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
   const [isPremium, setIsPremium] = useState(false);
 
   const updateTopic = useUpdateGrammarTopic();
+  const { data: categories, isLoading: categoriesLoading } = useActiveGrammarCategories();
   const router = useRouter();
 
   useEffect(() => {
     if (topic) {
       setTitle(topic.title);
-      setCategory(topic.category);
+      setCategoryId(topic.category_id);
       setLevel(topic.difficulty_level);
       setExplanation(topic.explanation);
       setMiniText(topic.mini_text);
@@ -88,13 +78,13 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!topic || !category) return;
+    if (!topic || !categoryId) return;
 
     await updateTopic.mutateAsync({
       id: topic.id,
       data: {
         title,
-        category: category as GrammarCategory,
+        category_id: categoryId,
         difficulty_level: level as Level,
         explanation,
         mini_text: miniText,
@@ -141,14 +131,17 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
 
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
-              <Select value={category} onValueChange={(val) => setCategory(val as GrammarCategory)} required>
+              <Select value={categoryId} onValueChange={setCategoryId} required disabled={categoriesLoading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select category"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {categories?.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      <span className="flex items-center gap-2">
+                        <span>{cat.icon}</span>
+                        <span>{cat.name}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

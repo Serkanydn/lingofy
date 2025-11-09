@@ -1,24 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { GrammarCategory } from "@/shared/types/common.types";
 import { grammarService } from "../services";
 import { quizService } from "@/features/quiz/services";
 
-export interface GrammarTopic {
-  id: string;
-  category: GrammarCategory;
-  title: string;
-  explanation: string;
-  examples: string[];
-  mini_text: string;
-  order_index: number;
-}
-
-export function useGrammarByCategory(category: GrammarCategory) {
+export function useGrammarByCategory(categoryId: string) {
   return useQuery({
-    queryKey: ["grammar", category],
+    queryKey: ["grammar", categoryId],
     queryFn: async () => {
-      return grammarService.getRulesByCategory(category);
+      return grammarService.getRulesByCategory(categoryId);
     },
+    enabled: !!categoryId,
   });
 }
 

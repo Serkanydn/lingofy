@@ -9,7 +9,8 @@
     "lint": "eslint",
     "setup-db": "ts-node --project tsconfig.seed.json ./src/scripts/setup-database.ts",
     "seed-content": "ts-node --project tsconfig.seed.json ./src/scripts/seed-content.ts",
-    "seed-grammar": "ts-node --project tsconfig.seed.json ./src/scripts/seed-grammar.ts"
+    "seed-grammar": "ts-node --project tsconfig.seed.json ./src/scripts/seed-grammar.ts",
+    "seed-grammar-categories": "ts-node --project tsconfig.seed.json ./src/scripts/seed-grammar-categories.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

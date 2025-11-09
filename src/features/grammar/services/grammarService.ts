@@ -1,5 +1,5 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { Level, GrammarCategory } from "@/shared/types/common.types";
+import { Level } from "@/shared/types/common.types";
 import { GrammarRule, GrammarExercise } from "../types/service.types";
 
 export class GrammarService extends BaseService<GrammarRule> {
@@ -7,22 +7,42 @@ export class GrammarService extends BaseService<GrammarRule> {
     super("grammar_topics");
   }
 
-
-  async getRulesByLevel(level: Level) {
+  async getAll() {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
-      .eq("difficulty_level", level);
+      .select(`
+        *,
+        category:grammar_categories(*)
+      `)
+      .order("order_index", { ascending: true });
 
     if (error) throw error;
     return data as GrammarRule[];
   }
 
-  async getRulesByCategory(category: GrammarCategory) {
+  async getRulesByLevel(level: Level) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
-      .eq("category", category);
+      .select(`
+        *,
+        category:grammar_categories(*)
+      `)
+      .eq("difficulty_level", level)
+      .order("order_index", { ascending: true });
+
+    if (error) throw error;
+    return data as GrammarRule[];
+  }
+
+  async getRulesByCategory(categoryId: string) {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select(`
+        *,
+        category:grammar_categories(*)
+      `)
+      .eq("category_id", categoryId)
+      .order("order_index", { ascending: true });
 
     if (error) throw error;
     return data as GrammarRule[];

@@ -1,0 +1,186 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useUpdateGrammarCategory } from "@/features/admin/hooks/useGrammarCategories";
+import { GrammarCategory } from "@/features/grammar/types/category.types";
+
+interface EditGrammarCategoryDialogProps {
+  open: boolean;
+  onClose: () => void;
+  category: GrammarCategory | null;
+}
+
+export function EditGrammarCategoryDialog({ open, onClose, category }: EditGrammarCategoryDialogProps) {
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState("📚");
+  const [color, setColor] = useState("#3b82f6");
+  const [orderIndex, setOrderIndex] = useState("0");
+  const [isActive, setIsActive] = useState(true);
+
+  const updateCategory = useUpdateGrammarCategory();
+
+  useEffect(() => {
+    if (category) {
+      setName(category.name);
+      setSlug(category.slug);
+      setDescription(category.description || "");
+      setIcon(category.icon);
+      setColor(category.color);
+      setOrderIndex(category.order_index.toString());
+      setIsActive(category.is_active);
+    }
+  }, [category]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!category) return;
+
+    await updateCategory.mutateAsync({
+      id: category.id,
+      data: {
+        name,
+        slug,
+        description: description || null,
+        icon,
+        color,
+        order_index: parseInt(orderIndex),
+        is_active: isActive,
+      },
+    });
+
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Edit Grammar Category</DialogTitle>
+          <DialogDescription>
+            Update the grammar category details
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Category Name *</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., Tenses"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug *</Label>
+              <Input
+                id="slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                placeholder="e.g., tenses"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="icon">Icon (Emoji)</Label>
+              <Input
+                id="icon"
+                value={icon}
+                onChange={(e) => setIcon(e.target.value)}
+                placeholder="📚"
+                maxLength={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="color">Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="color"
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="w-20"
+                />
+                <Input
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  placeholder="#3b82f6"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="orderIndex">Order Index</Label>
+              <Input
+                id="orderIndex"
+                type="number"
+                value={orderIndex}
+                onChange={(e) => setOrderIndex(e.target.value)}
+                min="0"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2 pt-8">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <Label htmlFor="isActive">Active</Label>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of this category..."
+              rows={3}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={updateCategory.isPending}
+            >
+              {updateCategory.isPending ? "Updating..." : "Update Category"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -1,5 +1,5 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { Level, GrammarCategory } from "@/shared/types/common.types";
+import { Level } from "@/shared/types/common.types";
 
 interface StatisticsData {
   id: string;
@@ -8,7 +8,7 @@ interface StatisticsData {
   successful_attempts: number;
   time_spent: number;
   level?: Level;
-  category?: GrammarCategory;
+  category_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -50,12 +50,12 @@ export class StatisticsService extends BaseService<StatisticsData> {
     return data;
   }
 
-  async getStatisticsByCategory(userId: string, category: GrammarCategory) {
+  async getStatisticsByCategory(userId: string, categoryId: string) {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select("*")
       .eq("user_id", userId)
-      .eq("category", category);
+      .eq("category_id", categoryId);
 
     if (error) throw error;
     return data;
