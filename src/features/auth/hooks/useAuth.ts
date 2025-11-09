@@ -2,7 +2,7 @@ import { useAuthStore } from "../store/useAuthStore";
 
 // Hook for components to use auth state
 export const useAuth = () => {
-  const { user, profile, isLoading, isPremium, logout } = useAuthStore();
+  const { user, profile, isLoading, isPremium, isAdmin, logout } = useAuthStore();
 
   return {
     user,
@@ -10,6 +10,7 @@ export const useAuth = () => {
     isLoading,
     isAuthenticated: !!user,
     isPremium: isPremium(),
+    isAdmin: isAdmin(),
     logout,
   };
 };

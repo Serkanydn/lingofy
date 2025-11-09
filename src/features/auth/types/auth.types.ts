@@ -7,6 +7,7 @@ export interface Profile {
   avatar_url: string | null
   is_premium: boolean
   premium_expires_at: string | null
+  is_admin: boolean
   created_at: string
 }
 

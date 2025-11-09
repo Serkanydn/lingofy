@@ -24,6 +24,7 @@ import {
   Book,
   BarChart3,
   Settings,
+  Shield,
 } from "lucide-react";
 import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
@@ -31,7 +32,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function Header() {
   const router = useRouter();
-  const { user, profile, isPremium } = useAuth();
+  const { user, profile, isPremium, isAdmin } = useAuth();
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -160,6 +161,15 @@ export function Header() {
                 <DropdownMenuSeparator />
 
                 {/* Navigation Items */}
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem onClick={() => router.push("/admin")}>
+                      <Shield className="mr-2 h-4 w-4 text-blue-500" />
+                      Admin Panel
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={() => router.push("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   Profile

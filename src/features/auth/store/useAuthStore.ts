@@ -13,6 +13,7 @@ interface AuthState {
   setProfile: (profile: Profile | null) => void;
   setLoading: (loading: boolean) => void;
   isPremium: () => boolean;
+  isAdmin: () => boolean;
 
   // Auth operations
   initialize: () => Promise<void>;
@@ -30,9 +31,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   isPremium: () => {
     const { profile } = get();
+    // Admins have full access to premium content
+    if (profile?.is_admin) return true;
     if (!profile?.is_premium) return false;
     if (!profile.premium_expires_at) return false;
     return new Date(profile.premium_expires_at) > new Date();
+  },
+
+  isAdmin: () => {
+    const { profile } = get();
+    return profile?.is_admin ?? false;
   },
 
   initialize: async () => {
@@ -63,6 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             avatar_url: profile.avatar_url,
             is_premium: profile.is_premium,
             premium_expires_at: profile.premium_expires_at,
+            is_admin: (profile as any).is_admin ?? false,
             created_at: (profile as any).created_at,
           };
           set({ profile: formattedProfile });
@@ -90,6 +99,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               avatar_url: (profile as any).avatar_url,
               is_premium: (profile as any).is_premium,
               premium_expires_at: (profile as any).premium_expires_at,
+              is_admin: (profile as any).is_admin ?? false,
               created_at: (profile as any).created_at,
             };
             set({ profile: formattedProfile });

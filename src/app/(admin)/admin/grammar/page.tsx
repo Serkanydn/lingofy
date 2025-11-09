@@ -18,12 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Lock, Crown } from "lucide-react";
+import { Plus, Edit, Trash2, Lock, Crown, FolderCog } from "lucide-react";
 import { useGrammarTopics, useDeleteGrammarTopic } from "@/features/admin/hooks/useGrammarTopics";
 import { AddGrammarDialog } from "@/features/admin/components/AddGrammarDialog";
 import { EditGrammarDialog } from "@/features/admin/components/EditGrammarDialog";
 import { DeleteConfirmDialog } from "@/features/admin/components/DeleteConfirmDialog";
 import { GrammarRule } from "@/features/grammar/types/service.types";
+import Link from "next/link";
 
 export default function GrammarAdminPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -64,10 +65,18 @@ export default function GrammarAdminPage() {
             Manage grammar lessons and topics
           </p>
         </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Topic
-        </Button>
+        <div className="flex gap-2">
+          <Link href="/admin/grammar/categories">
+            <Button variant="outline">
+              <FolderCog className="mr-2 h-4 w-4" />
+              Manage Categories
+            </Button>
+          </Link>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Topic
+          </Button>
+        </div>
       </div>
 
       <Card>
