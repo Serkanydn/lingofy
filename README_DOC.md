@@ -841,19 +841,8 @@ npm run lint     # Run ESLint
 This document provides a comprehensive overview of the Learn&Quiz English platform, designed to give any AI or developer a complete understanding of the project's structure, functionality, and implementation details.
 
 
-# Color Palett
-| Role                   | Color     | HEX                                                  | 
-| ---------------------- | --------- | ---------------------------------------------------- | 
-| **Primary**            | `#7C3AED` | Bright purple – main accent color                    |             
-| **Secondary**          | `#A78BFA` | Light lavender – secondary support color             |             
-| **Accent**             | `#C084FC` | Glowing lilac tone – used for highlights and accents |             
-| **Background (Light)** | `#F5F3FF` | Soft light purple background                         |             
-| **Background (Dark)**  | `#1E1B4B` | Deep purple – for dark mode                          |             
-| **Surface / Card**     | `#EDE9FE` | Light grayish-purple surface color                   |             
-| **Text Primary**       | `#1E1E1E` | Dark gray – for light backgrounds                    |             
-| **Text On Dark**       | `#FAFAFA` | White – for dark backgrounds                         |             
-| **Success**            | `#10B981` | Greenish accent (used for success states)            |             
-| **Error**              | `#EF4444` | Red (used for error alerts)                          |             
-| **Warning**            | `#F59E0B` | Amber – used for warnings or cautionary messages     |             
-| **Info**               | `#3B82F6` | Bright blue – used for informational messages        |             
-| **Neutral**            | `#6B7280` | Medium gray – used for neutral or system states      |             
+# Design type 
+- Claymorphism
+- Minimal Design
+- Modern color palette 
+- Based light colors
