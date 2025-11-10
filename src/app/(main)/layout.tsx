@@ -15,12 +15,12 @@ export default function MainLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background-light">
       <Header />
-      <div className="flex">
+      <main>{children}</main>
+      {/* <div className="flex">
         <Sidebar />
-        <main className="flex-1  lg:ml-64">{children}</main>
-      </div>
+      </div> */}
     </div>
   );
 }

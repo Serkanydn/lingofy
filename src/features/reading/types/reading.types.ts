@@ -10,6 +10,8 @@ export type ReadingContent = {
   order_index: number
   word_count: number
   created_at: string
+  category?: string
+  image_url?: string
 }
 
 export type ReadingFilters = {

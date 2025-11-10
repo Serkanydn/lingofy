@@ -46,7 +46,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-background to-muted">
+    <div className="min-h-screen  ">
       {/* Hero Section */}
       <section className="container mx-auto px-4 pt-20 pb-16">
         <div className="max-w-5xl mx-auto text-center">

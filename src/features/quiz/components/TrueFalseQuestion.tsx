@@ -37,13 +37,10 @@ export function TrueFalseQuestion({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <h3 className="text-xl font-semibold leading-relaxed flex-1">
-          {question.text}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed">
+          Question {question.order_index || 1}: {question.text}
         </h3>
-        <div className="ml-4 text-sm font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">
-          {question.points} pts
-        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -56,37 +53,39 @@ export function TrueFalseQuestion({
             showFeedback && !isSelected && isCorrectOption;
 
           return (
-            <Button
+            <button
               key={option.id}
-              variant="outline"
               className={cn(
-                "h-24 text-lg font-semibold transition-all",
+                "h-24 text-base font-medium transition-all rounded-2xl  flex items-center justify-center clay-shadow w-full",
                 isSelected &&
                   !showFeedback &&
-                  "bg-primary/10 border-primary ring-2 ring-primary",
-                showAsCorrect &&
-                  "bg-green-50 border-green-500 hover:bg-green-50 ring-2 ring-green-500",
-                showAsWrong &&
-                  "bg-red-50 border-red-500 hover:bg-red-50 ring-2 ring-red-500",
-                showAsCorrectAnswer && "bg-green-50 border-green-200",
+                  " bg-orange-50 dark:bg-orange-950/20 ",
+                !isSelected &&
+                  !showFeedback &&
+                  " dark:border-gray-700 bg-white dark:bg-card ",
+                showAsCorrect && " bg-green-50 dark:bg-green-950/20 ",
+                showAsWrong && " bg-red-50 dark:bg-red-950/20 ",
+                showAsCorrectAnswer && " bg-green-50/50 dark:bg-green-950/10",
                 isSubmitted && "cursor-not-allowed"
               )}
               onClick={() => handleOptionClick(option.id)}
               disabled={isSubmitted}
             >
               <div className="flex flex-col items-center gap-2">
-                <span>{option.text}</span>
+                <span className="text-gray-800 dark:text-gray-300 font-medium">
+                  {option.text}
+                </span>
                 {showAsCorrect && (
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                 )}
-                {showAsWrong && <XCircle className="h-6 w-6 text-red-600" />}
+                {showAsWrong && <XCircle className="h-5 w-5 text-red-600" />}
                 {showAsCorrectAnswer && (
                   <span className="text-xs text-green-600 font-medium">
                     Correct
                   </span>
                 )}
               </div>
-            </Button>
+            </button>
           );
         })}
       </div>

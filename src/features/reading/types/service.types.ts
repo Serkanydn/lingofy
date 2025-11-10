@@ -19,6 +19,8 @@ export interface ReadingText {
   order_index: number;
   created_at: string;
   updated_at: string;
+  category?: string;
+  image_url?: string;
 }
 
 import { Level } from "@/shared/types/common.types";

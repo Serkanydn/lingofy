@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { cn } from "@/shared/lib/utils";
 import { Level } from "@/shared/types/common.types";
-import { Badge, BookOpen, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import Link from "next/link";
 import { LEVEL_INFO } from "../constants/levels";
 import { useReadingByLevelCount } from "../hooks/useReading";
@@ -27,40 +20,67 @@ export function LevelCard({ level }: LevelCardProps) {
   const freeTexts = Math.min(10, totalTexts);
 
   return (
-    <Link href={`/reading/${level}`} className="block">
-      <Card
+    <Link href={`/reading/${level}`} className="block group">
+      <div
         className={cn(
-          "hover:shadow-lg transition-shadow cursor-pointer h-full relative overflow-hidden",
-          !isPremium && totalTexts > freeTexts && "relative overflow-hidden"
+          "relative rounded-3xl p-6 clay-shadow",
+          "transition-all duration-300 cursor-pointer h-full",
+          "border-none"
         )}
       >
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <Badge className={LEVEL_INFO[level].color}>{level}</Badge>
-            <BookOpen className="h-5 w-5 text-muted-foreground" />
+        {/* Icon */}
+        <div className="mb-4">
+          <span
+            className={cn(
+              "inline-flex items-center justify-center w-12 h-12 rounded-2xl text-2xl",
+              "shadow-[0_4px_14px_rgba(0,0,0,0.1)]",
+              LEVEL_INFO[level].iconBg
+            )}
+          >
+            {LEVEL_INFO[level].icon}
+          </span>
+        </div>
+
+        {/* Level Badge */}
+        <div className="mb-2">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {level}
+          </h3>
+          <p
+            className={cn(
+              "text-base font-semibold mt-1",
+              LEVEL_INFO[level].titleColor
+            )}
+          >
+            {LEVEL_INFO[level].name}
+          </p>
+        </div>
+
+        {/* Description */}
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+          {LEVEL_INFO[level].description}
+        </p>
+
+        {/* Stats */}
+        {isLoading ? (
+          <div className="text-sm text-gray-400">Loading...</div>
+        ) : (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500 dark:text-gray-400">
+              {isPremium
+                ? `${totalTexts} texts`
+                : `${freeTexts} free texts${
+                    totalTexts > freeTexts ? ` of ${totalTexts}` : ""
+                  }`}
+            </span>
+            {!isPremium && totalTexts > freeTexts && (
+              <div className="flex items-center gap-1 text-orange-500">
+                <Lock className="h-3.5 w-3.5" />
+              </div>
+            )}
           </div>
-          <CardTitle className="mt-2">{LEVEL_INFO[level].name}</CardTitle>
-          <CardDescription>{LEVEL_INFO[level].description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-sm text-muted-foreground">Loading...</div>
-          ) : (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {isPremium
-                  ? `${totalTexts} texts available`
-                  : `${freeTexts} free texts${
-                      totalTexts > freeTexts ? ` out of ${totalTexts}` : ""
-                    }`}
-              </span>
-              {!isPremium && totalTexts > freeTexts && (
-                <Lock className="h-4 w-4 text-muted-foreground" />
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </Link>
   );
 }

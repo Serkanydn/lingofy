@@ -120,3 +120,45 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .primary {
+    background-color: #ec7f13;
+  }
+  .bg-background-light {
+    background-color: #f8f7f6;
+  }
+  .bg-background-dark {
+    background-color: #221910;
+  }
+
+  .clay-shadow {
+    box-shadow: 4px 4px 8px #d9d5d1, -4px -4px 8px #ffffff;
+    background-color: #f8f7f6;
+    background-color: #fff;
+  }
+
+  .dark .clay-shadow {
+    box-shadow: 4px 4px 8px #1c140d, -4px -4px 8px #281e13;
+    background-color: #221910;
+    background-color: #000;
+  }
+
+  .clay-shadow-primary {
+    box-shadow: 4px 4px 10px #f3ede7, -2px -2px 8px #ffffff;
+    background-color: #ec7f13;
+  }
+
+  .dark .clay-shadow-primary {
+    box-shadow: 4px 4px 10px #1c140d, -2px -2px 8px #281e13;
+    background-color: #221910;
+  }
+
+  .clay-shadow-inset {
+    box-shadow: inset 4px 4px 8px #d9d5d1, inset -4px -4px 8px #ffffff;
+  }
+
+  .dark .clay-shadow-inset {
+    box-shadow: inset 4px 4px 8px #1c140d, inset -4px -4px 8px #281e13;
+  }
+}

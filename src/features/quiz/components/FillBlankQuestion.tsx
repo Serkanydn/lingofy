@@ -54,73 +54,69 @@ export function FillBlankQuestion({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className="text-xl font-semibold leading-relaxed mb-4">
-            Fill in the blank
-          </h3>
-          <div className="text-lg leading-relaxed flex flex-wrap items-center gap-2">
-            {parts.map((part, index) => (
-              <span key={index}>
-                {part}
-                {index < parts.length - 1 && (
-                  <span className="inline-block mx-1">
-                    <Input
-                      type="text"
-                      value={inputValue}
-                      onChange={handleInputChange}
-                      disabled={isSubmitted}
-                      className={cn(
-                        "inline-block w-48 mx-1",
-                        showFeedback &&
-                          isCorrect &&
-                          "border-green-500 bg-green-50",
-                        showFeedback && !isCorrect && "border-red-500 bg-red-50"
-                      )}
-                      placeholder="Type your answer..."
-                    />
-                  </span>
-                )}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="ml-4 text-sm font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">
-          {question.points} pts
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed mb-4">
+          Question {question.order_index || 1}: Fill in the blank
+        </h3>
+        <div className="text-base leading-relaxed flex flex-wrap items-center gap-2">
+          {parts.map((part, index) => (
+            <span key={index} className="text-gray-800 dark:text-gray-300">
+              {part}
+              {index < parts.length - 1 && (
+                <span className="inline-block mx-1">
+                  <Input
+                    type="text"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    disabled={isSubmitted}
+                    className={cn(
+                      "inline-block w-48 mx-1 rounded-xl border-2 transition-all h-11",
+                      !showFeedback && "border-gray-300 dark:border-gray-600 focus:border-orange-500 focus:shadow-[0_4px_16px_rgba(251,146,60,0.3)]",
+                      showFeedback &&
+                        isCorrect &&
+                        "border-green-500 bg-green-50 dark:bg-green-950/20 shadow-[0_4px_16px_rgba(34,197,94,0.3)]",
+                      showFeedback && !isCorrect && "border-red-500 bg-red-50 dark:bg-red-950/20 shadow-[0_4px_16px_rgba(239,68,68,0.3)]"
+                    )}
+                    placeholder="Type your answer..."
+                  />
+                </span>
+              )}
+            </span>
+          ))}
         </div>
       </div>
 
       {showFeedback && (
         <div
           className={cn(
-            "p-4 rounded-lg border-l-4",
+            "p-5 rounded-2xl border-2 transition-all",
             isCorrect
-              ? "bg-green-50 border-green-500"
-              : "bg-red-50 border-red-500"
+              ? "bg-green-50 dark:bg-green-950/20 border-green-500 shadow-[0_4px_16px_rgba(34,197,94,0.3)]"
+              : "bg-red-50 dark:bg-red-950/20 border-red-500 shadow-[0_4px_16px_rgba(239,68,68,0.3)]"
           )}
         >
           <div className="flex items-center gap-2 mb-2">
             {isCorrect ? (
               <>
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
-                <span className="font-semibold text-green-800">Correct!</span>
+                <span className="font-semibold text-green-800 dark:text-green-600">Correct!</span>
               </>
             ) : (
               <>
                 <XCircle className="h-5 w-5 text-red-600" />
-                <span className="font-semibold text-red-800">Incorrect</span>
+                <span className="font-semibold text-red-800 dark:text-red-600">Incorrect</span>
               </>
             )}
           </div>
           {!isCorrect && (
             <div className="text-sm">
-              <span className="text-muted-foreground">Your answer: </span>
-              <span className="font-medium text-red-800">
+              <span className="text-gray-600 dark:text-gray-400">Your answer: </span>
+              <span className="font-medium text-red-800 dark:text-red-600">
                 {inputValue || "(empty)"}
               </span>
               <br />
-              <span className="text-muted-foreground">Correct answer: </span>
-              <span className="font-medium text-green-800">
+              <span className="text-gray-600 dark:text-gray-400">Correct answer: </span>
+              <span className="font-medium text-green-800 dark:text-green-600">
                 {correctAnswer}
               </span>
             </div>

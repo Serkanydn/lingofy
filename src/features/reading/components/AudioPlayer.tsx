@@ -1,22 +1,22 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
+import { Play, Pause, Headphones } from "lucide-react";
 import { Howl } from "howler";
 
 interface AudioPlayerProps {
   audioUrl: string;
+  title?: string;
+  thumbnail?: string;
 }
 
-export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
+export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const soundRef = useRef<Howl | null>(null);
-  const progressInterval = useRef<NodeJS.Timeout>();
+  const progressInterval = useRef<any>(null);
 
   useEffect(() => {
     loadAudio(currentIndex);
@@ -100,40 +100,78 @@ export function AudioPlayer({ audioUrl }: AudioPlayerProps) {
   };
 
   return (
-    <div className="bg-card border rounded-lg p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Volume2 className="h-5 w-5 text-primary" />
-          <span className="font-medium">Audio</span>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Slider
-          value={[progress]}
-          max={duration}
-          step={0.1}
-          onValueChange={handleSeek}
-          className="w-full"
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{formatTime(progress)}</span>
-          <span>{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-center gap-4">
-        <Button variant="outline" size="icon" onClick={handleRestart}>
-          <RotateCcw className="h-4 w-4" />
-        </Button>
-        <Button size="lg" onClick={togglePlay}>
-          {isPlaying ? (
-            <Pause className="h-5 w-5 mr-2" />
+    <div className=" w-full items-center gap-4 p-6 border border-orange-200 rounded-3xl bg-orange-50">
+      <div className="flex justify-space-between items-center gap-4 mb-4">
+        {/* Thumbnail */}
+        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-linear-to-br from-amber-200 to-amber-300">
+          {thumbnail ? (
+            <img
+              src={thumbnail}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
           ) : (
-            <Play className="h-5 w-5 mr-2" />
+            <div className="w-full h-full flex items-center justify-center text-2xl">
+              <Headphones />
+            </div>
           )}
-          {isPlaying ? "Pause" : "Play"}
-        </Button>
+        </div>
+
+        {/* Title and Narrator */}
+        <div className="shrink-0 min-w-[200px]">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+            {title || "The Art of Storytelling"}
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Narrated by Jane Doe
+          </p>
+        </div>
+
+        {/* Play/Pause Button */}
+        <button
+          onClick={togglePlay}
+          className="w-12 h-12 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center shadow-lg transition-all duration-300 shrink-0 ml-auto"
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? (
+            <Pause className="w-5 h-5 text-white fill-white" />
+          ) : (
+            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+          )}
+        </button>
+      </div>
+
+      {/* Progress Bar Container */}
+      <div className="flex-1 min-w-0 px-3">
+        <div className="relative">
+          {/* Progress Bar */}
+          <div
+            className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const percentage = x / rect.width;
+              const newTime = percentage * duration;
+              handleSeek([newTime]);
+            }}
+          >
+            <div
+              className="h-full bg-orange-500 rounded-full relative transition-all duration-100"
+              style={{
+                width: `${duration > 0 ? (progress / duration) * 100 : 0}%`,
+              }}
+            >
+              {/* Progress Indicator Dot */}
+              <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-orange-500   rounded-full shadow border-2 border-white" />
+            </div>
+          </div>
+
+          {/* Time Labels */}
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+            <span>{formatTime(progress)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
