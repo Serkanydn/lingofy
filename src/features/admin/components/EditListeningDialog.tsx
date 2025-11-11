@@ -35,12 +35,14 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState<string>("B1");
   const [description, setDescription] = useState("");
-  const [audioUrl, setAudioUrl] = useState("");
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState("");
   const [transcript, setTranscript] = useState("");
   const [durationSeconds, setDurationSeconds] = useState("0");
   const [orderIndex, setOrderIndex] = useState("1");
   const [isPremium, setIsPremium] = useState(false);
   const [category, setCategory] = useState("general");
+  const [isUploading, setIsUploading] = useState(false);
 
   const updateListening = useUpdateListening();
 
@@ -49,7 +51,8 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
       setTitle(listening.title);
       setLevel(listening.level);
       setDescription(listening.description || "");
-      setAudioUrl(listening.audio_url);
+      setCurrentAudioUrl(listening.audio_url);
+      setAudioFile(null);
       setTranscript(listening.transcript || "");
       setDurationSeconds(String(listening.duration_seconds));
       setOrderIndex(String(listening.order_index));
@@ -63,13 +66,56 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
 
     if (!listening) return;
 
+    let finalAudioUrl = currentAudioUrl;
+
+    // Upload new audio file if provided
+    if (audioFile) {
+      try {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", audioFile);
+
+        const response = await fetch("/api/audio/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload audio");
+        }
+
+        const data = await response.json();
+        finalAudioUrl = data.url;
+
+        // Delete old audio file if it exists and is different
+        if (currentAudioUrl && currentAudioUrl !== finalAudioUrl) {
+          try {
+            await fetch("/api/audio/delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: currentAudioUrl }),
+            });
+          } catch (error) {
+            console.error("Failed to delete old audio:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Audio upload error:", error);
+        alert("Failed to upload audio file. Please try again.");
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     await updateListening.mutateAsync({
       id: listening.id,
       data: {
         title,
         level: level as Level,
         description,
-        audio_url: audioUrl,
+        audio_url: finalAudioUrl,
         transcript,
         duration_seconds: parseInt(durationSeconds),
         order_index: parseInt(orderIndex),
@@ -124,14 +170,24 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="audioUrl">Audio URL *</Label>
+              <Label htmlFor="audioFile">Upload New Audio (optional)</Label>
               <Input
-                id="audioUrl"
-                value={audioUrl}
-                onChange={(e) => setAudioUrl(e.target.value)}
-                placeholder="https://..."
-                required
+                id="audioFile"
+                type="file"
+                accept="audio/*"
+                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
               />
+              {audioFile ? (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  New: {audioFile.name} ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              ) : currentAudioUrl ? (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Current: {currentAudioUrl.split("/").pop()}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500">No audio file</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -216,9 +272,13 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
             <Button
               type="submit"
               className="flex-1"
-              disabled={updateListening.isPending}
+              disabled={updateListening.isPending || isUploading}
             >
-              {updateListening.isPending ? "Updating..." : "Update Listening"}
+              {isUploading
+                ? "Uploading Audio..."
+                : updateListening.isPending
+                ? "Updating..."
+                : "Update Listening"}
             </Button>
           </div>
         </form>

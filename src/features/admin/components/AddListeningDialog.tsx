@@ -34,25 +34,54 @@ export function AddListeningDialog({ open, onClose }: AddListeningDialogProps) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState<string>("");
   const [description, setDescription] = useState("");
-  const [audioUrl, setAudioUrl] = useState("");
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [transcript, setTranscript] = useState("");
   const [duration, setDuration] = useState("");
   const [isPremium, setIsPremium] = useState(false);
   const [orderIndex, setOrderIndex] = useState("1");
   const [category, setCategory] = useState("general");
+  const [isUploading, setIsUploading] = useState(false);
 
   const createListening = useCreateListening();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!level) return;
+    if (!level || !audioFile) return;
+
+    let uploadedAudioUrl = "";
+
+    // Upload audio file
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", audioFile);
+
+      const response = await fetch("/api/audio/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload audio");
+      }
+
+      const data = await response.json();
+      uploadedAudioUrl = data.url;
+    } catch (error) {
+      console.error("Audio upload error:", error);
+      alert("Failed to upload audio file. Please try again.");
+      setIsUploading(false);
+      return;
+    } finally {
+      setIsUploading(false);
+    }
 
     await createListening.mutateAsync({
       title,
       level: level as Level,
       description,
-      audio_url: audioUrl,
+      audio_url: uploadedAudioUrl,
       transcript,
       duration_seconds: parseInt(duration),
       is_premium: isPremium,
@@ -65,7 +94,7 @@ export function AddListeningDialog({ open, onClose }: AddListeningDialogProps) {
     setTitle("");
     setLevel("");
     setDescription("");
-    setAudioUrl("");
+    setAudioFile(null);
     setTranscript("");
     setDuration("");
     setIsPremium(false);
@@ -137,14 +166,19 @@ export function AddListeningDialog({ open, onClose }: AddListeningDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="audioUrl">Audio URL *</Label>
+              <Label htmlFor="audioFile">Audio File *</Label>
               <Input
-                id="audioUrl"
-                value={audioUrl}
-                onChange={(e) => setAudioUrl(e.target.value)}
-                placeholder="https://example.com/audio.mp3"
+                id="audioFile"
+                type="file"
+                accept="audio/*"
+                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
                 required
               />
+              {audioFile && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {audioFile.name} ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
             </div>
           </div>
 
@@ -208,9 +242,13 @@ export function AddListeningDialog({ open, onClose }: AddListeningDialogProps) {
             <Button
               type="submit"
               className="flex-1"
-              disabled={createListening.isPending}
+              disabled={createListening.isPending || isUploading}
             >
-              {createListening.isPending ? "Creating..." : "Create Listening"}
+              {isUploading
+                ? "Uploading Audio..."
+                : createListening.isPending
+                ? "Creating..."
+                : "Create Listening"}
             </Button>
           </div>
         </form>

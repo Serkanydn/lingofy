@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, Headphones } from "lucide-react";
+import { Play, Pause, Headphones, SkipBack, SkipForward } from "lucide-react";
 import { Howl } from "howler";
 
 interface AudioPlayerProps {
@@ -17,6 +17,7 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0);
   const soundRef = useRef<Howl | null>(null);
   const progressInterval = useRef<any>(null);
+  console.log('audioUrl',audioUrl);
 
   useEffect(() => {
     loadAudio(currentIndex);
@@ -35,16 +36,28 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
       soundRef.current.unload();
     }
 
+    console.log('Loading audio from:', audioUrl);
+
     soundRef.current = new Howl({
-      src: audioUrl,
+      src: [audioUrl],
       html5: true,
+      format: ['mp3', 'wav', 'ogg', 'm4a'],
       onload: () => {
+        console.log('Audio loaded successfully, duration:', soundRef.current?.duration());
         setDuration(soundRef.current?.duration() || 0);
       },
+      onloaderror: (id, error) => {
+        console.error('Audio load error:', error);
+      },
+      onplayerror: (id, error) => {
+        console.error('Audio play error:', error);
+      },
       onplay: () => {
+        console.log('Audio playing');
         startProgressUpdate();
       },
       onend: () => {
+        console.log('Audio ended');
         setIsPlaying(false);
         setProgress(0);
         if (progressInterval.current) {
@@ -93,6 +106,22 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
     }
   };
 
+  const skipBackward = () => {
+    if (soundRef.current) {
+      const newTime = Math.max(0, progress - 5);
+      soundRef.current.seek(newTime);
+      setProgress(newTime);
+    }
+  };
+
+  const skipForward = () => {
+    if (soundRef.current) {
+      const newTime = Math.min(duration, progress + 5);
+      soundRef.current.seek(newTime);
+      setProgress(newTime);
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -101,36 +130,20 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
 
   return (
     <div className=" w-full items-center gap-4 p-6 border border-orange-200 rounded-3xl bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800 ">
-      <div className="flex justify-space-between items-center gap-4 mb-4">
-        {/* Thumbnail */}
-        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-linear-to-br from-amber-200 to-amber-300 dark:from-amber-900/20 dark:to-amber-800/20">
-          {thumbnail ? (
-            <img
-              src={thumbnail}
-              alt={title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-2xl">
-              <Headphones />
-            </div>
-          )}
-        </div>
-
-        {/* Title and Narrator */}
-        <div className="shrink-0 min-w-[200px]">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-            {title || "The Art of Storytelling"}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Narrated by Jane Doe
-          </p>
-        </div>
+      <div className="flex justify-center items-center gap-4 mb-4">
+        {/* Skip Backward Button */}
+        <button
+          onClick={skipBackward}
+          className="w-10 h-10 rounded-full bg-orange-100 hover:bg-orange-200 dark:bg-orange-800/30 dark:hover:bg-orange-800/50 flex items-center justify-center transition-all duration-300"
+          aria-label="Skip backward 5 seconds"
+        >
+          <SkipBack className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+        </button>
 
         {/* Play/Pause Button */}
         <button
           onClick={togglePlay}
-          className="w-12 h-12 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center shadow-lg transition-all duration-300 shrink-0 ml-auto"
+          className="w-12 h-12 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center shadow-lg transition-all duration-300"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
@@ -138,6 +151,15 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
           ) : (
             <Play className="w-5 h-5 text-white fill-white ml-0.5" />
           )}
+        </button>
+
+        {/* Skip Forward Button */}
+        <button
+          onClick={skipForward}
+          className="w-10 h-10 rounded-full bg-orange-100 hover:bg-orange-200 dark:bg-orange-800/30 dark:hover:bg-orange-800/50 flex items-center justify-center transition-all duration-300"
+          aria-label="Skip forward 5 seconds"
+        >
+          <SkipForward className="w-5 h-5 text-orange-600 dark:text-orange-400" />
         </button>
       </div>
 

@@ -177,7 +177,7 @@ export default function ReadingDetailPage() {
               {reading.level} {level}
             </Badge>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              • {reading.word_count || 0} min read
+              {/* • {reading.word_count || 0} min read */}
             </span>
           </div>
 

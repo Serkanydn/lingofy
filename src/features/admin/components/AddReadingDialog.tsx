@@ -34,9 +34,10 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState<string>("");
   const [content, setContent] = useState("");
-  const [audioUrl, setAudioUrl] = useState("");
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [orderIndex, setOrderIndex] = useState("1");
+  const [isUploading, setIsUploading] = useState(false);
 
   const createReading = useCreateReading();
 
@@ -45,15 +46,43 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
 
     if (!level) return;
 
+    let uploadedAudioUrl = "";
+
+    // Upload audio file if provided
+    if (audioFile) {
+      try {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", audioFile);
+
+        const response = await fetch("/api/audio/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload audio");
+        }
+
+        const data = await response.json();
+        uploadedAudioUrl = data.url;
+      } catch (error) {
+        console.error("Audio upload error:", error);
+        alert("Failed to upload audio file. Please try again.");
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     await createReading.mutateAsync({
       title,
       level: level as Level,
       content,
-      audio_url: audioUrl,
+      audio_url: uploadedAudioUrl,
       is_premium: isPremium,
       order_index: parseInt(orderIndex),
-      content_id: crypto.randomUUID(),
-      word_count: content.trim().split(/\s+/).length,
       updated_at: new Date().toISOString(),
     });
 
@@ -61,7 +90,7 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
     setTitle("");
     setLevel("");
     setContent("");
-    setAudioUrl("");
+    setAudioFile(null);
     setIsPremium(false);
     setOrderIndex("1");
     onClose();
@@ -127,14 +156,19 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="audioUrl">Audio URL</Label>
+            <Label htmlFor="audioFile">Audio File</Label>
             <Input
-              id="audioUrl"
-              value={audioUrl}
-              onChange={(e) => setAudioUrl(e.target.value)}
-              placeholder="https://example.com/audio.mp3"
-              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700"
+              id="audioFile"
+              type="file"
+              accept="audio/*"
+              onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 dark:file:bg-orange-900/20 dark:file:text-orange-400"
             />
+            {audioFile && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Selected: {audioFile.name} ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 items-start">
@@ -178,9 +212,13 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
             <Button
               type="submit"
               className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={createReading.isPending}
+              disabled={createReading.isPending || isUploading}
             >
-              {createReading.isPending ? "Creating..." : "Create Reading"}
+              {isUploading
+                ? "Uploading Audio..."
+                : createReading.isPending
+                ? "Creating..."
+                : "Create Reading"}
             </Button>
           </div>
         </form>
