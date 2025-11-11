@@ -31,7 +31,11 @@ interface EditReadingDialogProps {
   reading: ReadingText | null;
 }
 
-export function EditReadingDialog({ open, onClose, reading }: EditReadingDialogProps) {
+export function EditReadingDialog({
+  open,
+  onClose,
+  reading,
+}: EditReadingDialogProps) {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState<string>("B1");
   const [content, setContent] = useState("");
@@ -79,31 +83,51 @@ export function EditReadingDialog({ open, onClose, reading }: EditReadingDialogP
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Reading Content</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-0">
+        <DialogHeader className="space-y-4 pb-6">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-green-100 to-green-50 dark:from-green-900 dark:to-green-800 flex items-center justify-center shadow-[0_4px_14px_rgba(34,197,94,0.4)]">
+            <span className="text-4xl">📖</span>
+          </div>
+          <DialogTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+            Edit Reading Content
+          </DialogTitle>
+          <DialogDescription className="text-center text-gray-600 dark:text-gray-400">
             Update the reading text details
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+          <div className="flex justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <Label
+                htmlFor="title"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
+                Title *
+              </Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., The History of Coffee"
                 required
+                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="level">Level *</Label>
-              <Select value={level} onValueChange={(val) => setLevel(val as Level)} required>
-                <SelectTrigger>
+            <div className="space-y-2 flex-1">
+              <Label
+                htmlFor="level"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
+                Level *
+              </Label>
+              <Select
+                value={level}
+                onValueChange={(val) => setLevel(val as Level)}
+                required
+              >
+                <SelectTrigger className="rounded-2xl border-2 w-full border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -115,64 +139,89 @@ export function EditReadingDialog({ open, onClose, reading }: EditReadingDialogP
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          <div className="space-y-2">
+            <Label
+              htmlFor="content"
+              className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+            >
+              Reading Text *
+            </Label>
+            <Textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Enter the reading text..."
+              rows={12}
+              required
+              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="audioUrl">Audio URL (optional)</Label>
+              <Label
+                htmlFor="audioUrl"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
+                Audio URL (optional)
+              </Label>
               <Input
                 id="audioUrl"
                 value={audioUrl}
                 onChange={(e) => setAudioUrl(e.target.value)}
                 placeholder="https://..."
+                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="orderIndex">Order Index</Label>
+              <Label
+                htmlFor="orderIndex"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
+                Order Index
+              </Label>
               <Input
                 id="orderIndex"
                 type="number"
                 value={orderIndex}
                 onChange={(e) => setOrderIndex(e.target.value)}
                 min="1"
+                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
             <input
               type="checkbox"
               id="isPremium"
               checked={isPremium}
               onChange={(e) => setIsPremium(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500 focus:ring-2 focus:ring-offset-2"
             />
-            <Label htmlFor="isPremium">Premium Content</Label>
+            <Label
+              htmlFor="isPremium"
+              className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
+            >
+              <span>👑</span> Premium Content
+            </Label>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">Reading Text *</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter the reading text..."
-              rows={15}
-              required
-            />
-          </div>
-
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1"
+              className="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1"
+              className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
               disabled={updateReading.isPending}
             >
               {updateReading.isPending ? "Updating..." : "Update Reading"}

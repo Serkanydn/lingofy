@@ -39,14 +39,12 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-blue-50 dark:from-gray-900 dark:via-background dark:to-gray-900">
       <AdminHeader />
       <div className="flex">
         <AdminSidebar />
         <main className="flex-1 ml-64 pt-16">
-          <div className="container mx-auto px-6 py-8">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
     </div>

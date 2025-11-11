@@ -90,10 +90,13 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add Grammar Topic</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-0">
+        <DialogHeader className="space-y-4 pb-6">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-800/10 flex items-center justify-center shadow-[0_4px_14px_rgba(251,191,36,0.4)]">
+            <span className="text-4xl">📚</span>
+          </div>
+          <DialogTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">Add Grammar Topic</DialogTitle>
+          <DialogDescription className="text-center text-gray-600 dark:text-gray-400">
             Create a new grammar lesson with examples
           </DialogDescription>
         </DialogHeader>
@@ -107,6 +110,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Present Perfect vs Past Simple"
+                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
                 required
               />
             </div>
@@ -114,7 +118,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select value={categoryId} onValueChange={setCategoryId} required disabled={categoriesLoading}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select category"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -133,7 +137,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="level">Difficulty Level *</Label>
               <Select value={level} onValueChange={(val) => setLevel(val as Level)} required>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,20 +157,23 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
                 type="number"
                 value={orderIndex}
                 onChange={(e) => setOrderIndex(e.target.value)}
+                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700"
                 min="1"
               />
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
             <input
               type="checkbox"
               id="isPremium"
               checked={isPremium}
               onChange={(e) => setIsPremium(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500 focus:ring-2 focus:ring-offset-2"
             />
-            <Label htmlFor="isPremium">Premium Content</Label>
+            <Label htmlFor="isPremium" className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2">
+              <span>👑</span> Premium Content
+            </Label>
           </div>
 
           <div className="space-y-2">
@@ -176,6 +183,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
               placeholder="Explain the grammar concept..."
+              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               rows={4}
               required
             />
@@ -189,6 +197,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
                   value={example}
                   onChange={(e) => handleExampleChange(index, e.target.value)}
                   placeholder={`Example ${index + 1}`}
+                  className="rounded-2xl border-2 border-gray-200 dark:border-gray-700"
                 />
                 {examples.length > 1 && (
                   <Button
@@ -196,8 +205,9 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemoveExample(index)}
+                    className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4 text-red-600" />
                   </Button>
                 )}
               </div>
@@ -207,6 +217,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
               variant="outline"
               size="sm"
               onClick={handleAddExample}
+              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-300"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Example
@@ -220,23 +231,24 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
               value={miniText}
               onChange={(e) => setMiniText(e.target.value)}
               placeholder="A short text demonstrating the grammar concept..."
+              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               rows={6}
               required
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1"
+              className="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1"
+              className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
               disabled={createTopic.isPending}
             >
               {createTopic.isPending ? "Creating..." : "Create Topic"}
