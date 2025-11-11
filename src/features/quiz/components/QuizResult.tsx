@@ -200,12 +200,71 @@ export function QuizResult({
                   question,
                   userAnswer
                 );
-                const correctOption = question.options.find(
-                  (opt) => opt.is_correct
-                );
-                const userOption = question.options.find(
-                  (opt) => opt.id === userAnswer?.selectedOptionId
-                );
+                
+                // Get correct answer text based on question type
+                let correctAnswerText = "";
+                let userAnswerText = "No answer";
+                type AnswerPart = {text: string, isBlank: boolean, isCorrect?: boolean};
+                let correctAnswerParts: AnswerPart[] = [];
+                let userAnswerParts: AnswerPart[] = [];
+                
+                if (question.type === 'fill_blank') {
+                  // For fill_blank, show the question with answers filled in
+                  const parts = question.text.split("__");
+                  
+                  // Parse correct answer
+                  let correctAnswers: string[] = [];
+                  if (question.correct_answer) {
+                    const correctStr = String(question.correct_answer);
+                    correctAnswers = correctStr.split(" ");
+                  }
+                  
+                  // Parse user answers
+                  let userAnswers: string[] = [];
+                  if (userAnswer?.textAnswer) {
+                    try {
+                      const parsed = JSON.parse(userAnswer.textAnswer);
+                      userAnswers = Array.isArray(parsed) ? parsed : [userAnswer.textAnswer];
+                    } catch {
+                      userAnswers = [userAnswer.textAnswer];
+                    }
+                  }
+                  
+                  // Build correct answer parts array
+                  correctAnswerParts = parts.flatMap((part, i) => {
+                    const result = [{text: part, isBlank: false}];
+                    if (i < parts.length - 1) {
+                      result.push({text: correctAnswers[i] || "___", isBlank: true});
+                    }
+                    return result;
+                  });
+                  
+                  // Build user answer parts array with individual correctness check
+                  userAnswerParts = parts.flatMap((part, i): AnswerPart[] => {
+                    const result: AnswerPart[] = [{text: part, isBlank: false}];
+                    if (i < parts.length - 1) {
+                      const userAns = (userAnswers[i] || "").trim().toLowerCase();
+                      const correctAns = (correctAnswers[i] || "").trim().toLowerCase();
+                      const isBlankCorrect = userAns === correctAns;
+                      result.push({
+                        text: userAnswers[i] || "___", 
+                        isBlank: true, 
+                        isCorrect: isBlankCorrect
+                      });
+                    }
+                    return result;
+                  });
+                } else {
+                  // For multiple_choice and true_false
+                  correctAnswerText = question.options.find((opt) => opt.is_correct)?.text || "";
+                  
+                  if (userAnswer) {
+                    const userOption = question.options.find(
+                      (opt) => opt.id === userAnswer.selectedOptionId
+                    );
+                    userAnswerText = userOption?.text || "No answer";
+                  }
+                }
 
                 return (
                   <div
@@ -230,33 +289,72 @@ export function QuizResult({
 
                       {/* Question Content */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                          {question.text}
-                        </p>
-                        <div className="text-xs space-y-1">
-                          <div className="flex items-start gap-1">
-                            <span className="text-green-600 dark:text-green-400 font-medium shrink-0">
-                              Correct Answer:
-                            </span>
-                            <span className="text-green-600 dark:text-green-400">
-                              {correctOption?.text}
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-1">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium shrink-0">
-                              Your Answer:
-                            </span>
-                            <span
-                              className={
-                                isCorrect
-                                  ? "text-green-600 dark:text-green-400"
-                                  : "text-red-600 dark:text-red-400"
-                              }
-                            >
-                              {userOption?.text || "No answer"}
-                            </span>
-                          </div>
-                        </div>
+                        {question.type === 'fill_blank' ? (
+                          <>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                              Question {index + 1}
+                            </p>
+                            <div className="text-xs space-y-1">
+                              <div className="flex items-start gap-1">
+                                <span className="text-gray-600 dark:text-gray-400 font-medium shrink-0">
+                                  Correct:
+                                </span>
+                                <span className="text-gray-900 dark:text-white">
+                                  {correctAnswerParts.map((part, idx) => (
+                                    <span key={idx} className={part.isBlank ? "text-green-600 dark:text-green-400 font-semibold" : ""}>
+                                      {part.text}
+                                    </span>
+                                  ))}
+                                </span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span className="text-gray-600 dark:text-gray-400 font-medium shrink-0">
+                                  Your Answer:
+                                </span>
+                                <span className="text-gray-900 dark:text-white">
+                                  {userAnswerParts.map((part, idx) => (
+                                    <span 
+                                      key={idx} 
+                                      className={part.isBlank ? (part.isCorrect ? "text-green-600 dark:text-green-400 font-semibold" : "text-red-600 dark:text-red-400 font-semibold") : ""}
+                                    >
+                                      {part.text}
+                                    </span>
+                                  ))}
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                              {question.text}
+                            </p>
+                            <div className="text-xs space-y-1">
+                              <div className="flex items-start gap-1">
+                                <span className="text-green-600 dark:text-green-400 font-medium shrink-0">
+                                  Correct Answer:
+                                </span>
+                                <span className="text-green-600 dark:text-green-400">
+                                  {correctAnswerText}
+                                </span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span className="text-gray-600 dark:text-gray-400 font-medium shrink-0">
+                                  Your Answer:
+                                </span>
+                                <span
+                                  className={
+                                    isCorrect
+                                      ? "text-green-600 dark:text-green-400"
+                                      : "text-red-600 dark:text-red-400"
+                                  }
+                                >
+                                  {userAnswerText}
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -60,10 +60,11 @@ export async function POST(request: NextRequest) {
       .from('audio_assets') as any)
       .insert({
         storage_url: result.url,
+        cdn_url: result.url, // Use public URL as CDN URL
         original_filename: file.name,
         file_size_bytes: file.size,
         content_type: contentType,
-        storage_provider: 'cloudflare',
+        storage_provider: 'cloudflare_r2',
         storage_bucket: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME || 'audio-assets',
         storage_path: result.key,
         format: file.name.split('.').pop(),

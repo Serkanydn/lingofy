@@ -164,6 +164,7 @@ export default function ReadingAdminPage() {
                 <TableHead>Title</TableHead>
                 <TableHead>Level</TableHead>
                 <TableHead>Word Count</TableHead>
+                <TableHead>Questions</TableHead>
                 <TableHead>Premium</TableHead>
                 <TableHead>Order</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -179,6 +180,11 @@ export default function ReadingAdminPage() {
                     <Badge className="rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-0">{reading.level}</Badge>
                   </TableCell>
                   <TableCell>{reading.content.split(" ").length} words</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="rounded-full">
+                      {reading.content_id ? "✓" : "—"}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     {reading.is_premium ? (
                       <Lock className="h-4 w-4 text-yellow-600" />

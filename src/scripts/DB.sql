@@ -1,6 +1,27 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.audio_assets (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  storage_url text NOT NULL UNIQUE,
+  original_filename text,
+  file_size_bytes integer,
+  duration_seconds integer,
+  format text CHECK (format = ANY (ARRAY['mp3'::text, 'wav'::text, 'ogg'::text, 'm4a'::text])),
+  bitrate integer,
+  sample_rate integer,
+  content_type text CHECK (content_type = ANY (ARRAY['reading'::text, 'listening'::text, 'pronunciation'::text, 'general'::text])),
+  language text DEFAULT 'en'::text,
+  storage_provider text DEFAULT 'cloudflare_r2'::text,
+  storage_bucket text,
+  storage_path text,
+  cdn_url text,
+  is_optimized boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT audio_assets_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.grammar_categories (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   name text NOT NULL,
@@ -42,7 +63,9 @@ CREATE TABLE public.listening_content (
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   quiz_content_id uuid,
-  CONSTRAINT listening_content_pkey PRIMARY KEY (id)
+  audio_asset_id uuid,
+  CONSTRAINT listening_content_pkey PRIMARY KEY (id),
+  CONSTRAINT listening_content_audio_asset_id_fkey FOREIGN KEY (audio_asset_id) REFERENCES public.audio_assets(id)
 );
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
@@ -87,7 +110,10 @@ CREATE TABLE public.reading_content (
   order_index integer,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT reading_content_pkey PRIMARY KEY (id)
+  audio_asset_id uuid,
+  content_id uuid,
+  CONSTRAINT reading_content_pkey PRIMARY KEY (id),
+  CONSTRAINT reading_content_audio_asset_id_fkey FOREIGN KEY (audio_asset_id) REFERENCES public.audio_assets(id)
 );
 CREATE TABLE public.user_question_attempts (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -113,6 +139,7 @@ CREATE TABLE public.user_statistics (
   last_activity_date date,
   most_studied_level text,
   updated_at timestamp with time zone DEFAULT now(),
+  total_grammar_completed integer DEFAULT 0,
   CONSTRAINT user_statistics_pkey PRIMARY KEY (user_id),
   CONSTRAINT user_statistics_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );

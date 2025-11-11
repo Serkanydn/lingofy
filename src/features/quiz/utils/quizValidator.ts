@@ -16,9 +16,30 @@ export const quizValidator = {
         return selectedOption?.is_correct || false;
 
       case "fill_blank":
-        // Check if text answer matches any correct option (case-insensitive)
+        // Check if text answer matches correct_answer (case-insensitive)
         if (!userAnswer.textAnswer) return false;
-        const normalizedAnswer = userAnswer.textAnswer.trim().toLowerCase();
+        
+        // Parse user answer - could be JSON array or single string
+        let userAnswerText = userAnswer.textAnswer.trim();
+        try {
+          const parsed = JSON.parse(userAnswerText);
+          // If it's an array, join with spaces
+          if (Array.isArray(parsed)) {
+            userAnswerText = parsed.join(" ");
+          }
+        } catch {
+          // Not JSON, use as is
+        }
+        
+        const normalizedAnswer = userAnswerText.toLowerCase();
+        
+        // Check against correct_answer field if it exists
+        if (question.correct_answer) {
+          const correctAnswerStr = String(question.correct_answer).toLowerCase();
+          return correctAnswerStr === normalizedAnswer;
+        }
+        
+        // Fallback: check against options if correct_answer is not set
         return question.options.some(
           (opt) => opt.is_correct && opt.text.toLowerCase() === normalizedAnswer
         );
@@ -30,6 +51,12 @@ export const quizValidator = {
 
   // Get correct answer text
   getCorrectAnswerText(question: QuizQuestion): string {
+    // For fill_blank, return correct_answer field if it exists
+    if (question.type === 'fill_blank' && question.correct_answer) {
+      return String(question.correct_answer);
+    }
+    
+    // Otherwise, get from options
     const correctOption = question.options.find((opt) => opt.is_correct);
     return correctOption?.text || "";
   },

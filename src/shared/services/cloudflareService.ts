@@ -26,6 +26,7 @@ export interface UploadAudioParams {
 export interface UploadAudioResult {
   url: string;
   key: string;
+  storageUrl?: string;
 }
 
 /**
@@ -63,8 +64,11 @@ export async function uploadAudioToR2(
 
   // Construct public URL
   const url = `${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+  
+  // Also construct direct storage URL as fallback
+  const storageUrl = `https://${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME}/${key}`;
 
-  return { url, key };
+  return { url, key, storageUrl };
 }
 
 /**

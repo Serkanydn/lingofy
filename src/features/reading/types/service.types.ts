@@ -7,6 +7,15 @@ export interface ReadingQuestion {
   explanation: string;
 }
 
+export interface ReadingQuestionInput {
+  text: string;
+  type: "multiple_choice" | "fill_blank" | "true_false";
+  options: { text: string; is_correct: boolean }[];
+  correct_answer?: string;
+  points: number;
+  order_index: number;
+}
+
 export interface ReadingText {
   id: string;
   content_id?: string;

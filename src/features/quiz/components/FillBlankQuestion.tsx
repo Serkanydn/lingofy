@@ -23,25 +23,46 @@ export function FillBlankQuestion({
   isSubmitted,
   showFeedback,
 }: FillBlankQuestionProps) {
-  const [inputValue, setInputValue] = useState(userAnswer?.textAnswer || "");
+  // Parse existing answers if they exist (stored as JSON array or single value)
+  const parseAnswers = (textAnswer: string | null | undefined): string[] => {
+    if (!textAnswer) return [];
+    try {
+      const parsed = JSON.parse(textAnswer);
+      return Array.isArray(parsed) ? parsed : [textAnswer];
+    } catch {
+      return [textAnswer];
+    }
+  };
+
+  const [inputValues, setInputValues] = useState<string[]>(() => {
+    const parts = question.text.split("__");
+    const blankCount = parts.length - 1;
+    const existing = parseAnswers(userAnswer?.textAnswer);
+    return Array(blankCount).fill("").map((_, i) => existing[i] || "");
+  });
 
   useEffect(() => {
     if (userAnswer?.textAnswer) {
-      setInputValue(userAnswer.textAnswer);
+      const existing = parseAnswers(userAnswer.textAnswer);
+      setInputValues(prev => prev.map((_, i) => existing[i] || ""));
     }
   }, [userAnswer]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (index: number, value: string) => {
     if (isSubmitted) return;
 
-    const value = e.target.value;
-    setInputValue(value);
+    const newValues = [...inputValues];
+    newValues[index] = value;
+    setInputValues(newValues);
+
+    // Store as JSON array if multiple blanks, otherwise single value
+    const answerText = newValues.length === 1 ? newValues[0] : JSON.stringify(newValues);
 
     onAnswer({
       question_id: question.id,
       type: "text",
       selectedOptionId: null,
-      textAnswer: value,
+      textAnswer: answerText,
     });
   };
 
@@ -50,7 +71,8 @@ export function FillBlankQuestion({
   const correctAnswer = quizValidator.getCorrectAnswerText(question);
 
   // Split question text by underscores to show blanks
-  const parts = question.text.split("_____");
+  const parts = question.text.split("__");
+  const hasBlankMarker = parts.length > 1;
 
   return (
     <div className="space-y-6">
@@ -58,16 +80,17 @@ export function FillBlankQuestion({
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed mb-4">
           Question {question.order_index || 1}: Fill in the blank
         </h3>
-        <div className="text-base leading-relaxed flex flex-wrap items-center gap-2">
-          {parts.map((part, index) => (
-            <span key={index} className="text-gray-800 dark:text-gray-300">
-              {part}
-              {index < parts.length - 1 && (
-                <span className="inline-block mx-1">
+        
+        {hasBlankMarker ? (
+          <div className="text-base leading-relaxed">
+            {parts.map((part, index) => (
+              <span key={index}>
+                <span className="text-gray-800 dark:text-gray-300">{part}</span>
+                {index < parts.length - 1 && (
                   <Input
                     type="text"
-                    value={inputValue}
-                    onChange={handleInputChange}
+                    value={inputValues[index] || ""}
+                    onChange={(e) => handleInputChange(index, e.target.value)}
                     disabled={isSubmitted}
                     className={cn(
                       "inline-block w-48 mx-1 rounded-xl border-2 transition-all h-11",
@@ -79,11 +102,32 @@ export function FillBlankQuestion({
                     )}
                     placeholder="Type your answer..."
                   />
-                </span>
+                )}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-base leading-relaxed text-gray-800 dark:text-gray-300">
+              {question.text}
+            </p>
+            <Input
+              type="text"
+              value={inputValues[0] || ""}
+              onChange={(e) => handleInputChange(0, e.target.value)}
+              disabled={isSubmitted}
+              className={cn(
+                "w-full rounded-xl border-2 transition-all h-11",
+                !showFeedback && "border-gray-300 dark:border-gray-600 focus:border-orange-500 focus:shadow-[0_4px_16px_rgba(251,146,60,0.3)]",
+                showFeedback &&
+                  isCorrect &&
+                  "border-green-500 bg-green-50 dark:bg-green-950/20 shadow-[0_4px_16px_rgba(34,197,94,0.3)]",
+                showFeedback && !isCorrect && "border-red-500 bg-red-50 dark:bg-red-950/20 shadow-[0_4px_16px_rgba(239,68,68,0.3)]"
               )}
-            </span>
-          ))}
-        </div>
+              placeholder="Type your answer..."
+            />
+          </div>
+        )}
       </div>
 
       {showFeedback && (
@@ -112,7 +156,7 @@ export function FillBlankQuestion({
             <div className="text-sm">
               <span className="text-gray-600 dark:text-gray-400">Your answer: </span>
               <span className="font-medium text-red-800 dark:text-red-600">
-                {inputValue || "(empty)"}
+                {inputValues.filter(v => v).join(", ") || "(empty)"}
               </span>
               <br />
               <span className="text-gray-600 dark:text-gray-400">Correct answer: </span>

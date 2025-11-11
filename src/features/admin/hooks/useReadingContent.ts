@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ReadingText } from "@/features/reading/types/service.types";
+import { ReadingText, ReadingQuestionInput } from "@/features/reading/types/service.types";
 import { readingService } from "@/features/reading/services";
 
-type CreateReadingData = Omit<ReadingText, "id" | "created_at">;
+type CreateReadingData = Omit<ReadingText, "id" | "created_at"> & {
+  questions?: ReadingQuestionInput[];
+};
 
 export function useReadingContent() {
   return useQuery({
@@ -19,7 +21,15 @@ export function useCreateReading() {
 
   return useMutation({
     mutationFn: async (insertData: CreateReadingData) => {
-      return await readingService.create(insertData);
+      const { questions, ...readingData } = insertData;
+      const reading = await readingService.create(readingData);
+      
+      // If questions are provided, create them
+      if (questions && questions.length > 0 && reading?.id) {
+        await readingService.createQuestions(reading.id, questions);
+      }
+      
+      return reading;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-reading-content"] });
@@ -38,11 +48,20 @@ export function useUpdateReading() {
     mutationFn: async ({
       id,
       data,
+      questions,
     }: {
       id: string;
       data: Partial<CreateReadingData>;
+      questions?: ReadingQuestionInput[];
     }) => {
-      return await readingService.update(id, data);
+      const result = await readingService.update(id, data);
+      
+      // Update or create questions using reading_content id directly
+      if (questions !== undefined) {
+        await readingService.updateQuestions(id, questions);
+      }
+      
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-reading-content"] });

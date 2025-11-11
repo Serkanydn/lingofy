@@ -22,6 +22,10 @@ import {
 import { useUpdateReading } from "@/features/admin/hooks/useReadingContent";
 import { Level } from "@/shared/types/common.types";
 import { ReadingText } from "@/features/reading/types/service.types";
+import { QuestionManager, Question } from "./QuestionManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { readingService } from "@/features/reading/services";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -44,6 +48,8 @@ export function EditReadingDialog({
   const [orderIndex, setOrderIndex] = useState("1");
   const [isPremium, setIsPremium] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
 
   const updateReading = useUpdateReading();
 
@@ -56,6 +62,23 @@ export function EditReadingDialog({
       setAudioFile(null);
       setOrderIndex(String(reading.order_index));
       setIsPremium(reading.is_premium);
+      
+      // Fetch existing questions
+      if (reading.id) {
+        setIsLoadingQuestions(true);
+        readingService.getQuestionsForContent(reading.id)
+          .then((fetchedQuestions) => {
+            setQuestions(fetchedQuestions);
+          })
+          .catch((error) => {
+            console.error("Failed to fetch questions:", error);
+          })
+          .finally(() => {
+            setIsLoadingQuestions(false);
+          });
+      } else {
+        setQuestions([]);
+      }
     }
   }, [reading]);
 
@@ -119,6 +142,7 @@ export function EditReadingDialog({
         content_id: reading.content_id,
         updated_at: new Date().toISOString(),
       },
+      questions,
     });
 
     onClose();
@@ -128,7 +152,7 @@ export function EditReadingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-0">
         <DialogHeader className="space-y-4 pb-6">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-green-100 to-green-50 dark:from-green-900 dark:to-green-800 flex items-center justify-center shadow-[0_4px_14px_rgba(34,197,94,0.4)]">
             <span className="text-4xl">📖</span>
@@ -142,6 +166,17 @@ export function EditReadingDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
+              <TabsTrigger value="content" className="rounded-xl">
+                Content Details
+              </TabsTrigger>
+              <TabsTrigger value="questions" className="rounded-xl">
+                Questions ({questions.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="content" className="space-y-6 mt-6">
           <div className="flex justify-between gap-4">
             <div className="space-y-2 flex-1">
               <Label
@@ -253,12 +288,11 @@ export function EditReadingDialog({
           </div>
 
           <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
-            <input
-              type="checkbox"
+            <Checkbox
               id="isPremium"
               checked={isPremium}
-              onChange={(e) => setIsPremium(e.target.checked)}
-              className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500 focus:ring-2 focus:ring-offset-2"
+              onCheckedChange={(checked) => setIsPremium(checked as boolean)}
+              className="h-5 w-5 rounded-lg border-2 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
             />
             <Label
               htmlFor="isPremium"
@@ -267,8 +301,20 @@ export function EditReadingDialog({
               <span>👑</span> Premium Content
             </Label>
           </div>
+            </TabsContent>
 
-          <div className="flex gap-3 pt-6">
+            <TabsContent value="questions" className="mt-6">
+              {isLoadingQuestions ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-600 dark:text-gray-400">Loading questions...</p>
+                </div>
+              ) : (
+                <QuestionManager questions={questions} onChange={setQuestions} />
+              )}
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-800">
             <Button
               type="button"
               variant="outline"
