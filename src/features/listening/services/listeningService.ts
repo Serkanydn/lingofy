@@ -21,7 +21,10 @@ export class ListeningService extends BaseService<ListeningExercise> {
   async getExercisesByLevel(level: Level) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
+      .select(`
+        *,
+        audio_asset:audio_assets(*)
+      `)
       .eq("level", level);
 
     if (error) throw error;
@@ -31,7 +34,10 @@ export class ListeningService extends BaseService<ListeningExercise> {
   async getExercisesByCategory(category: string) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
+      .select(`
+        *,
+        audio_asset:audio_assets(*)
+      `)
       .eq("category", category);
 
     if (error) throw error;

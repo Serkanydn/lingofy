@@ -5,6 +5,14 @@ export interface ListeningExercise {
   title: string;
   description: string;
   audio_url: string;
+  audio_asset_id?: string;
+  audio_asset?: {
+    id: string;
+    storage_url: string;
+    cdn_url?: string;
+    duration_seconds?: number;
+    format?: string;
+  };
   transcript: string;
   level: Level;
   duration_seconds: number;

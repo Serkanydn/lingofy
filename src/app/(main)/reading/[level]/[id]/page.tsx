@@ -186,7 +186,7 @@ export default function ReadingDetailPage() {
           </h1>
 
           {/* Audio Player Section */}
-          <AudioPlayer audioUrl={reading.audio_url} />
+          <AudioPlayer audioAsset={reading.audio_asset!} />
 
           {/* Content Section */}
           <div

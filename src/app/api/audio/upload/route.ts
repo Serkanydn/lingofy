@@ -16,9 +16,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get file from form data
+    // Get file and content type from form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const contentType = formData.get("contentType") as string || "general";
 
     if (!file) {
       return NextResponse.json(
@@ -52,12 +53,38 @@ export async function POST(request: NextRequest) {
       contentType: file.type,
     });
 
-    console.log('result',result);
+    console.log('Cloudflare upload result:', result);
+
+    // Create audio asset record in Supabase
+    const { data: audioAsset, error: insertError } = await (supabase
+      .from('audio_assets') as any)
+      .insert({
+        storage_url: result.url,
+        original_filename: file.name,
+        file_size_bytes: file.size,
+        content_type: contentType,
+        storage_provider: 'cloudflare',
+        storage_bucket: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME || 'audio-assets',
+        storage_path: result.key,
+        format: file.name.split('.').pop(),
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Database insert error:', insertError);
+      return NextResponse.json(
+        { error: "Failed to create audio asset record" },
+        { status: 500 }
+      );
+    }
+
+    console.log('Audio asset created:', audioAsset);
 
     return NextResponse.json({
       success: true,
-      url: result.url,
-      key: result.key,
+      audioAsset,
     });
   } catch (error) {
     console.error("Audio upload error:", error);

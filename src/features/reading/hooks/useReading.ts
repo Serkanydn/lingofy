@@ -53,7 +53,7 @@ export function useReadingDetail(id: string) {
   return useQuery({
     queryKey: ["reading", id],
     queryFn: async () => {
-      return readingService.getById(id);
+      return readingService.getReadingDetailById(id);
     },
   });
 }

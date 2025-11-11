@@ -22,6 +22,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateListening } from "@/features/admin/hooks/useListeningContent";
 import { Level } from "@/shared/types/common.types";
+import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -49,25 +50,23 @@ export function AddListeningDialog({ open, onClose }: AddListeningDialogProps) {
 
     if (!level || !audioFile) return;
 
-    let uploadedAudioUrl = "";
+    let audioAssetId: string | undefined = undefined;
 
     // Upload audio file
     try {
       setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", audioFile);
-
-      const response = await fetch("/api/audio/upload", {
-        method: "POST",
-        body: formData,
+      
+      // Use the new audio asset upload service
+      const result = await uploadAudioAsset({
+        file: audioFile,
+        contentType: 'listening',
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to upload audio");
+      if (!result.success || !result.audioAsset) {
+        throw new Error(result.error || 'Failed to upload audio');
       }
 
-      const data = await response.json();
-      uploadedAudioUrl = data.url;
+      audioAssetId = result.audioAsset.id;
     } catch (error) {
       console.error("Audio upload error:", error);
       alert("Failed to upload audio file. Please try again.");
@@ -81,7 +80,8 @@ export function AddListeningDialog({ open, onClose }: AddListeningDialogProps) {
       title,
       level: level as Level,
       description,
-      audio_url: uploadedAudioUrl,
+      audio_url: audioAssetId ? '' : '', // Keep for backward compatibility
+      audio_asset_id: audioAssetId,
       transcript,
       duration_seconds: parseInt(duration),
       is_premium: isPremium,

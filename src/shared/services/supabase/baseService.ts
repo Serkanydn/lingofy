@@ -30,6 +30,17 @@ export class BaseService<T = any> {
     return data as T;
   }
 
+    async getReadingDetailById(id: string | number): Promise<T | null> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+    return data as T;
+  }
+
   async create(payload: Partial<T>): Promise<T> {
     const { data, error } = await this.supabase
       .from(this.tableName)

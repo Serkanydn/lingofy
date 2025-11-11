@@ -8,7 +8,6 @@ export type ReadingContent = {
   audio_url: string
   is_premium: boolean
   order_index: number
-  word_count: number
   created_at: string
   category?: string
   image_url?: string

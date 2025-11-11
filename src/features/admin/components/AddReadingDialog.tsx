@@ -22,6 +22,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateReading } from "@/features/admin/hooks/useReadingContent";
 import { Level } from "@/shared/types/common.types";
+import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -46,29 +47,39 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
 
     if (!level) return;
 
-    let uploadedAudioUrl = "";
+    let audioAssetId: string | undefined = undefined;
 
     // Upload audio file if provided
     if (audioFile) {
       try {
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append("file", audioFile);
-
-        const response = await fetch("/api/audio/upload", {
-          method: "POST",
-          body: formData,
+        
+        console.log('Starting audio upload:', {
+          name: audioFile.name,
+          size: audioFile.size,
+          type: audioFile.type,
+        });
+        
+        // Use the new audio asset upload service
+        const result = await uploadAudioAsset({
+          file: audioFile,
+          contentType: 'reading',
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to upload audio");
+        if (!result.success || !result.audioAsset) {
+          const errorMsg = result.error || 'Failed to upload audio';
+          console.error('Upload failed:', errorMsg);
+          alert(`Failed to upload audio file: ${errorMsg}`);
+          setIsUploading(false);
+          return;
         }
 
-        const data = await response.json();
-        uploadedAudioUrl = data.url;
+        console.log('Audio uploaded successfully:', result.audioAsset);
+        audioAssetId = result.audioAsset.id;
       } catch (error) {
         console.error("Audio upload error:", error);
-        alert("Failed to upload audio file. Please try again.");
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        alert(`Failed to upload audio file: ${errorMsg}`);
         setIsUploading(false);
         return;
       } finally {
@@ -80,7 +91,8 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
       title,
       level: level as Level,
       content,
-      audio_url: uploadedAudioUrl,
+      audio_url: audioAssetId ? '' : '', // Keep for backward compatibility, can be removed later
+      audio_asset_id: audioAssetId,
       is_premium: isPremium,
       order_index: parseInt(orderIndex),
       updated_at: new Date().toISOString(),

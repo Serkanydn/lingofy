@@ -3,24 +3,37 @@
 import { useState, useEffect, useRef } from "react";
 import { Play, Pause, Headphones, SkipBack, SkipForward } from "lucide-react";
 import { Howl } from "howler";
+import type { AudioAsset } from "@/shared/types/audio.types";
 
 interface AudioPlayerProps {
-  audioUrl: string;
+  audioAsset: AudioAsset; // New preferred method
   title?: string;
   thumbnail?: string;
 }
 
-export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
+export function AudioPlayer({
+  audioAsset,
+  title,
+  thumbnail,
+}: AudioPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const soundRef = useRef<Howl | null>(null);
   const progressInterval = useRef<any>(null);
-  console.log('audioUrl',audioUrl);
+
+  // Prefer audio asset, fallback to direct URL
+  const audioSource =
+    audioAsset?.cdn_url || audioAsset?.storage_url;
+  const audioDuration = audioAsset?.duration_seconds;
+
+  console.log("audioSource", audioSource);
 
   useEffect(() => {
-    loadAudio(currentIndex);
+    if (audioSource) {
+      loadAudio(currentIndex);
+    }
     return () => {
       if (soundRef.current) {
         soundRef.current.unload();
@@ -29,35 +42,45 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
         clearInterval(progressInterval.current);
       }
     };
-  }, [currentIndex]);
+  }, [currentIndex, audioSource]);
 
   const loadAudio = (index: number) => {
     if (soundRef.current) {
       soundRef.current.unload();
     }
 
-    console.log('Loading audio from:', audioUrl);
+    if (!audioSource) {
+      console.error("No audio source available");
+      return;
+    }
+
+    console.log("Loading audio from:", audioSource);
 
     soundRef.current = new Howl({
-      src: [audioUrl],
+      src: [audioSource],
       html5: true,
-      format: ['mp3', 'wav', 'ogg', 'm4a'],
+      format: ["mp3", "wav", "ogg", "m4a"],
       onload: () => {
-        console.log('Audio loaded successfully, duration:', soundRef.current?.duration());
-        setDuration(soundRef.current?.duration() || 0);
+        console.log(
+          "Audio loaded successfully, duration:",
+          soundRef.current?.duration()
+        );
+        const loadedDuration =
+          soundRef.current?.duration() || audioDuration || 0;
+        setDuration(loadedDuration);
       },
       onloaderror: (id, error) => {
-        console.error('Audio load error:', error);
+        console.error("Audio load error:", error);
       },
       onplayerror: (id, error) => {
-        console.error('Audio play error:', error);
+        console.error("Audio play error:", error);
       },
       onplay: () => {
-        console.log('Audio playing');
+        console.log("Audio playing");
         startProgressUpdate();
       },
       onend: () => {
-        console.log('Audio ended');
+        console.log("Audio ended");
         setIsPlaying(false);
         setProgress(0);
         if (progressInterval.current) {

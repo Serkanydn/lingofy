@@ -21,10 +21,31 @@ export class ReadingService extends BaseService<ReadingText> {
     return { ...text, questions };
   }
 
+  async getReadingDetailById(id: string | number): Promise<ReadingText | null> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select(
+        `
+        *,
+        audio_asset:audio_assets(*)
+      `
+      )
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   async getTextsByLevel(level: Level) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
+      .select(
+        `
+        *,
+        audio_asset:audio_assets(*)
+      `
+      )
       .eq("level", level);
 
     if (error) throw error;
@@ -44,7 +65,12 @@ export class ReadingService extends BaseService<ReadingText> {
   async getTextsByCategory(category: string) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
+      .select(
+        `
+        *,
+        audio_asset:audio_assets(*)
+      `
+      )
       .eq("category", category);
 
     if (error) throw error;
@@ -54,7 +80,12 @@ export class ReadingService extends BaseService<ReadingText> {
   async searchTexts(query: string) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*")
+      .select(
+        `
+        *,
+        audio_asset:audio_assets(*)
+      `
+      )
       .textSearch("title", query);
 
     if (error) throw error;
