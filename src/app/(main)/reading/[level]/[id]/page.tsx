@@ -63,27 +63,31 @@ export default function ReadingDetailPage() {
         selectedOptionId?: string | null;
         textAnswer?: string | null;
       }
-    >
+    > & { _formattedAnswers?: any[]; _totalTime?: number }
   ) => {
     if (!user || !quiz) return;
 
-    // Transform userAnswers to QuizAnswer format
-    const answers = Object.values(userAnswers).map((answer) => {
-      const question = quiz.questions.find((q) => q.id === answer.question_id);
-      const selectedOption = question?.options.find(
-        (opt: { id: string; is_correct: boolean }) =>
-          opt.id === answer.selectedOptionId
-      );
+    // Use formatted answers if available (includes is_correct and time_taken)
+    const answers = userAnswers._formattedAnswers || Object.entries(userAnswers)
+      .filter(([key, _]) => !key.startsWith('_')) // Filter out metadata fields
+      .map(([_, answer]) => {
+        const ans = answer as { question_id: string; type: string; selectedOptionId?: string | null; textAnswer?: string | null };
+        const question = quiz.questions.find((q) => q.id === ans.question_id);
+        const selectedOption = question?.options.find(
+          (opt: { id: string; is_correct: boolean }) =>
+            opt.id === ans.selectedOptionId
+        );
 
-      return {
-        question_id: answer.question_id,
-        selected_option: answer.selectedOptionId
-          ? parseInt(answer.selectedOptionId)
-          : 0,
-        is_correct: selectedOption?.is_correct || false,
-        time_taken: 0,
-      };
-    });
+        return {
+          question_id: ans.question_id,
+          selected_option: ans.selectedOptionId
+            ? parseInt(ans.selectedOptionId)
+            : null,
+          text_answer: ans.textAnswer || null,
+          is_correct: selectedOption?.is_correct || false,
+          time_taken: 0,
+        };
+      });
 
     await submitQuiz.mutateAsync({
       content_id: quiz.id,

@@ -1,13 +1,14 @@
 "use client";
 
 import { QuizContent, QuizState, UserAnswer } from "../types/quiz.types";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { QuizResult } from "./QuizResult";
 import { ArrowLeft } from "lucide-react";
 import { scoreCalculator } from "../utils/scoreCalculator";
 import { Button } from "@/components/ui/button";
 import { QuestionRenderer } from "./QuestionRenderer";
 import Link from "next/link";
+import { quizValidator } from "../utils/quizValidator";
 
 interface QuizContainerProps {
   quiz: QuizContent;
@@ -27,10 +28,21 @@ export function QuizContainer({
     showResults: false,
   });
 
+  // Time tracking
+  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
+  const [questionTimes, setQuestionTimes] = useState<Record<string, number>>({});
+  const [totalTime, setTotalTime] = useState<number>(0);
+  const totalStartTime = useRef<number>(Date.now());
+
   const currentQuestion = quiz.questions[quizState.currentQuestionIndex];
   const totalQuestions = quiz.questions.length;
   const progress =
     ((quizState.currentQuestionIndex + 1) / totalQuestions) * 100;
+
+  // Reset question start time when question changes
+  useEffect(() => {
+    setQuestionStartTime(Date.now());
+  }, [quizState.currentQuestionIndex]);
 
   const handleAnswer = (answer: UserAnswer) => {
     setQuizState((prev: QuizState) => ({
@@ -43,6 +55,13 @@ export function QuizContainer({
   };
 
   const handleNext = () => {
+    // Save time for current question before moving
+    const timeTaken = Math.floor((Date.now() - questionStartTime) / 1000);
+    setQuestionTimes(prev => ({
+      ...prev,
+      [currentQuestion.id]: timeTaken,
+    }));
+
     if (quizState.currentQuestionIndex < totalQuestions - 1) {
       setQuizState((prev) => ({
         ...prev,
@@ -52,6 +71,13 @@ export function QuizContainer({
   };
 
   const handlePrevious = () => {
+    // Save time for current question before moving
+    const timeTaken = Math.floor((Date.now() - questionStartTime) / 1000);
+    setQuestionTimes(prev => ({
+      ...prev,
+      [currentQuestion.id]: timeTaken,
+    }));
+
     if (quizState.currentQuestionIndex > 0) {
       setQuizState((prev) => ({
         ...prev,
@@ -61,6 +87,17 @@ export function QuizContainer({
   };
 
   const handleSubmit = () => {
+    // Calculate final time for current question if answered
+    const finalQuestionTime = Math.floor((Date.now() - questionStartTime) / 1000);
+    const finalQuestionTimes = {
+      ...questionTimes,
+      [currentQuestion.id]: questionTimes[currentQuestion.id] || finalQuestionTime,
+    };
+
+    // Calculate and store total time taken
+    const calculatedTotalTime = Math.floor((Date.now() - totalStartTime.current) / 1000);
+    setTotalTime(calculatedTotalTime);
+
     const { totalScore, maxScore, percentage } = scoreCalculator.calculateScore(
       quiz.questions,
       quizState.userAnswers
@@ -72,7 +109,26 @@ export function QuizContainer({
       showResults: true,
     }));
 
-    onComplete(totalScore, maxScore, quizState.userAnswers);
+    // Format answers for database with is_correct and time_taken
+    const formattedAnswers = quiz.questions.map((q) => {
+      const userAnswer = quizState.userAnswers[q.id];
+      const isCorrect = quizValidator.isAnswerCorrect(q, userAnswer);
+      const timeTaken = finalQuestionTimes[q.id] || 0;
+
+      return {
+        question_id: q.id,
+        selected_option: userAnswer?.selectedOptionId || null,
+        text_answer: userAnswer?.textAnswer || null,
+        is_correct: isCorrect,
+        time_taken: timeTaken,
+      };
+    });
+
+    onComplete(totalScore, maxScore, {
+      ...quizState.userAnswers,
+      _formattedAnswers: formattedAnswers,
+      _totalTime: calculatedTotalTime,
+    } as any);
   };
 
   const handleRetry = () => {
@@ -82,6 +138,10 @@ export function QuizContainer({
       isSubmitted: false,
       showResults: false,
     });
+    setQuestionTimes({});
+    setQuestionStartTime(Date.now());
+    setTotalTime(0);
+    totalStartTime.current = Date.now();
   };
 
   const isQuestionAnswered = (questionId: string) => {
@@ -98,7 +158,7 @@ export function QuizContainer({
     return (
       <QuizResult
         quiz={quiz}
-        userAnswers={quizState.userAnswers}
+        userAnswers={{...quizState.userAnswers, _totalTime: totalTime} as any}
         onRetry={handleRetry}
         onExit={onExit}
       />

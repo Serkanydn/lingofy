@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 interface QuizResultProps {
   quiz: QuizContent;
-  userAnswers: Record<string, UserAnswer>;
+  userAnswers: Record<string, UserAnswer> & { _totalTime?: number };
   onRetry: () => void;
   onExit: () => void;
 }
@@ -36,8 +36,17 @@ export function QuizResult({
     quizValidator.isAnswerCorrect(q, userAnswers[q.id])
   ).length;
 
-  // Calculate time taken (mock for now)
-  const timeTaken = "8 min 30 sec";
+  // Format time taken from seconds to readable format
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins === 0) return `${secs} sec`;
+    if (secs === 0) return `${mins} min`;
+    return `${mins} min ${secs} sec`;
+  };
+
+  const totalTimeSeconds = userAnswers._totalTime || 0;
+  const timeTaken = formatTime(totalTimeSeconds);
 
   return (
     <div className="min-h-screen bg-white dark:bg-background py-8 ">
