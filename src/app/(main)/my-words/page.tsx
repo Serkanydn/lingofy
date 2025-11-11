@@ -134,7 +134,10 @@ export default function MyWordsPage() {
     ?.filter((word) => {
       const matchesSearch =
         word.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        word.translation.toLowerCase().includes(searchQuery.toLowerCase());
+        word.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        word.example_sentences?.some(sentence => 
+          sentence.toLowerCase().includes(searchQuery.toLowerCase())
+        );
       return matchesSearch;
     })
     .sort((a, b) => {

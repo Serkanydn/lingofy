@@ -63,7 +63,7 @@ export function Header() {
     { href: "/listening", name: "Listening Hub", icon: Headphones },
     { href: "/grammar", name: "Grammar", icon: GraduationCap },
     { href: "/my-words", name: "Vocabulary", icon: Book },
-    { href: "/premium", name: "Premium", icon: Crown },
+    ...(!isPremium ? [{ href: "/premium", name: "Premium", icon: Crown }] : []),
   ];
 
   const isActiveLink = (href: string) => {

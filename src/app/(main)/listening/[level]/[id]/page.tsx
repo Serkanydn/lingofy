@@ -4,9 +4,10 @@ import React, { useState, use } from "react";
 import Link from "next/link";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { Button } from "@/components/ui/button";
-import { PlayCircleIcon, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { PlayCircleIcon, FileText, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
+import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
 import { cn } from "@/shared/lib/utils";
@@ -149,6 +150,16 @@ export default function ListeningDetailPage({
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [showAddWord, setShowAddWord] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+
+  const handleTextSelection = () => {
+    const selection = window.getSelection()?.toString().trim();
+    if (selection) {
+      setSelectedText(selection);
+      setShowAddWord(true);
+    }
+  };
 
   const handleQuizComplete = async (
     score: number,
@@ -349,7 +360,10 @@ export default function ListeningDetailPage({
 
               {showTranscript && (
                 <div className="mt-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6">
-                  <div className="prose prose-lg max-w-none dark:prose-invert">
+                  <div 
+                    className="prose prose-lg max-w-none dark:prose-invert"
+                    onMouseUp={handleTextSelection}
+                  >
                     {listening.transcript.split("\n\n").map((paragraph, i) => (
                       <p
                         key={i}
@@ -364,17 +378,37 @@ export default function ListeningDetailPage({
             </div>
           )}
 
-          {/* Action Button */}
-          <Button
-            className="w-full rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
-            onClick={() => setShowQuiz(true)}
-            disabled={!quizQuestions}
-          >
-            <PlayCircleIcon className="mr-2 h-6 w-6" />
-            Take the Quiz
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <Button
+              className="flex-1 rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
+              onClick={() => setShowQuiz(true)}
+              disabled={!quizQuestions}
+            >
+              <PlayCircleIcon className="mr-2 h-6 w-6" />
+              Take the Quiz
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-3xl px-6 py-6 border-2 border-gray-200 dark:border-gray-700 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-300"
+              onClick={() => {
+                setSelectedText("");
+                setShowAddWord(true);
+              }}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
+
+      <AddWordDialog
+        open={showAddWord}
+        onClose={() => setShowAddWord(false)}
+        initialWord={selectedText}
+        sourceType="listening"
+        sourceId={id}
+      />
     </div>
   );
 }

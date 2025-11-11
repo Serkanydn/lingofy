@@ -4,7 +4,8 @@ import { useState } from "react";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PlayCircleIcon, BookOpen, Lightbulb, FileText } from "lucide-react";
+import { PlayCircleIcon, BookOpen, Lightbulb, FileText, Plus } from "lucide-react";
+import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
@@ -23,6 +24,16 @@ export default function GrammarTopicPage({
   const { data: quizQuestions } = useQuizFromId(topic?.id || "");
   const submitQuiz = useQuizSubmit();
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showAddWord, setShowAddWord] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+
+  const handleTextSelection = () => {
+    const selection = window.getSelection()?.toString().trim();
+    if (selection) {
+      setSelectedText(selection);
+      setShowAddWord(true);
+    }
+  };
 
   const handleQuizComplete = async (
     score: number,
@@ -172,7 +183,10 @@ export default function GrammarTopicPage({
               </h2>
             </div>
             <div className="bg-linear-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-6">
-              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              <p 
+                className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
+                onMouseUp={handleTextSelection}
+              >
                 {topic.explanation}
               </p>
             </div>
@@ -198,7 +212,10 @@ export default function GrammarTopicPage({
                     <span className="text-amber-600 dark:text-amber-400 font-bold text-lg shrink-0">
                       {index + 1}.
                     </span>
-                    <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <p 
+                      className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
+                      onMouseUp={handleTextSelection}
+                    >
                       {example}
                     </p>
                   </div>
@@ -218,24 +235,47 @@ export default function GrammarTopicPage({
               </h2>
             </div>
             <div className="bg-linear-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-6">
-              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+              <p 
+                className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap"
+                onMouseUp={handleTextSelection}
+              >
                 {topic.mini_text}
               </p>
             </div>
           </div>
 
-          {/* Quiz Button */}
+          {/* Action Buttons */}
           {!!quizQuestions?.length && (
-            <Button
-              className="w-full rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
-              onClick={() => setShowQuiz(true)}
-            >
-              <PlayCircleIcon className="mr-2 h-6 w-6" />
-              Take the Quiz
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                className="flex-1 rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
+                onClick={() => setShowQuiz(true)}
+              >
+                <PlayCircleIcon className="mr-2 h-6 w-6" />
+                Take the Quiz
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-3xl px-6 py-6 border-2 border-gray-200 dark:border-gray-700 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-300"
+                onClick={() => {
+                  setSelectedText("");
+                  setShowAddWord(true);
+                }}
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
+            </div>
           )}
         </div>
       </div>
+
+      <AddWordDialog
+        open={showAddWord}
+        onClose={() => setShowAddWord(false)}
+        initialWord={selectedText}
+        sourceType="grammar"
+        sourceId={id}
+      />
     </div>
   );
 }
