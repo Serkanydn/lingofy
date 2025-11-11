@@ -100,10 +100,10 @@ export function AudioPlayer({ audioUrl, title, thumbnail }: AudioPlayerProps) {
   };
 
   return (
-    <div className=" w-full items-center gap-4 p-6 border border-orange-200 rounded-3xl bg-orange-50">
+    <div className=" w-full items-center gap-4 p-6 border border-orange-200 rounded-3xl bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800 ">
       <div className="flex justify-space-between items-center gap-4 mb-4">
         {/* Thumbnail */}
-        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-linear-to-br from-amber-200 to-amber-300">
+        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-linear-to-br from-amber-200 to-amber-300 dark:from-amber-900/20 dark:to-amber-800/20">
           {thumbnail ? (
             <img
               src={thumbnail}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quiz Results - Learn&amp;Quiz English</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+      .clay-shadow {
+        box-shadow: 6px 6px 12px #e0e0e0, -6px -6px 12px #ffffff;
+      }
+      .dark .clay-shadow {
+        box-shadow: 6px 6px 12px #1d150c, -6px -6px 12px #271d14;
+      }
+       .clay-inset {
+        box-shadow: inset 4px 4px 8px #e0e0e0, inset -4px -4px 8px #ffffff;
+      }
+      .dark .clay-inset {
+         box-shadow: inset 4px 4px 8px #1d150c, inset -4px -4px 8px #271d14;
+      }
+    </style>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ec7f13",
+              "background-light": "#f8f7f6",
+              "background-dark": "#221910",
+              "success": "#28a745",
+              "error": "#dc3545",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<svg class="h-8 w-8" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M39.475 21.6262C40.358 21.4363 40.6863 21.5589 40.7581 21.5934C40.7876 21.655 40.8547 21.857 40.8082 22.3336C40.7408 23.0255 40.4502 24.0046 39.8572 25.2301C38.6799 27.6631 36.5085 30.6631 33.5858 33.5858C30.6631 36.5085 27.6632 38.6799 25.2301 39.8572C24.0046 40.4502 23.0255 40.7407 22.3336 40.8082C21.8571 40.8547 21.6551 40.7875 21.5934 40.7581C21.5589 40.6863 21.4363 40.358 21.6262 39.475C21.8562 38.4054 22.4689 36.9657 23.5038 35.2817C24.7575 33.2417 26.5497 30.9744 28.7621 28.762C30.9744 26.5497 33.2417 24.7574 35.2817 23.5037C36.9657 22.4689 38.4054 21.8562 39.475 21.6262ZM4.41189 29.2403L18.7597 43.5881C19.8813 44.7097 21.4027 44.9179 22.7217 44.7893C24.0585 44.659 25.5148 44.1631 26.9723 43.4579C29.9052 42.0387 33.2618 39.5667 36.4142 36.4142C39.5667 33.2618 42.0387 29.9052 43.4579 26.9723C44.1631 25.5148 44.659 24.0585 44.7893 22.7217C44.9179 21.4027 44.7097 19.8813 43.5881 18.7597L29.2403 4.41187C27.8527 3.02428 25.8765 3.02573 24.2861 3.36776C22.6081 3.72863 20.7334 4.58419 18.8396 5.74801C16.4978 7.18716 13.9881 9.18353 11.5858 11.5858C9.18354 13.988 7.18717 16.4978 5.74802 18.8396C4.58421 20.7334 3.72865 22.6081 3.36778 24.2861C3.02574 25.8765 3.02429 27.8527 4.41189 29.2403Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Learn&amp;Quiz English</h1>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Profile</a>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold shadow-sm hover:brightness-110 transition-all clay-shadow">
+<span class="truncate">Log Out</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+<div class="flex flex-col gap-10 lg:flex-row">
+<div class="flex-1 flex flex-col gap-10 min-w-0">
+<p class="text-4xl font-black leading-tight tracking-tight text-left">Personalized Study Dashboard: Present Tense Basics</p>
+<div class="bg-background-light dark:bg-background-dark rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 clay-shadow w-full lg:w-3/4">
+<div class="relative size-48 flex items-center justify-center">
+<svg class="size-full" height="36" viewBox="0 0 36 36" width="36" xmlns="http://www.w3.org/2000/svg">
+<circle class="stroke-current text-gray-200 dark:text-gray-700" cx="18" cy="18" fill="transparent" r="15.9155" stroke-width="3"></circle>
+<circle class="stroke-current text-primary" cx="18" cy="18" fill="transparent" r="15.9155" stroke-dasharray="80, 100" stroke-dashoffset="25" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-4xl font-bold">80%</span>
+<span class="text-gray-500 dark:text-gray-400">Score</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<p class="text-2xl font-bold">Great Job!</p>
+<p class="text-gray-600 dark:text-gray-300 mt-1">Your Score: <span class="font-semibold text-primary">8/10</span></p>
+<p class="text-gray-500 dark:text-gray-400 mt-2">Excellent work! You have a solid understanding of the present tense. Keep practicing to master it completely.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full lg:w-3/4">
+<div class="bg-background-light dark:bg-background-dark rounded-xl p-6 flex flex-col items-start clay-shadow">
+<div class="text-primary material-symbols-outlined mb-2 text-3xl">timer</div>
+<p class="text-lg font-bold">Time Taken</p>
+<p class="text-gray-600 dark:text-gray-300">8 min 30 sec</p>
+</div>
+<div class="bg-background-light dark:bg-background-dark rounded-xl p-6 flex flex-col items-start clay-shadow">
+<div class="text-primary material-symbols-outlined mb-2 text-3xl">help_outline</div>
+<p class="text-lg font-bold">Questions Answered</p>
+<p class="text-gray-600 dark:text-gray-300">10 / 10</p>
+</div>
+<div class="bg-background-light dark:bg-background-dark rounded-xl p-6 flex flex-col items-start clay-shadow">
+<div class="text-primary material-symbols-outlined mb-2 text-3xl">school</div>
+<p class="text-lg font-bold">Topic Proficiency</p>
+<p class="text-gray-600 dark:text-gray-300">Present Tense (High)</p>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-start gap-4 pt-6 w-full lg:w-3/4">
+<button class="flex w-full sm:w-auto min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold shadow-sm hover:brightness-110 transition-all clay-shadow">
+<span class="truncate">Next Lesson</span>
+</button>
+<button class="flex w-full sm:w-auto min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-background-light dark:bg-background-dark text-primary border border-primary text-base font-bold shadow-sm hover:bg-primary/10 transition-all clay-shadow">
+<span class="truncate">Review All Answers</span>
+</button>
+<a class="text-primary font-medium text-sm hover:underline" href="#">Retake Quiz</a>
+</div>
+</div>
+<div class="lg:w-1/3 min-w-0 lg:pl-8 lg:border-l lg:border-gray-200 dark:lg:border-gray-800">
+<h2 class="text-2xl font-bold leading-tight tracking-tight px-4 lg:px-0 mb-4">Answer Breakdown</h2>
+<div class="flex flex-col divide-y divide-gray-200 dark:divide-gray-800 border border-gray-200 dark:border-gray-800 rounded-xl clay-inset bg-background-light dark:bg-background-dark overflow-y-auto max-h-[80vh] lg:max-h-[calc(100vh-10rem)]">
+<div class="flex gap-4 p-4 items-start">
+<div class="text-success flex items-center justify-center rounded-full bg-success/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">She ___ to the library every day.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Correct Answer: goes</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Your Answer: goes</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-error flex items-center justify-center rounded-full bg-error/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">close</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">They ___ soccer in the park.</p>
+<p class="text-sm font-semibold text-success">Correct Answer: play</p>
+<p class="text-sm text-gray-500 dark:text-gray-400 line-through">Your Answer: plays</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-success flex items-center justify-center rounded-full bg-success/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">I ___ my homework after school.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Correct Answer: do</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Your Answer: do</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-error flex items-center justify-center rounded-full bg-error/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">close</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">Which sentence is grammatically correct?</p>
+<p class="text-sm font-semibold text-success">Correct Answer: He goes to school.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400 line-through">Your Answer: He go to school.</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-success flex items-center justify-center rounded-full bg-success/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">The sun ___ in the east.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Correct Answer: rises</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Your Answer: rises</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-success flex items-center justify-center rounded-full bg-success/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">Cats ___ milk.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Correct Answer: drink</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Your Answer: drink</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-error flex items-center justify-center rounded-full bg-error/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">close</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">My brother ___ a new car last month.</p>
+<p class="text-sm font-semibold text-success">Correct Answer: bought</p>
+<p class="text-sm text-gray-500 dark:text-gray-400 line-through">Your Answer: buys</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 items-start">
+<div class="text-success flex items-center justify-center rounded-full bg-success/20 shrink-0 size-10 mt-1">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-medium">Water ___ at 100 degrees Celsius.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Correct Answer: boils</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Your Answer: boils</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

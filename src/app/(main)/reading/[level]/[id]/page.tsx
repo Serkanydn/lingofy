@@ -146,7 +146,7 @@ export default function ReadingDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-8">
+    <div className="min-h-screen bg-white dark:bg-background py-8 clay-shadow">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Breadcrumb */}
         <div className=" mb-6">

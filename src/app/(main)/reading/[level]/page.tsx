@@ -60,8 +60,7 @@ function ReadingCard({
     <div
       className={cn(
         "relative bg-white dark:bg-card rounded-3xl overflow-hidden",
-        "shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]",
-        "hover:shadow-[0_12px_40px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.4)]",
+        "clay-shadow",
         "transition-all duration-300 h-full flex flex-col",
         isLocked ? "opacity-75" : "cursor-pointer"
       )}
@@ -302,10 +301,16 @@ export default function ReadingLevelPage({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-2xl">
-              <DropdownMenuItem onClick={() => setSortBy("newest")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setSortBy("newest")}
+                className="cursor-pointer"
+              >
                 Newest
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("oldest")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setSortBy("oldest")}
+                className="cursor-pointer"
+              >
                 Oldest
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -318,21 +323,35 @@ export default function ReadingLevelPage({
                 variant="ghost"
                 className={cn(
                   "rounded-2xl bg-white dark:bg-card shadow-[0_4px_14px_rgb(0,0,0,0.06)] hover:shadow-[0_6px_20px_rgb(0,0,0,0.1)] transition-all duration-300 px-5",
-                  accessFilter !== "all" && "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
+                  accessFilter !== "all" &&
+                    "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
                 )}
               >
-                {accessFilter === "all" ? "All Access" : accessFilter === "free" ? "Free" : "Premium"}
+                {accessFilter === "all"
+                  ? "All Access"
+                  : accessFilter === "free"
+                  ? "Free"
+                  : "Premium"}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-2xl">
-              <DropdownMenuItem onClick={() => setAccessFilter("all")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setAccessFilter("all")}
+                className="cursor-pointer"
+              >
                 All Access
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setAccessFilter("free")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setAccessFilter("free")}
+                className="cursor-pointer"
+              >
                 Free
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setAccessFilter("premium")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setAccessFilter("premium")}
+                className="cursor-pointer"
+              >
                 Premium
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -345,7 +364,8 @@ export default function ReadingLevelPage({
                 variant="ghost"
                 className={cn(
                   "rounded-2xl bg-white dark:bg-card shadow-[0_4px_14px_rgb(0,0,0,0.06)] hover:shadow-[0_6px_20px_rgb(0,0,0,0.1)] transition-all duration-300 px-5",
-                  categoryFilter !== "all" && "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
+                  categoryFilter !== "all" &&
+                    "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
                 )}
               >
                 {categoryFilter === "all" ? "All Categories" : categoryFilter}
@@ -353,7 +373,10 @@ export default function ReadingLevelPage({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-2xl max-h-[300px] overflow-y-auto">
-              <DropdownMenuItem onClick={() => setCategoryFilter("all")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setCategoryFilter("all")}
+                className="cursor-pointer"
+              >
                 All Categories
               </DropdownMenuItem>
               {categories.map((cat) => (

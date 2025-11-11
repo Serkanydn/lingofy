@@ -40,7 +40,7 @@ export function QuizResult({
   const timeTaken = "8 min 30 sec";
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-8">
+    <div className="min-h-screen bg-white dark:bg-background py-8 ">
       <div className="container mx-auto ">
         {/* Header */}
         <div className="mb-8">
@@ -49,11 +49,11 @@ export function QuizResult({
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
           {/* Left Column - Score and Stats */}
           <div className="space-y-6">
             {/* Score Circle Card */}
-            <div className="clay-shadow rounded-3xl  p-8">
+            <div className="clay-shadow rounded-3xl  p-8 bg-background-light">
               <div className="flex flex-col items-center">
                 {/* Circular Progress */}
                 <div className="relative w-48 h-48 mb-6">
@@ -92,7 +92,7 @@ export function QuizResult({
                 </div>
 
                 {/* Performance Message */}
-                <div className="text-center mb-6">
+                <div className="text-center mb-6 ">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     {performance.message}
                   </h3>

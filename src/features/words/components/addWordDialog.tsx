@@ -33,6 +33,7 @@ interface AddWordDialogProps {
   initialWord?: string;
   sourceType?: "reading" | "listening";
   sourceId?: string;
+  initialCategoryId?: string | null;
 }
 
 export function AddWordDialog({
@@ -41,6 +42,7 @@ export function AddWordDialog({
   initialWord = "",
   sourceType,
   sourceId,
+  initialCategoryId = null,
 }: AddWordDialogProps) {
   const [word, setWord] = useState(initialWord);
   const [description, setDescription] = useState("");
@@ -53,8 +55,9 @@ export function AddWordDialog({
   useEffect(() => {
     if (open) {
       setWord(initialWord);
+      setCategoryId(initialCategoryId || "none");
     }
-  }, [open, initialWord]);
+  }, [open, initialWord, initialCategoryId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,50 +112,58 @@ export function AddWordDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] rounded-3xl">
         <DialogHeader>
-          <DialogTitle>Add New Word</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Add New Word</DialogTitle>
+          <DialogDescription className="text-base">
             Add a new word to your personal vocabulary collection
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="word">English Word *</Label>
+            <Label htmlFor="word" className="text-sm font-semibold">
+              English Word *
+            </Label>
             <Input
               id="word"
               value={word}
               onChange={(e) => setWord(e.target.value)}
               placeholder="e.g., excellent"
               required
+              className="rounded-2xl h-12 text-base border-2"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="description" className="text-sm font-semibold">
+              Description *
+            </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g., An adjective meaning very good or of high quality"
-              rows={2}
+              rows={3}
               required
+              className="rounded-2xl text-base border-2"
             />
           </div>
 
           <div className="space-y-2 w-full">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category" className="text-sm font-semibold">
+              Category
+            </Label>
             <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full rounded-2xl h-12 border-2">
                 <SelectValue placeholder="Select a category (optional)" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-2xl">
                 <SelectItem value="none">Uncategorized</SelectItem>
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-2 h-2 rounded-full"
+                        className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: category.color }}
                       />
                       {category.name}
@@ -163,50 +174,55 @@ export function AddWordDialog({
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Example Sentences *</Label>
+              <Label className="text-sm font-semibold">Example Sentences *</Label>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setExampleSentences([...exampleSentences, ""])}
+                className="rounded-2xl border-2"
               >
                 <Plus className="mr-1 h-3 w-3" />
                 Add Example
               </Button>
             </div>
-            {exampleSentences.map((example, index) => (
-              <div key={index} className="flex gap-2">
-                <Textarea
-                  value={example}
-                  onChange={(e) => {
-                    const updated = [...exampleSentences];
-                    updated[index] = e.target.value;
-                    setExampleSentences(updated);
-                  }}
-                  placeholder={`Example ${
-                    index + 1
-                  }: She did an excellent job on the project.`}
-                  rows={2}
-                  required={index === 0}
-                />
-                {exampleSentences.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setExampleSentences(
-                        exampleSentences.filter((_, i) => i !== index)
-                      );
+            <div className="space-y-3">
+              {exampleSentences.map((example, index) => (
+                <div key={index} className="flex gap-2">
+                  <Textarea
+                    value={example}
+                    onChange={(e) => {
+                      const updated = [...exampleSentences];
+                      updated[index] = e.target.value;
+                      setExampleSentences(updated);
                     }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+                    placeholder={`Example ${
+                      index + 1
+                    }: She did an excellent job on the project.`}
+                    rows={2}
+                    required={index === 0}
+                    className="rounded-2xl text-base border-2"
+                  />
+                  {exampleSentences.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setExampleSentences(
+                          exampleSentences.filter((_, i) => i !== index)
+                        );
+                      }}
+                      className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 h-10 w-10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -214,17 +230,17 @@ export function AddWordDialog({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1"
+              className="flex-1 rounded-2xl h-12 text-base border-2"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1"
+              className="flex-1 rounded-2xl h-12 text-base bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
               disabled={addWord.isPending}
             >
               {addWord.isPending ? "Adding..." : "Add Word"}
-            </Button>{" "}
+            </Button>
           </div>
         </form>
       </DialogContent>

@@ -43,3 +43,13 @@ export function useListeningQuiz(contentId: string) {
     },
   });
 }
+
+export function useListeningByLevelCount(level: Level) {
+  return useQuery({
+    queryKey: ["listening", "count", level],
+    queryFn: async () => {
+      const exercises = await listeningService.getExercisesByLevel(level);
+      return exercises.length;
+    },
+  });
+}
