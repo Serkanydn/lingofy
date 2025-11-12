@@ -1,0 +1,3 @@
+# Architecture Guidelines
+
+Content summarizing architecture...

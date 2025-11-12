@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Level } from "@/shared/types/common.types";
+import { AudioAsset } from "@/shared/types/audio.types";
 import { listeningService } from "../services";
 
 export interface ListeningContent {
@@ -7,11 +8,17 @@ export interface ListeningContent {
   title: string;
   level: Level;
   description: string;
-  audio_url: string;
+  audio_url: string; // Deprecated - keep for backward compatibility
+  audio_asset_id?: string;
+  audio_asset?: AudioAsset;
   duration_seconds: number;
   transcript: string;
   is_premium: boolean;
   order_index: number;
+  category?: string;
+  thumbnail?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export function useListeningByLevel(level: Level) {
@@ -51,5 +58,15 @@ export function useListeningByLevelCount(level: Level) {
       const exercises = await listeningService.getExercisesByLevel(level);
       return exercises.length;
     },
+  });
+}
+
+export function useListeningQuestions(contentId: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ["listening-questions", contentId],
+    queryFn: async () => {
+      return await listeningService.getQuestionsForContent(contentId);
+    },
+    enabled,
   });
 }

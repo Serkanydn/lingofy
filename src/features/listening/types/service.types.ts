@@ -4,7 +4,6 @@ export interface ListeningExercise {
   id: string;
   title: string;
   description: string;
-  audio_url: string;
   audio_asset_id?: string;
   audio_asset?: {
     id: string;
@@ -16,7 +15,6 @@ export interface ListeningExercise {
   transcript: string;
   level: Level;
   duration_seconds: number;
-  category: string;
   is_premium: boolean;
   order_index: number;
   created_at: string;

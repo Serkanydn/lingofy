@@ -20,12 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUpdateReading } from "@/features/admin/hooks/useReadingContent";
+import { useReadingQuestions } from "@/features/reading/hooks/useReading";
 import { Level } from "@/shared/types/common.types";
 import { ReadingText } from "@/features/reading/types/service.types";
 import { QuestionManager, Question } from "./QuestionManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { readingService } from "@/features/reading/services";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -49,80 +49,92 @@ export function EditReadingDialog({
   const [isPremium, setIsPremium] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
 
   const updateReading = useUpdateReading();
 
+  // Fetch questions using React Query hook
+  const {
+    data: fetchedQuestions,
+    isLoading: isLoadingQuestions,
+    error: questionsError,
+  } = useReadingQuestions(reading?.id || "", open && !!reading?.id);
+
   useEffect(() => {
-    if (reading) {
+    if (reading && open) {
+      console.log('Reading data in dialog:', reading);
+      console.log('Audio asset:', reading.audio_asset);
+      console.log('Audio asset ID:', reading.audio_asset_id);
+      console.log('Audio URL:', reading.audio_url);
+      
       setTitle(reading.title);
       setLevel(reading.level);
       setContent(reading.content);
-      setCurrentAudioUrl(reading.audio_url || "");
+      // Check both audio_url and audio_asset for audio file
+      const audioUrl = reading.audio_asset?.cdn_url || reading.audio_asset?.storage_url || reading.audio_url || "";
+      console.log('Resolved audio URL:', audioUrl);
+      setCurrentAudioUrl(audioUrl);
       setAudioFile(null);
       setOrderIndex(String(reading.order_index));
       setIsPremium(reading.is_premium);
-      
-      // Fetch existing questions
-      if (reading.id) {
-        setIsLoadingQuestions(true);
-        readingService.getQuestionsForContent(reading.id)
-          .then((fetchedQuestions) => {
-            setQuestions(fetchedQuestions);
-          })
-          .catch((error) => {
-            console.error("Failed to fetch questions:", error);
-          })
-          .finally(() => {
-            setIsLoadingQuestions(false);
-          });
-      } else {
-        setQuestions([]);
-      }
     }
-  }, [reading]);
+
+    // Reset state when dialog closes
+    if (!open) {
+      setQuestions([]);
+      setCurrentAudioUrl("");
+    }
+  }, [reading, open]);
+
+  // Update local questions state when fetched questions change
+  useEffect(() => {
+    if (fetchedQuestions) {
+      setQuestions(fetchedQuestions);
+    }
+  }, [fetchedQuestions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!reading) return;
 
-    let finalAudioUrl = currentAudioUrl;
+    let audioAssetId: string | undefined = reading.audio_asset_id;
 
     // Upload new audio file if provided
     if (audioFile) {
       try {
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append("file", audioFile);
 
-        const response = await fetch("/api/audio/upload", {
-          method: "POST",
-          body: formData,
+        const { uploadAudioAsset } = await import(
+          "@/shared/services/audioUploadService"
+        );
+
+        console.log("Starting audio upload:", {
+          name: audioFile.name,
+          size: audioFile.size,
+          type: audioFile.type,
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to upload audio");
+        // Use the new audio asset upload service
+        const result = await uploadAudioAsset({
+          file: audioFile,
+          contentType: "reading",
+        });
+
+        if (!result.success || !result.audioAsset) {
+          const errorMsg = result.error || "Failed to upload audio";
+          console.error("Upload failed:", errorMsg);
+          alert(`Failed to upload audio file: ${errorMsg}`);
+          setIsUploading(false);
+          return;
         }
 
-        const data = await response.json();
-        finalAudioUrl = data.url;
-
-        // Delete old audio file if it exists and is different
-        if (currentAudioUrl && currentAudioUrl !== finalAudioUrl) {
-          try {
-            await fetch("/api/audio/delete", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: currentAudioUrl }),
-            });
-          } catch (error) {
-            console.error("Failed to delete old audio:", error);
-          }
-        }
+        console.log("Audio uploaded successfully:", result.audioAsset);
+        audioAssetId = result.audioAsset.id;
       } catch (error) {
         console.error("Audio upload error:", error);
-        alert("Failed to upload audio file. Please try again.");
+        const errorMsg =
+          error instanceof Error ? error.message : "Unknown error";
+        alert(`Failed to upload audio file: ${errorMsg}`);
         setIsUploading(false);
         return;
       } finally {
@@ -136,7 +148,8 @@ export function EditReadingDialog({
         title,
         level: level as Level,
         content,
-        audio_url: finalAudioUrl,
+        audio_url: audioAssetId ? "" : currentAudioUrl, // Keep for backward compatibility
+        audio_asset_id: audioAssetId,
         order_index: parseInt(orderIndex),
         is_premium: isPremium,
         content_id: reading.content_id,
@@ -177,139 +190,166 @@ export function EditReadingDialog({
             </TabsList>
 
             <TabsContent value="content" className="space-y-6 mt-6">
-          <div className="flex justify-between gap-4">
-            <div className="space-y-2 flex-1">
-              <Label
-                htmlFor="title"
-                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-              >
-                Title *
-              </Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., The History of Coffee"
-                required
-                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-              />
-            </div>
+              <div className="flex justify-between gap-4">
+                <div className="space-y-2 flex-1">
+                  <Label
+                    htmlFor="title"
+                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                  >
+                    Title *
+                  </Label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., The History of Coffee"
+                    required
+                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+                  />
+                </div>
 
-            <div className="space-y-2 flex-1">
-              <Label
-                htmlFor="level"
-                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-              >
-                Level *
-              </Label>
-              <Select
-                value={level}
-                onValueChange={(val) => setLevel(val as Level)}
-                required
-              >
-                <SelectTrigger className="rounded-2xl border-2 w-full border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300">
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LEVELS.map((lvl) => (
-                    <SelectItem key={lvl} value={lvl}>
-                      {lvl}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                <div className="space-y-2 flex-1">
+                  <Label
+                    htmlFor="level"
+                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                  >
+                    Level *
+                  </Label>
+                  <Select
+                    value={level}
+                    onValueChange={(val) => setLevel(val as Level)}
+                    required
+                  >
+                    <SelectTrigger className="rounded-2xl border-2 w-full border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LEVELS.map((lvl) => (
+                        <SelectItem key={lvl} value={lvl}>
+                          {lvl}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="content"
-              className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-            >
-              Reading Text *
-            </Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter the reading text..."
-              rows={12}
-              required
-              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="content"
+                  className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                >
+                  Reading Text *
+                </Label>
+                <Textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter the reading text..."
+                  rows={12}
+                  required
+                  className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="audioFile"
-                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-              >
-                Upload New Audio (optional)
-              </Label>
-              <Input
-                id="audioFile"
-                type="file"
-                accept="audio/*"
-                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 dark:file:bg-orange-900/20 dark:file:text-orange-400"
-              />
-              {audioFile ? (
-                <p className="text-sm text-green-600 dark:text-green-400">
-                  New: {audioFile.name} ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              ) : currentAudioUrl ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Current: {currentAudioUrl.split("/").pop()}
-                </p>
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-500">
-                  No audio file
-                </p>
-              )}
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="audioFile"
+                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                  >
+                    Upload New Audio (optional)
+                  </Label>
+                  <Input
+                    id="audioFile"
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 dark:file:bg-orange-900/20 dark:file:text-orange-400"
+                  />
+                  {audioFile ? (
+                    <p className="text-sm text-green-600 dark:text-green-400">
+                      New: {audioFile.name} (
+                      {(audioFile.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  ) : currentAudioUrl ? (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Current: {currentAudioUrl.includes('/') ? currentAudioUrl.split("/").pop() : 'Audio file exists'}
+                    </p>
+                  ) : reading?.audio_asset_id ? (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Audio asset ID: {reading.audio_asset_id.substring(0, 8)}...
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                      No audio file
+                    </p>
+                  )}
+                </div>
 
-            <div className="space-y-2">
-              <Label
-                htmlFor="orderIndex"
-                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-              >
-                Order Index
-              </Label>
-              <Input
-                id="orderIndex"
-                type="number"
-                value={orderIndex}
-                onChange={(e) => setOrderIndex(e.target.value)}
-                min="1"
-                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-              />
-            </div>
-          </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="orderIndex"
+                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                  >
+                    Order Index
+                  </Label>
+                  <Input
+                    id="orderIndex"
+                    type="number"
+                    value={orderIndex}
+                    onChange={(e) => setOrderIndex(e.target.value)}
+                    min="1"
+                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+                  />
+                </div>
+              </div>
 
-          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
-            <Checkbox
-              id="isPremium"
-              checked={isPremium}
-              onCheckedChange={(checked) => setIsPremium(checked as boolean)}
-              className="h-5 w-5 rounded-lg border-2 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-            />
-            <Label
-              htmlFor="isPremium"
-              className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
-            >
-              <span>👑</span> Premium Content
-            </Label>
-          </div>
+              <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
+                <Checkbox
+                  id="isPremium"
+                  checked={isPremium}
+                  onCheckedChange={(checked) =>
+                    setIsPremium(checked as boolean)
+                  }
+                  className="h-5 w-5 rounded-lg border-2 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                />
+                <Label
+                  htmlFor="isPremium"
+                  className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
+                >
+                  <span>👑</span> Premium Content
+                </Label>
+              </div>
             </TabsContent>
 
             <TabsContent value="questions" className="mt-6">
               {isLoadingQuestions ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-600 dark:text-gray-400">Loading questions...</p>
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                  <p className="text-gray-600 dark:text-gray-400 animate-pulse">
+                    Loading questions...
+                  </p>
+                </div>
+              ) : questionsError ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                    <span className="text-3xl">⚠️</span>
+                  </div>
+                  <p className="text-red-600 dark:text-red-400">
+                    Failed to load questions
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {questionsError instanceof Error
+                      ? questionsError.message
+                      : "Unknown error"}
+                  </p>
                 </div>
               ) : (
-                <QuestionManager questions={questions} onChange={setQuestions} />
+                <QuestionManager
+                  questions={questions}
+                  onChange={setQuestions}
+                />
               )}
             </TabsContent>
           </Tabs>

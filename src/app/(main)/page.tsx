@@ -18,9 +18,11 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useTheme } from "@/shared/hooks/useTheme";
 
 export default function HomePage() {
   const { user, profile, isPremium } = useAuth();
+  useTheme(); // Apply theme on mount
 
   const features = [
     {

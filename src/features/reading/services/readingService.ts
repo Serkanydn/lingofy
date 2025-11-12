@@ -10,6 +10,34 @@ export class ReadingService extends BaseService<ReadingText> {
     this.questionsService = new BaseService<ReadingQuestion>("reading_quiz");
   }
 
+  // Override getAll to include audio assets
+  async getAll(): Promise<ReadingText[]> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select(`
+        *,
+        audio_asset:audio_assets(*)
+      `);
+
+    if (error) throw error;
+    return data as ReadingText[];
+  }
+
+  // Override getById to include audio assets
+  async getById(id: string | number): Promise<ReadingText | null> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select(`
+        *,
+        audio_asset:audio_assets(*)
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+    return data as ReadingText;
+  }
+
   async createQuestions(readingId: string, questions: ReadingQuestionInput[]) {
     if (questions.length === 0) return [];
 

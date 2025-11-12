@@ -2,12 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Home, LogOut } from "lucide-react";
+import { Home, LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useTheme } from "@/shared/hooks/useTheme";
 
 export function AdminHeader() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-card/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 h-16">
@@ -20,6 +22,18 @@ export function AdminHeader() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-600 dark:text-gray-400">{user?.email}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
+            onClick={toggleTheme}
+          >
+            {isDark ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
           <Button
             variant="ghost"
             size="sm"

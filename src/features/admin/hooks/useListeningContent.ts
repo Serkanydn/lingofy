@@ -2,8 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ListeningService } from "@/features/listening/services/listeningService";
 import { ListeningExercise } from "@/features/listening/types/service.types";
+import { ReadingQuestionInput } from "@/features/reading/types/service.types";
 
-type CreateListeningData = Omit<ListeningExercise, "id" | "created_at">;
+type CreateListeningData = Omit<ListeningExercise, "id" | "created_at"> & {
+  questions?: ReadingQuestionInput[];
+};
 
 const listeningService = new ListeningService();
 
@@ -21,7 +24,15 @@ export function useCreateListening() {
 
   return useMutation({
     mutationFn: async (insertData: CreateListeningData) => {
-      return await listeningService.create(insertData);
+      const { questions, ...listeningData } = insertData;
+      const listening = await listeningService.create(listeningData);
+      
+      // If questions are provided, create them
+      if (questions && questions.length > 0 && listening?.id) {
+        await listeningService.createQuestions(listening.id, questions);
+      }
+      
+      return listening;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-listening-content"] });
@@ -37,8 +48,23 @@ export function useUpdateListening() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateListeningData> }) => {
-      return await listeningService.update(id, data);
+    mutationFn: async ({
+      id,
+      data,
+      questions,
+    }: {
+      id: string;
+      data: Partial<CreateListeningData>;
+      questions?: ReadingQuestionInput[];
+    }) => {
+      const result = await listeningService.update(id, data);
+      
+      // Update or create questions using listening_content id directly
+      if (questions !== undefined) {
+        await listeningService.updateQuestions(id, questions);
+      }
+      
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-listening-content"] });

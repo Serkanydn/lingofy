@@ -59,7 +59,7 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
         
         console.log('Starting audio upload:', {
           name: audioFile.name,
-          size: audioFile.size,
+          // size: audioFile.size,
           type: audioFile.type,
         });
         

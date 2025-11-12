@@ -74,6 +74,24 @@ export function useReadingQuiz(contentId: string) {
 }
 
 /**
+ * Hook to fetch questions for reading content (for admin/editing)
+ */
+export function useReadingQuestions(contentId: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ["reading-questions", contentId],
+    queryFn: async () => {
+      if (!contentId) return [];
+      console.log("Fetching questions for reading:", contentId);
+      const questions = await readingService.getQuestionsForContent(contentId);
+      console.log("Fetched questions:", questions);
+      return questions;
+    },
+    enabled: !!contentId && enabled,
+    staleTime: 0, // Always fetch fresh data
+  });
+}
+
+/**
  * Hook to submit quiz results
  */
 export function useSubmitQuiz() {

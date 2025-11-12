@@ -17,21 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
-
-// Mock data for listening content
-interface ListeningContent {
-  id: string;
-  title: string;
-  level: Level;
-  description: string;
-  audio_url: string;
-  duration_seconds: number;
-  transcript: string;
-  is_premium: boolean;
-  category?: string;
-  thumbnail?: string;
-  created_at: string;
-}
+import {
+  useListeningByLevel,
+} from "@/features/listening/hooks/useListening";
+import { ListeningExercise } from "@/features/listening/types/service.types";
 
 // Category color mapping
 const CATEGORY_COLORS: Record<string, string> = {
@@ -44,88 +33,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   DIALOGUE: "text-cyan-600 dark:text-cyan-400",
 };
 
-// Mock data generator
-function getMockListeningContent(level: Level): ListeningContent[] {
-  const mockData: ListeningContent[] = [
-    {
-      id: "1",
-      title: "A Day at the Beach",
-      level: level,
-      description: "Listen to a casual conversation between friends planning a beach trip.",
-      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-      duration_seconds: 180,
-      transcript: "Sample transcript...",
-      is_premium: false,
-      category: "CONVERSATION",
-      created_at: "2024-01-15T10:00:00Z",
-    },
-    {
-      id: "2",
-      title: "The Future of Technology",
-      level: level,
-      description: "An engaging podcast discussing emerging technologies and their impact.",
-      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-      duration_seconds: 420,
-      transcript: "Sample transcript...",
-      is_premium: false,
-      category: "PODCAST",
-      created_at: "2024-01-14T10:00:00Z",
-    },
-    {
-      id: "3",
-      title: "Interview with a Chef",
-      level: level,
-      description: "A professional chef shares secrets about cooking and restaurant management.",
-      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-      duration_seconds: 360,
-      transcript: "Sample transcript...",
-      is_premium: true,
-      category: "INTERVIEW",
-      created_at: "2024-01-13T10:00:00Z",
-    },
-    {
-      id: "4",
-      title: "The Lost Treasure",
-      level: level,
-      description: "An exciting adventure story about explorers searching for hidden treasure.",
-      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-      duration_seconds: 540,
-      transcript: "Sample transcript...",
-      is_premium: true,
-      category: "STORY",
-      created_at: "2024-01-12T10:00:00Z",
-    },
-    {
-      id: "5",
-      title: "World News Briefing",
-      level: level,
-      description: "Today's top international news stories and analysis.",
-      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-      duration_seconds: 300,
-      transcript: "Sample transcript...",
-      is_premium: false,
-      category: "NEWS",
-      created_at: "2024-01-11T10:00:00Z",
-    },
-    {
-      id: "6",
-      title: "Introduction to Psychology",
-      level: level,
-      description: "A university lecture covering the basics of human behavior and cognition.",
-      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-      duration_seconds: 600,
-      transcript: "Sample transcript...",
-      is_premium: true,
-      category: "LECTURE",
-      created_at: "2024-01-10T10:00:00Z",
-    },
-  ];
-
-  return mockData;
-}
-
 interface ListeningCardProps {
-  listening: ListeningContent;
+  listening: ListeningExercise;
   level: Level;
   index: number;
   isPremium: boolean;
@@ -140,9 +49,6 @@ function ListeningCard({
   onPremiumClick,
 }: ListeningCardProps) {
   const isLocked = listening.is_premium && !isPremium;
-  const category = listening.category || "AUDIO";
-  const categoryColor =
-    CATEGORY_COLORS[category.toUpperCase()] || "text-gray-600";
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -161,11 +67,15 @@ function ListeningCard({
     >
       {/* Audio Player Preview */}
       <div className="relative w-full bg-linear-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 p-6">
-        <AudioPlayer
-          audioUrl={listening.audio_url}
-          title={listening.title}
-          thumbnail={listening.thumbnail}
-        />
+        {listening.audio_asset && (
+          <AudioPlayer
+            audioAsset={{
+              ...listening.audio_asset,
+              format: listening.audio_asset.format as 'mp3' | 'wav' | 'ogg' | 'm4a' | undefined,
+            }}
+            title={listening.title}
+          />
+        )}
         {isLocked && (
           <div className="absolute top-3 right-3 w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg z-10">
             <Lock className="h-5 w-5 text-white" />
@@ -175,18 +85,6 @@ function ListeningCard({
 
       {/* Content */}
       <div className="p-5 flex-1 flex flex-col">
-        {/* Category */}
-        <div className="mb-2">
-          <span
-            className={cn(
-              "text-xs font-bold uppercase tracking-wide",
-              categoryColor
-            )}
-          >
-            {category}
-          </span>
-        </div>
-
         {/* Title */}
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
           {listening.title}
@@ -222,7 +120,9 @@ function ListeningCard({
     return <div onClick={onPremiumClick}>{cardContent}</div>;
   }
 
-  return <Link href={`/listening/${level}/${listening.id}`}>{cardContent}</Link>;
+  return (
+    <Link href={`/listening/${level}/${listening.id}`}>{cardContent}</Link>
+  );
 }
 
 function LoadingSkeleton() {
@@ -256,25 +156,18 @@ export default function ListeningLevelPage({
   const { isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
 
-  // Use mock data
-  const listeningContent = getMockListeningContent(level);
-  const isLoading = false;
+  // Fetch real data from API
+  const { data: listeningContent, isLoading } = useListeningByLevel(level);
 
   // Filter states
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
   const [accessFilter, setAccessFilter] = useState<"all" | "free" | "premium">(
     "all"
   );
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = new Set(listeningContent.map((l) => l.category).filter(Boolean));
-    return Array.from(cats);
-  }, [listeningContent]);
 
   // Filter and sort content
   const filteredContent = useMemo(() => {
+    if (!listeningContent) return [];
     let filtered = [...listeningContent];
 
     // Apply access filter
@@ -284,22 +177,15 @@ export default function ListeningLevelPage({
       filtered = filtered.filter((l) => l.is_premium);
     }
 
-    // Apply category filter
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter(
-        (l) => l.category?.toUpperCase() === categoryFilter.toUpperCase()
-      );
-    }
-
     // Apply sorting
     filtered.sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
+      const dateA = new Date(a.created_at || "").getTime();
+      const dateB = new Date(b.created_at || "").getTime();
       return sortBy === "newest" ? dateB - dateA : dateA - dateB;
     });
 
     return filtered;
-  }, [listeningContent, accessFilter, categoryFilter, sortBy]);
+  }, [listeningContent, accessFilter, sortBy]);
 
   if (isLoading) {
     return (
@@ -423,40 +309,6 @@ export default function ListeningLevelPage({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Category Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "rounded-2xl bg-white dark:bg-card shadow-[0_4px_14px_rgb(0,0,0,0.06)] hover:shadow-[0_6px_20px_rgb(0,0,0,0.1)] transition-all duration-300 px-5",
-                  categoryFilter !== "all" &&
-                    "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
-                )}
-              >
-                {categoryFilter === "all" ? "All Categories" : categoryFilter}
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="rounded-2xl max-h-[300px] overflow-y-auto">
-              <DropdownMenuItem
-                onClick={() => setCategoryFilter("all")}
-                className="cursor-pointer"
-              >
-                All Categories
-              </DropdownMenuItem>
-              {categories.map((cat) => (
-                <DropdownMenuItem
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat || "all")}
-                  className="cursor-pointer capitalize"
-                >
-                  {cat}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {/* Listening Content Grid */}
@@ -482,15 +334,14 @@ export default function ListeningLevelPage({
               No listening exercises found
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-center max-w-md mb-6">
-              {accessFilter !== "all" || categoryFilter !== "all"
+              {accessFilter !== "all"
                 ? "Try adjusting your filters to see more results."
                 : "No listening exercises available for this level yet."}
             </p>
-            {(accessFilter !== "all" || categoryFilter !== "all") && (
+            {accessFilter !== "all" && (
               <Button
                 onClick={() => {
                   setAccessFilter("all");
-                  setCategoryFilter("all");
                 }}
                 className="rounded-2xl bg-orange-500 hover:bg-orange-600 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)]"
               >

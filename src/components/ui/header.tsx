@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./button";
@@ -32,29 +31,18 @@ import {
 import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useTheme } from "@/shared/hooks/useTheme";
 
 export function Header() {
   const router = useRouter();
   const { user, profile, isPremium, isAdmin } = useAuth();
   const pathname = usePathname();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkMode(isDark);
-  }, []);
+  const { isDark: isDarkMode, toggleTheme: toggleDarkMode } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
-  };
-
-  const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    document.documentElement.classList.toggle("dark", newMode);
-    localStorage.setItem("theme", newMode ? "dark" : "light");
   };
 
   const mainMenuItems = [
