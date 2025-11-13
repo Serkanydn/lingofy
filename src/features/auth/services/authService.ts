@@ -56,6 +56,19 @@ export class AuthService extends BaseService<AuthUser> {
     return data;
   }
 
+  async signUp(email: string, password: string, metadata?: Record<string, any>) {
+    const { data, error } = await this.supabase.auth.signUp({
+      email,
+      password,
+      options: metadata ? {
+        data: metadata,
+      } : undefined,
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
   async signOut() {
     const { error } = await this.supabase.auth.signOut();
     if (error) throw error;
