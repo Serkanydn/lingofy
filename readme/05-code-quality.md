@@ -1,3 +1,0 @@
-# Code Quality Standards
-
-Content summarizing code quality...

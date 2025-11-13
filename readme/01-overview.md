@@ -1,3 +1,0 @@
-# Project Overview
-
-Content summarizing overview...

@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
 import {
   useListeningByLevel,
 } from "@/features/listening/hooks/useListening";
@@ -65,26 +64,13 @@ function ListeningCard({
         isLocked ? "opacity-75" : "cursor-pointer"
       )}
     >
-      {/* Audio Player Preview */}
-      <div className="relative w-full bg-linear-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 p-6">
-        {listening.audio_asset && (
-          <AudioPlayer
-            audioAsset={{
-              ...listening.audio_asset,
-              format: listening.audio_asset.format as 'mp3' | 'wav' | 'ogg' | 'm4a' | undefined,
-            }}
-            title={listening.title}
-          />
-        )}
+      {/* Content */}
+      <div className="p-5 flex-1 flex flex-col relative">
         {isLocked && (
           <div className="absolute top-3 right-3 w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg z-10">
             <Lock className="h-5 w-5 text-white" />
           </div>
         )}
-      </div>
-
-      {/* Content */}
-      <div className="p-5 flex-1 flex flex-col">
         {/* Title */}
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
           {listening.title}

@@ -1,3 +1,0 @@
-# Error Handling
-
-Content summarizing error handling...

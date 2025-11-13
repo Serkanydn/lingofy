@@ -10,128 +10,9 @@ import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
-import { cn } from "@/shared/lib/utils";
 import { Level } from "@/shared/types/common.types";
 import { QuizQuestion } from "@/features/quiz/types/quiz.types";
-
-// Mock data structure
-interface ListeningDetail {
-  id: string;
-  title: string;
-  level: Level;
-  description: string;
-  audio_url: string;
-  duration_seconds: number;
-  transcript: string;
-  is_premium: boolean;
-  category?: string;
-}
-
-// Mock data generator
-function getMockListeningDetail(id: string, level: Level): ListeningDetail {
-  return {
-    id,
-    title: "A Day at the Beach",
-    level,
-    description: "Listen to a casual conversation between friends planning a beach trip. Pay attention to how they discuss weather, activities, and preparations.",
-    audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    duration_seconds: 180,
-    transcript: `Sarah: Hey Tom, are you ready for our beach trip this weekend?
-
-Tom: Absolutely! I've been looking forward to it all week. The weather forecast looks perfect - sunny with temperatures around 28 degrees.
-
-Sarah: That's great! I've already packed my swimsuit, sunscreen, and a beach towel. What about you?
-
-Tom: I'm almost done packing. I'm bringing my surfboard this time. The waves are supposed to be good on Saturday.
-
-Sarah: Sounds exciting! I'm planning to just relax and read my book. Maybe build a sandcastle or two if I'm feeling creative.
-
-Tom: Don't forget to bring an umbrella or a beach tent. The sun can be quite strong in the afternoon.
-
-Sarah: Good thinking! I'll grab the big umbrella from the garage. Should we bring some snacks and drinks too?
-
-Tom: Definitely! I'll pick up some sandwiches, fruits, and plenty of water. Maybe some ice cream for later?
-
-Sarah: Perfect! What time should we leave?
-
-Tom: How about 9 AM? That way we can get a good spot on the beach before it gets too crowded.
-
-Sarah: Sounds like a plan! I can't wait!`,
-    is_premium: false,
-    category: "CONVERSATION",
-  };
-}
-
-function getMockQuizQuestions(id: string): QuizQuestion[] {
-  return [
-    {
-      id: "q1",
-      content_id: id,
-      content_type: "listening",
-      text: "What is the weather forecast for the weekend?",
-      type: "multiple_choice",
-      options: [
-        { id: "q1-a", text: "Rainy and cold", is_correct: false },
-        { id: "q1-b", text: "Sunny and 28 degrees", is_correct: true },
-        { id: "q1-c", text: "Cloudy and windy", is_correct: false },
-        { id: "q1-d", text: "Snowy and freezing", is_correct: false },
-      ],
-      correct_answer: 1,
-      explanation: "Tom mentions the weather forecast is sunny with temperatures around 28 degrees.",
-      order_index: 0,
-      points: 1,
-    },
-    {
-      id: "q2",
-      content_id: id,
-      content_type: "listening",
-      text: "What activity is Tom planning to do at the beach?",
-      type: "multiple_choice",
-      options: [
-        { id: "q2-a", text: "Building sandcastles", is_correct: false },
-        { id: "q2-b", text: "Reading a book", is_correct: false },
-        { id: "q2-c", text: "Surfing", is_correct: true },
-        { id: "q2-d", text: "Swimming only", is_correct: false },
-      ],
-      correct_answer: 2,
-      explanation: "Tom says he's bringing his surfboard because the waves are supposed to be good.",
-      order_index: 1,
-      points: 1,
-    },
-    {
-      id: "q3",
-      content_id: id,
-      content_type: "listening",
-      text: "Sarah plans to read a book at the beach.",
-      type: "true_false",
-      options: [
-        { id: "q3-a", text: "True", is_correct: true },
-        { id: "q3-b", text: "False", is_correct: false },
-      ],
-      correct_answer: 0,
-      explanation: "Sarah mentions she's planning to relax and read her book.",
-      order_index: 2,
-      points: 1,
-    },
-    {
-      id: "q4",
-      content_id: id,
-      content_type: "listening",
-      text: "What time do they plan to leave?",
-      type: "multiple_choice",
-      options: [
-        { id: "q4-a", text: "7 AM", is_correct: false },
-        { id: "q4-b", text: "8 AM", is_correct: false },
-        { id: "q4-c", text: "9 AM", is_correct: true },
-        { id: "q4-d", text: "10 AM", is_correct: false },
-      ],
-      correct_answer: 2,
-      explanation: "Tom suggests leaving at 9 AM to get a good spot before it gets crowded.",
-      order_index: 3,
-      points: 1,
-    },
-  ];
-}
+import { useListeningDetail, useListeningQuestions } from "@/features/listening/hooks/useListening";
 
 export default function ListeningDetailPage({
   params,
@@ -143,10 +24,29 @@ export default function ListeningDetailPage({
   const { user } = useAuth();
   const submitQuiz = useQuizSubmit();
   
-  // Use mock data
-  const listening = getMockListeningDetail(id, level);
-  const quizQuestions = getMockQuizQuestions(id);
-  const isLoading = false;
+  // Fetch data from database
+  const { data: listening, isLoading: isLoadingListening } = useListeningDetail(id);
+  const { data: questions, isLoading: isLoadingQuestions } = useListeningQuestions(id);
+  
+  const isLoading = isLoadingListening || isLoadingQuestions;
+
+  // Transform questions to QuizQuestion format
+  const quizQuestions: QuizQuestion[] | undefined = questions?.map((q: any) => ({
+    id: q.id,
+    content_id: id,
+    content_type: "listening" as const,
+    text: q.text,
+    type: q.type,
+    options: q.options?.map((opt: any, idx: number) => ({
+      id: `${q.id}-${idx}`,
+      text: opt.text,
+      is_correct: opt.is_correct,
+    })) || [],
+    correct_answer: q.type === 'fill_blank' ? undefined : q.options?.findIndex((opt: any) => opt.is_correct),
+    explanation: q.explanation,
+    order_index: q.order_index,
+    points: q.points || 1,
+  }));
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
@@ -297,11 +197,6 @@ export default function ListeningDetailPage({
             <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1 text-sm rounded-full">
               {listening.level}
             </Badge>
-            {listening.category && (
-              <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 text-sm rounded-full">
-                {listening.category}
-              </Badge>
-            )}
             <span className="text-sm text-gray-500 dark:text-gray-400">
               • {formatDuration(listening.duration_seconds)}
             </span>
@@ -319,10 +214,12 @@ export default function ListeningDetailPage({
 
           {/* Audio Player Section */}
           <div className="mb-8">
-            <AudioPlayer
-              audioUrl={listening.audio_url}
-              title={listening.title}
-            />
+            {listening.audio_asset && (
+              <AudioPlayer
+                audioAsset={listening.audio_asset as any}
+                title={listening.title}
+              />
+            )}
           </div>
 
           {/* Tip Card */}

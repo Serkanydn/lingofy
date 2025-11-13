@@ -26,6 +26,7 @@ import { useListeningQuestions } from "@/features/listening/hooks/useListening";
 import { Level } from "@/shared/types/common.types";
 import { ListeningExercise } from "@/features/listening/types/service.types";
 import { QuestionManager, Question } from "./QuestionManager";
+import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -44,6 +45,8 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
   const [orderIndex, setOrderIndex] = useState("1");
   const [isPremium, setIsPremium] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const updateListening = useUpdateListening();
 
@@ -83,6 +86,34 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
 
     if (!listening) return;
 
+    let audioAssetId = listening.audio_asset_id;
+
+    // Upload audio file if a new one is selected
+    if (audioFile) {
+      try {
+        setIsUploading(true);
+
+        // Use the new audio asset upload service
+        const result = await uploadAudioAsset({
+          file: audioFile,
+          contentType: "listening",
+        });
+
+        if (!result.success || !result.audioAsset) {
+          throw new Error(result.error || "Failed to upload audio");
+        }
+
+        audioAssetId = result.audioAsset.id;
+      } catch (error) {
+        console.error("Audio upload error:", error);
+        alert("Failed to upload audio file. Please try again.");
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     await updateListening.mutateAsync({
       id: listening.id,
       data: {
@@ -93,6 +124,7 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
         duration_seconds: parseInt(durationSeconds),
         order_index: parseInt(orderIndex),
         is_premium: isPremium,
+        audio_asset_id: audioAssetId,
         updated_at: new Date().toISOString(),
       },
       questions,
@@ -173,12 +205,24 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="audioAsset">Audio Asset</Label>
-                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700">
-                  {listening.audio_asset ? (
+                <Label htmlFor="audioFile">Audio File</Label>
+                <Input
+                  id="audioFile"
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                  className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 dark:file:bg-orange-900/20 dark:file:text-orange-400"
+                />
+                {audioFile ? (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {audioFile.name} (
+                    {(audioFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                ) : listening.audio_asset ? (
+                  <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {listening.audio_asset.cdn_url ? '🌐 CDN' : '💾 Storage'}
+                        Current: {listening.audio_asset.cdn_url ? '🌐 CDN' : '💾 Storage'}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         Duration: {listening.audio_asset.duration_seconds}s
@@ -189,10 +233,10 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
                         </p>
                       )}
                     </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">No audio asset linked</p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No audio asset linked</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -268,9 +312,13 @@ export function EditListeningDialog({ open, onClose, listening }: EditListeningD
             <Button
               type="submit"
               className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={updateListening.isPending}
+              disabled={updateListening.isPending || isUploading}
             >
-              {updateListening.isPending ? "Updating..." : "Update Listening"}
+              {isUploading
+                ? "Uploading Audio..."
+                : updateListening.isPending
+                ? "Updating..."
+                : "Update Listening"}
             </Button>
           </div>
         </form>
