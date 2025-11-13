@@ -1,7 +1,6 @@
 "use client";
 
-import { AdminSidebar } from "@/features/admin/components/AdminSidebar";
-import { AdminHeader } from "@/features/admin/components/AdminHeader";
+import { AdminSidebar, AdminHeader } from "@/features/admin/shared/components";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";

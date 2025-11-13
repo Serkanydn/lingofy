@@ -1,4 +1,4 @@
-import { GrammarCategoriesPageClient } from "@/features/admin/pages/GrammarCategoriesPageClient";
+import { GrammarCategoriesPageClient } from "@/features/admin/features/grammar";
 
 export default function GrammarCategoriesPage() {
   return <GrammarCategoriesPageClient />;

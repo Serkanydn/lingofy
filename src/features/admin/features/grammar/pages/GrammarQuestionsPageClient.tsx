@@ -1,16 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -18,27 +10,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Plus, Edit, Trash2, ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+} from '@/components/ui/table';
+import { Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { PageHeader, ContentCard, DeleteConfirmDialog } from '@/features/admin/shared/components';
+import { AddQuestionDialog, EditQuestionDialog } from '../components';
+import { useGrammarQuestions } from '../hooks';
 
-import { DeleteConfirmDialog } from "@/features/admin/shared/components";
-import { useGrammarQuestions, AddQuestionDialog, EditQuestionDialog } from "@/features/admin/features/grammar";
-
-interface PageProps {
-  params: Promise<{ id: string }>;
+interface GrammarQuestionsPageClientProps {
+  topicId: string;
 }
 
-export default function GrammarQuestionsPage({ params }: PageProps) {
-  const resolvedParams = React.use(params);
-  const topicId = resolvedParams.id;
+export function GrammarQuestionsPageClient({ topicId }: GrammarQuestionsPageClientProps) {
   const router = useRouter();
-  
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
-  
+
   const { data: questionsData, isLoading } = useGrammarQuestions(topicId);
   const questions = questionsData?.questions || [];
   const topic = questionsData?.topic;
@@ -48,41 +37,36 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/admin/grammar")}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Grammar Topics
-        </Button>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">
-              {topic?.title || "Grammar Questions"}
-            </h1>
-            <p className="text-muted-foreground">
-              Manage quiz questions for this grammar topic
-            </p>
-          </div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Question
+    <div className="min-h-screen py-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/admin/grammar')}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Grammar Topics
           </Button>
-        </div>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Quiz Questions</CardTitle>
-          <CardDescription>
-            Total: {questions.length} questions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          <PageHeader
+            icon={<span className="text-4xl">❓</span>}
+            iconBgClass="bg-linear-to-br from-blue-400 to-blue-600 shadow-[0_4px_14px_rgba(59,130,246,0.4)]"
+            title={topic?.title || 'Grammar Questions'}
+            description="Manage quiz questions for this grammar topic"
+            action={
+              <Button onClick={() => setShowAddDialog(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Question
+              </Button>
+            }
+          />
+        </div>
+
+        <ContentCard
+          title="Quiz Questions"
+          description={`Total: ${questions.length} questions`}
+        >
           {questions.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               No questions yet. Add your first question to get started.
@@ -134,8 +118,8 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+        </ContentCard>
+      </div>
 
       <AddQuestionDialog
         open={showAddDialog}
@@ -160,7 +144,6 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
           setSelectedQuestion(null);
         }}
         onConfirm={async () => {
-          // Delete logic will be handled by hook
           setShowDeleteDialog(false);
           setSelectedQuestion(null);
         }}

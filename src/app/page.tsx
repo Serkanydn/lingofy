@@ -49,7 +49,14 @@ export default function Home() {
   const { isLoading } = useAuth();
 
   if (isLoading) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="text-lg text-gray-600 dark:text-gray-400">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
