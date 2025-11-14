@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -10,15 +10,31 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
-import { PageHeader, ContentCard, FilterBar, Pagination, DeleteConfirmDialog } from '@/features/admin/shared/components';
-import { AddGrammarCategoryDialog, EditGrammarCategoryDialog } from '../components';
+} from "@/components/ui/table";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  GripVertical,
+  ToggleRight,
+  ToggleLeft,
+} from "lucide-react";
+import {
+  PageHeader,
+  ContentCard,
+  FilterBar,
+  Pagination,
+  DeleteConfirmDialog,
+} from "@/features/admin/shared/components";
+import {
+  AddGrammarCategoryDialog,
+  EditGrammarCategoryDialog,
+} from "../components";
 import {
   useGrammarCategories,
   useDeleteGrammarCategory,
   useToggleGrammarCategory,
-} from '../hooks/useGrammarCategories';
+} from "../hooks/useGrammarCategories";
 
 export function GrammarCategoriesPageClient() {
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -27,8 +43,8 @@ export function GrammarCategoriesPageClient() {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: categories, isLoading } = useGrammarCategories();
   const deleteCategory = useDeleteGrammarCategory();
@@ -64,14 +80,17 @@ export function GrammarCategoriesPageClient() {
       (category) =>
         (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           category.slug.toLowerCase().includes(searchQuery.toLowerCase())) &&
-        (statusFilter === 'all' ||
-          (statusFilter === 'active' && category.is_active) ||
-          (statusFilter === 'inactive' && !category.is_active))
+        (statusFilter === "all" ||
+          (statusFilter === "active" && category.is_active) ||
+          (statusFilter === "inactive" && !category.is_active))
     ) || [];
 
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedCategories = filteredCategories.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedCategories = filteredCategories.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -117,9 +136,9 @@ export function GrammarCategoriesPageClient() {
                     setCurrentPage(1);
                   },
                   options: [
-                    { value: 'all', label: 'All Status' },
-                    { value: 'active', label: 'Active' },
-                    { value: 'inactive', label: 'Inactive' },
+                    { value: "all", label: "All Status" },
+                    { value: "active", label: "Active" },
+                    { value: "inactive", label: "Inactive" },
                   ],
                 },
               ]}
@@ -173,24 +192,38 @@ export function GrammarCategoriesPageClient() {
                       {category.is_active ? (
                         <>
                           <ToggleRight className="h-5 w-5 text-green-600" />
-                          <span className="text-green-600 font-medium">Active</span>
+                          <span className="text-green-600 font-medium">
+                            Active
+                          </span>
                         </>
                       ) : (
                         <>
                           <ToggleLeft className="h-5 w-5 text-gray-400" />
-                          <span className="text-gray-400 font-medium">Inactive</span>
+                          <span className="text-gray-400 font-medium">
+                            Inactive
+                          </span>
                         </>
                       )}
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">{new Date(category.created_at).toLocaleDateString()}</div>
+                    <div className="text-sm">
+                      {new Date(category.created_at).toLocaleDateString()}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(category)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(category)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(category)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(category)}
+                    >
                       <Trash2 className="h-4 w-4 text-red-600" />
                     </Button>
                   </TableCell>

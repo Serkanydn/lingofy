@@ -4,24 +4,25 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Plus, Edit, Trash2, List } from 'lucide-react';
-import { PageHeader, ContentCard, FilterBar, Pagination, DeleteConfirmDialog } from '@/features/admin/shared/components';
+import { PageHeader, ContentCard, FilterBar, Pagination, DataTable, DeleteConfirmDialog, type DataTableColumn } from '@/features/admin/shared/components';
 import { AddGrammarDialog, EditGrammarDialog } from '../components';
 import { useGrammarTopics, useDeleteGrammarTopic } from '../hooks';
+
+type GrammarTopic = {
+  id: string;
+  title: string;
+  mini_text: string | null;
+  category_id: string | null;
+  is_premium: boolean;
+  created_at: string;
+};
 
 export function GrammarPageClient() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState<any>(null);
+  const [selectedTopic, setSelectedTopic] = useState<GrammarTopic | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [premiumFilter, setPremiumFilter] = useState<string>('all');
@@ -44,12 +45,12 @@ export function GrammarPageClient() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTopics = filteredTopics.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleEdit = (topic: any) => {
+  const handleEdit = (topic: GrammarTopic) => {
     setSelectedTopic(topic);
     setShowEditDialog(true);
   };
 
-  const handleDelete = (topic: any) => {
+  const handleDelete = (topic: GrammarTopic) => {
     setSelectedTopic(topic);
     setShowDeleteDialog(true);
   };
@@ -62,9 +63,59 @@ export function GrammarPageClient() {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const columns: DataTableColumn<GrammarTopic>[] = [
+    {
+      header: 'Title',
+      accessor: 'title',
+      render: (topic) => (
+        <div>
+          <div className="font-medium">{topic.title}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+            {topic.mini_text || 'No description'}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Category',
+      accessor: 'category_id',
+      render: (topic) => (
+        <Badge variant="outline">{topic.category_id || 'Uncategorized'}</Badge>
+      ),
+    },
+    {
+      header: 'Type',
+      accessor: 'is_premium',
+      render: (topic) =>
+        topic.is_premium ? (
+          <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
+        ) : (
+          <Badge variant="secondary">Free</Badge>
+        ),
+    },
+    {
+      header: 'Created',
+      accessor: 'created_at',
+      render: (topic) => (
+        <div className="text-sm">{new Date(topic.created_at).toLocaleDateString()}</div>
+      ),
+    },
+    {
+      header: 'Actions',
+      accessor: (topic) => topic.id,
+      className: 'text-right space-x-2',
+      render: (topic) => (
+        <div className="space-x-2">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(topic)}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => handleDelete(topic)}>
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="min-h-screen py-8">
@@ -135,50 +186,17 @@ export function GrammarPageClient() {
             />
           }
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTopics.map((topic) => (
-                <TableRow key={topic.id}>
-                  <TableCell>
-                    <div className="font-medium">{topic.title}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                      {topic.mini_text || 'No description'}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{topic.category_id || 'Uncategorized'}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {topic.is_premium ? (
-                      <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
-                    ) : (
-                      <Badge variant="secondary">Free</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">{new Date(topic.created_at).toLocaleDateString()}</div>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(topic)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(topic)}>
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={paginatedTopics}
+            keyExtractor={(topic) => topic.id}
+            isLoading={isLoading}
+            emptyState={
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">No grammar topics found</p>
+              </div>
+            }
+          />
         </ContentCard>
 
         <Pagination
@@ -202,7 +220,7 @@ export function GrammarPageClient() {
           setShowEditDialog(false);
           setSelectedTopic(null);
         }}
-        topic={selectedTopic}
+        topic={selectedTopic as any}
       />
 
       <DeleteConfirmDialog

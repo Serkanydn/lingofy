@@ -10,37 +10,22 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAdmin, isLoading, isAuthenticated, profile, user } = useAuth();
+  const { isAdmin, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    console.log("Admin Layout - Auth State:", {
-      isLoading,
-      isAuthenticated,
-      isAdmin,
-      hasUser: !!user,
-      hasProfile: !!profile,
-      profileIsAdmin: profile?.is_admin,
-      hasRedirected: hasRedirected.current
-    }); 
-    console.log('isAdmin',isAdmin);
-
     // Only redirect once after loading is complete
     if (!isLoading && !hasRedirected.current) {
       if (!isAuthenticated) {
-        console.log("Not authenticated, redirecting to login");
         hasRedirected.current = true;
         router.push("/login");
       } else if (!isAdmin) {
-        console.log("Not admin, redirecting to home. Profile:", profile);
         hasRedirected.current = true;
         router.push("/");
-      } else {
-        console.log("Admin authenticated, staying on admin panel");
       }
     }
-  }, [isAdmin, isLoading, isAuthenticated, profile, user, router]);
+  }, [isAdmin, isLoading, isAuthenticated, router]);
 
   // Show loading state while checking authentication
   if (isLoading) {

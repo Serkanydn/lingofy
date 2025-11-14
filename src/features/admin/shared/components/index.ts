@@ -6,3 +6,5 @@ export { ContentCard } from './ContentCard';
 export { FilterBar } from './FilterBar';
 export { Pagination } from './Pagination';
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';
+export { DataTable } from './DataTable';
+export type { DataTableColumn } from './DataTable';

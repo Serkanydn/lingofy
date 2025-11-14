@@ -7,6 +7,7 @@ const nextConfig = {
     serverActions: true,
   },
   reactCompiler: true,
+  reactStrictMode: false,
 }
 
 module.exports = nextConfig

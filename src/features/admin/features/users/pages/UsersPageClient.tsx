@@ -3,16 +3,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Eye } from 'lucide-react';
-import { PageHeader, ContentCard, FilterBar, Pagination } from '@/features/admin/shared/components';
+import { PageHeader, ContentCard, FilterBar, Pagination, DataTable, type DataTableColumn } from '@/features/admin/shared/components';
 import { UserDetailsDialog } from '../components';
 import { useUsers } from '../hooks';
 
@@ -55,9 +47,74 @@ export function UsersPageClient() {
     setCurrentPage(1);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const columns: DataTableColumn<User>[] = [
+    {
+      header: 'User',
+      accessor: 'full_name',
+      render: (user) => (
+        <div className="font-medium">{user.full_name || 'Anonymous'}</div>
+      ),
+    },
+    {
+      header: 'Email',
+      accessor: 'email',
+      render: (user) => (
+        <div className="text-sm text-gray-600 dark:text-gray-400">{user.email}</div>
+      ),
+    },
+    {
+      header: 'Status',
+      accessor: 'is_premium',
+      render: (user) =>
+        user.is_premium ? (
+          <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
+        ) : (
+          <Badge variant="outline">Free</Badge>
+        ),
+    },
+    {
+      header: 'Joined',
+      accessor: 'created_at',
+      render: (user) => (
+        <div className="text-sm">
+          {new Date(user.created_at).toLocaleDateString()}
+        </div>
+      ),
+    },
+    {
+      header: 'Subscription',
+      accessor: 'premium_expires_at',
+      render: (user) =>
+        user.is_premium && user.premium_expires_at ? (
+          <div className="text-sm">
+            <div className="text-gray-900 dark:text-white font-medium">Active</div>
+            <div className="text-gray-500 dark:text-gray-400">
+              Expires: {new Date(user.premium_expires_at).toLocaleDateString()}
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-500 dark:text-gray-400">No subscription</div>
+        ),
+    },
+    {
+      header: 'Actions',
+      accessor: (user) => user.id,
+      className: 'text-right',
+      render: (user) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSelectedUser(user);
+            setShowDetailsDialog(true);
+          }}
+          className="rounded-xl"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className="min-h-screen py-8">
@@ -94,67 +151,17 @@ export function UsersPageClient() {
             />
           }
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead>Subscription</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="font-medium">{user.full_name || 'Anonymous'}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{user.email}</div>
-                  </TableCell>
-                  <TableCell>
-                    {user.is_premium ? (
-                      <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
-                    ) : (
-                      <Badge variant="outline">Free</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {user.is_premium && user.premium_expires_at ? (
-                      <div className="text-sm">
-                        <div className="text-gray-900 dark:text-white font-medium">Active</div>
-                        <div className="text-gray-500 dark:text-gray-400">
-                          Expires: {new Date(user.premium_expires_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500 dark:text-gray-400">No subscription</div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setShowDetailsDialog(true);
-                      }}
-                      className="rounded-xl"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={paginatedUsers}
+            keyExtractor={(user) => user.id}
+            isLoading={isLoading}
+            emptyState={
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">No users found</p>
+              </div>
+            }
+          />
         </ContentCard>
 
         <Pagination

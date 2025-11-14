@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "@/shared/components/providers/QueryProvider";
 import ToastProvider from "@/shared/providers/toastProvider";
 import { AuthProvider } from "@/features/auth/components/AuthProvider";
+import { ThemeProvider } from "@/shared/providers/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ThemeProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

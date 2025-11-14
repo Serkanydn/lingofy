@@ -44,38 +44,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
-    console.log("initialize");
     try {
       // Get initial session
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log("session", session);
 
       if (session?.user) {
-        set({ user: session.user });
-
         // Fetch user profile
         const { data: profile } = (await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
           .single()) as { data: Profile };
-
-        console.log("profile", profile);
-        if (profile) {
-          const formattedProfile: Profile = {
-            id: profile.id,
-            email: profile.email,
-            full_name: profile.full_name,
-            avatar_url: profile.avatar_url,
-            is_premium: profile.is_premium,
-            premium_expires_at: profile.premium_expires_at,
-            is_admin: (profile as any).is_admin ?? false,
-            created_at: (profile as any).created_at,
-          };
-          set({ profile: formattedProfile });
-        }
+        
+        // Batch update: Set user and profile together to avoid multiple re-renders
+        const formattedProfile: Profile | null = profile ? {
+          id: profile.id,
+          email: profile.email,
+          full_name: profile.full_name,
+          avatar_url: profile.avatar_url,
+          is_premium: profile.is_premium,
+          premium_expires_at: profile.premium_expires_at,
+          is_admin: (profile as any).is_admin ?? false,
+          created_at: (profile as any).created_at,
+        } : null;
+        
+        // Single state update with both user and profile
+        set({ user: session.user, profile: formattedProfile });
       }
 
       // Listen for auth changes
