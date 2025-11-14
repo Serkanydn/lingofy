@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-
-type PlanType = 'monthly' | 'yearly';
+import { PlanType } from '../types/premium.types';
 
 /**
  * usePremiumSubscription Hook
@@ -19,7 +18,7 @@ type PlanType = 'monthly' | 'yearly';
  */
 export function usePremiumSubscription() {
   const { user } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState<PlanType>('yearly');
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>(PlanType.YEARLY);
   const [loading, setLoading] = useState(false);
 
   /**
@@ -36,7 +35,7 @@ export function usePremiumSubscription() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/create-checkout', {
+      const response = await fetch('/api/premium/create-checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

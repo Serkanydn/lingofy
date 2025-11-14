@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { addPremiumToUser } from "../services/addPremiumService";
 import { UpgradePlanCard } from "../components/UpgradePlanCard";
 import { useSettingsStore } from "@/features/admin/features/settings/store/settingsStore";
+import { PlanType } from "../types/premium.types";
 
 const MONTHLY_PRICE = 9.99;
 const ANNUAL_PRICE = 99.99;
@@ -73,14 +74,45 @@ export function PremiumUpgradePageClient() {
   const maxFreeQuizzes = useSettingsStore((state) => state.getMaxFreeQuizzes());
 
   const handleUpgrade = async (plan: PricingPlan) => {
-    // Development mode: directly add premium
-    await handleUpgradev2();
-    return;
+    try {
+      setIsLoading(plan.id);
+      setError("");
+      
+      if (!user?.id) {
+        setError("You must be logged in to upgrade");
+        return;
+      }
+
+      // Determine plan type based on interval
+      const planType = plan.interval === 'year' ? PlanType.YEARLY : PlanType.MONTHLY;
+      
+      // TODO: Replace with actual LemonSqueezy customer and subscription IDs from payment flow
+      // For now, using plan ID as placeholder
+      const lemonSqueezyCustomerId = `cus_${user.id.substring(0, 8)}`;
+      const lemonSqueezySubscriptionId = `sub_${plan.id}`;
+      
+      // Add premium with selected plan and LemonSqueezy IDs
+      await addPremiumToUser({
+        userId: user.id.toString(),
+        plan: planType,
+        lemonSqueezyCustomerId,
+        lemonSqueezySubscriptionId,
+      });
+      
+      // Redirect to success page or dashboard
+      router.push("/premium/success");
+    } catch (err: any) {
+      setError(err.message || "Failed to upgrade. Please try again.");
+    } finally {
+      setIsLoading(null);
+    }
   };
 
   const handleUpgradev2 = async () => {
     if (user?.id) {
-      await addPremiumToUser(user.id.toString());
+      await addPremiumToUser({
+        userId: user.id.toString(),
+      });
     }
   };
 

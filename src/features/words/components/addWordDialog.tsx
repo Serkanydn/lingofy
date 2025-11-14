@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Crown, Sparkles } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import {
   useWordCategories,
   useAssignWordToCategory,
 } from "../hooks/useWords";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface AddWordDialogProps {
   open: boolean;
@@ -44,6 +46,7 @@ export function AddWordDialog({
   sourceId,
   initialCategoryId = null,
 }: AddWordDialogProps) {
+  const { isPremium } = useAuth();
   const [word, setWord] = useState(initialWord);
   const [description, setDescription] = useState("");
   const [exampleSentences, setExampleSentences] = useState<string[]>([""]);
@@ -111,7 +114,7 @@ export function AddWordDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose} >
       <DialogContent className="sm:max-w-[600px] rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Add New Word</DialogTitle>
@@ -119,6 +122,37 @@ export function AddWordDialog({
             Add a new word to your personal vocabulary collection
           </DialogDescription>
         </DialogHeader>
+
+        {!isPremium && initialWord && (
+          <div className="pt-4">
+            <Alert className="rounded-2xl border-2 border-orange-100 bg-linear-to-br from-orange-50 to-amber-50 shadow-[0_4px_14px_rgba(249,115,22,0.15)]">
+              <Crown className="h-5 w-5 text-orange-500" />
+              <AlertTitle className="text-orange-900 font-bold flex items-center gap-2">
+                Premium Feature
+                <Sparkles className="h-4 w-4 text-orange-500" />
+              </AlertTitle>
+              <AlertDescription className="text-orange-800 leading-relaxed">
+                <p className="mb-2">
+                  You've selected: <span className="font-semibold text-orange-900">"{initialWord}"</span>
+                </p>
+                <p>
+                  Upgrade to Premium to save selected words and sentences to your study list. 
+                  Get unlimited word storage, personalized categories, and advanced learning features!
+                </p>
+                <div className="mt-3">
+                  <a
+                    href="/premium"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 text-white font-semibold text-sm shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 hover:from-orange-600 hover:to-orange-700"
+                  >
+                    <Crown className="h-4 w-4" />
+                    Upgrade to Premium
+                  </a>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
             <Label htmlFor="word" className="text-sm font-semibold">
@@ -130,6 +164,7 @@ export function AddWordDialog({
               onChange={(e) => setWord(e.target.value)}
               placeholder="e.g., excellent"
               required
+              disabled={!isPremium && !!initialWord}
               className="rounded-2xl h-12 text-base border-2"
             />
           </div>
@@ -145,6 +180,7 @@ export function AddWordDialog({
               placeholder="e.g., An adjective meaning very good or of high quality"
               rows={3}
               required
+              disabled={!isPremium && !!initialWord}
               className="rounded-2xl text-base border-2"
             />
           </div>
@@ -153,7 +189,11 @@ export function AddWordDialog({
             <Label htmlFor="category" className="text-sm font-semibold">
               Category
             </Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select 
+              value={categoryId} 
+              onValueChange={setCategoryId}
+              disabled={!isPremium && !!initialWord}
+            >
               <SelectTrigger className="w-full rounded-2xl h-12 border-2">
                 <SelectValue placeholder="Select a category (optional)" />
               </SelectTrigger>
@@ -183,6 +223,7 @@ export function AddWordDialog({
                 size="sm"
                 onClick={() => setExampleSentences([...exampleSentences, ""])}
                 className="rounded-2xl border-2"
+                disabled={!isPremium && !!initialWord}
               >
                 <Plus className="mr-1 h-3 w-3" />
                 Add Example
@@ -203,6 +244,7 @@ export function AddWordDialog({
                     }: She did an excellent job on the project.`}
                     rows={2}
                     required={index === 0}
+                    disabled={!isPremium && !!initialWord}
                     className="rounded-2xl text-base border-2"
                   />
                   {exampleSentences.length > 1 && (
@@ -215,6 +257,7 @@ export function AddWordDialog({
                           exampleSentences.filter((_, i) => i !== index)
                         );
                       }}
+                      disabled={!isPremium && !!initialWord}
                       className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 h-10 w-10"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -237,7 +280,7 @@ export function AddWordDialog({
             <Button
               type="submit"
               className="flex-1 rounded-2xl h-12 text-base bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={addWord.isPending}
+              disabled={addWord.isPending || (!isPremium && !!initialWord)}
             >
               {addWord.isPending ? "Adding..." : "Add Word"}
             </Button>

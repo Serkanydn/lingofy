@@ -3,7 +3,12 @@ export interface PremiumFeature {
   description: string;
 }
 
-export type PlanType = 'monthly' | 'yearly';
+export const PlanType = {
+  MONTHLY: 'monthly',
+  YEARLY: 'yearly',
+} as const;
+
+export type PlanType = typeof PlanType[keyof typeof PlanType];
 
 export interface PricingPlan {
   plan: PlanType;

@@ -31,6 +31,17 @@ export async function POST(request: NextRequest) {
         ? LEMON_SQUEEZY_CONFIG.yearlyVariantId
         : LEMON_SQUEEZY_CONFIG.monthlyVariantId;
 
+    // Validate variant ID
+    if (!variantId) {
+      console.error("Missing variant ID for plan:", plan);
+      return NextResponse.json(
+        { error: "Product configuration error. Please contact support." },
+        { status: 500 }
+      );
+    }
+
+    console.log("Creating checkout with:", { variantId, plan, userId: user.id });
+
     const checkoutUrl = await createCheckout(variantId, user.email!, user.id);
 
     return NextResponse.json({ url: checkoutUrl });
