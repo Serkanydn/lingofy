@@ -25,8 +25,8 @@ import { useUpdateListening } from "../hooks";
 import { useListeningQuestions } from "@/features/listening/hooks/useListening";
 import { Level } from "@/shared/types/common.types";
 import { ListeningExercise } from "@/features/listening/types/service.types";
-import { QuestionManager, Question } from "./QuestionManager";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
+import { Question, QuestionManager } from "@/features/admin/components/QuestionManager";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 

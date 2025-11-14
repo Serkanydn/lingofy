@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateGrammarCategory } from "../hooks/useGrammarCategories";
 import { GrammarCategory } from "@/features/grammar/types/category.types";
+import { updateGrammarCategorySchema, type UpdateGrammarCategoryFormData } from "../types/validation";
 
 interface EditGrammarCategoryDialogProps {
   open: boolean;
@@ -22,43 +25,39 @@ interface EditGrammarCategoryDialogProps {
 }
 
 export function EditGrammarCategoryDialog({ open, onClose, category }: EditGrammarCategoryDialogProps) {
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState("📚");
-  const [color, setColor] = useState("#3b82f6");
-  const [orderIndex, setOrderIndex] = useState("0");
-  const [isActive, setIsActive] = useState(true);
-
   const updateCategory = useUpdateGrammarCategory();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<UpdateGrammarCategoryFormData>({
+    resolver: zodResolver(updateGrammarCategorySchema),
+  });
+
   useEffect(() => {
-    if (category) {
-      setName(category.name);
-      setSlug(category.slug);
-      setDescription(category.description || "");
-      setIcon(category.icon);
-      setColor(category.color);
-      setOrderIndex(category.order_index.toString());
-      setIsActive(category.is_active);
+    if (category && open) {
+      reset({
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        icon: category.icon,
+        color: category.color,
+        order_index: category.order_index,
+        is_active: category.is_active,
+      });
     }
-  }, [category]);
+  }, [category, open, reset]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: UpdateGrammarCategoryFormData) => {
     if (!category) return;
 
     await updateCategory.mutateAsync({
       id: category.id,
       data: {
-        name,
-        slug,
-        description: description || null,
-        icon,
-        color,
-        order_index: parseInt(orderIndex),
-        is_active: isActive,
+        ...data,
+        description: data.description || null,
       },
     });
 
@@ -80,7 +79,7 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -88,12 +87,13 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
               </Label>
               <Input
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name")}
                 placeholder="e.g., Tenses"
-                required
                 className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -102,12 +102,13 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
               </Label>
               <Input
                 id="slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                {...register("slug")}
                 placeholder="e.g., tenses"
-                required
                 className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
+              {errors.slug && (
+                <p className="text-sm text-red-500">{errors.slug.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -116,12 +117,14 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
               </Label>
               <Input
                 id="icon"
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
+                {...register("icon")}
                 placeholder="📚"
                 maxLength={2}
                 className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
+              {errors.icon && (
+                <p className="text-sm text-red-500">{errors.icon.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -132,17 +135,18 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
                 <Input
                   id="color"
                   type="color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
+                  {...register("color")}
                   className="w-20 rounded-2xl border-2 border-gray-200 dark:border-gray-700"
                 />
                 <Input
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
+                  {...register("color")}
                   placeholder="#3b82f6"
                   className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
                 />
               </div>
+              {errors.color && (
+                <p className="text-sm text-red-500">{errors.color.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -152,11 +156,13 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
               <Input
                 id="orderIndex"
                 type="number"
-                value={orderIndex}
-                onChange={(e) => setOrderIndex(e.target.value)}
+                {...register("order_index", { valueAsNumber: true })}
                 min="0"
                 className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
               />
+              {errors.order_index && (
+                <p className="text-sm text-red-500">{errors.order_index.message}</p>
+              )}
             </div>
           </div>
 
@@ -166,20 +172,21 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
             </Label>
             <Textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description")}
               placeholder="Brief description of this category..."
               rows={3}
               className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
             />
+            {errors.description && (
+              <p className="text-sm text-red-500">{errors.description.message}</p>
+            )}
           </div>
 
           <div className="flex items-center space-x-3 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/10 border-2 border-blue-100 dark:border-blue-900/30">
             <input
               type="checkbox"
               id="isActive"
-              checked={isActive}
-              onChange={(e) => setIsActive(e.target.checked)}
+              {...register("is_active")}
               className="h-5 w-5 rounded-lg border-2 border-blue-300 text-blue-500 focus:ring-blue-500 focus:ring-2 focus:ring-offset-2"
             />
             <Label htmlFor="isActive" className="text-sm font-semibold text-blue-700 dark:text-blue-400 cursor-pointer flex items-center gap-2">
@@ -198,10 +205,10 @@ export function EditGrammarCategoryDialog({ open, onClose, category }: EditGramm
             </Button>
             <Button
               type="submit"
+              disabled={isSubmitting || updateCategory.isPending}
               className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={updateCategory.isPending}
             >
-              {updateCategory.isPending ? "Updating..." : "Update Category"}
+              {isSubmitting || updateCategory.isPending ? "Updating..." : "Update Category"}
             </Button>
           </div>
         </form>
