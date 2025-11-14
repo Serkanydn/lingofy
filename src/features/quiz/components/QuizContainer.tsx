@@ -13,13 +13,19 @@ import { quizValidator } from "../utils/quizValidator";
 interface QuizContainerProps {
   quiz: QuizContent;
   onExit: () => void;
-  onComplete: (score: number, maxScore: number, userAnswers: Record<string, UserAnswer>) => void;
+  onComplete: (
+    score: number,
+    maxScore: number,
+    userAnswers: Record<string, UserAnswer>
+  ) => void;
+  onTextSelection: () => void;
 }
 
 export function QuizContainer({
   quiz,
   onExit,
   onComplete,
+  onTextSelection,
 }: QuizContainerProps) {
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestionIndex: 0,
@@ -28,9 +34,15 @@ export function QuizContainer({
     showResults: false,
   });
 
+  console.log('onTextSelection',onTextSelection);
+
   // Time tracking
-  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
-  const [questionTimes, setQuestionTimes] = useState<Record<string, number>>({});
+  const [questionStartTime, setQuestionStartTime] = useState<number>(
+    Date.now()
+  );
+  const [questionTimes, setQuestionTimes] = useState<Record<string, number>>(
+    {}
+  );
   const [totalTime, setTotalTime] = useState<number>(0);
   const totalStartTime = useRef<number>(Date.now());
 
@@ -57,7 +69,7 @@ export function QuizContainer({
   const handleNext = () => {
     // Save time for current question before moving
     const timeTaken = Math.floor((Date.now() - questionStartTime) / 1000);
-    setQuestionTimes(prev => ({
+    setQuestionTimes((prev) => ({
       ...prev,
       [currentQuestion.id]: timeTaken,
     }));
@@ -73,7 +85,7 @@ export function QuizContainer({
   const handlePrevious = () => {
     // Save time for current question before moving
     const timeTaken = Math.floor((Date.now() - questionStartTime) / 1000);
-    setQuestionTimes(prev => ({
+    setQuestionTimes((prev) => ({
       ...prev,
       [currentQuestion.id]: timeTaken,
     }));
@@ -88,14 +100,19 @@ export function QuizContainer({
 
   const handleSubmit = () => {
     // Calculate final time for current question if answered
-    const finalQuestionTime = Math.floor((Date.now() - questionStartTime) / 1000);
+    const finalQuestionTime = Math.floor(
+      (Date.now() - questionStartTime) / 1000
+    );
     const finalQuestionTimes = {
       ...questionTimes,
-      [currentQuestion.id]: questionTimes[currentQuestion.id] || finalQuestionTime,
+      [currentQuestion.id]:
+        questionTimes[currentQuestion.id] || finalQuestionTime,
     };
 
     // Calculate and store total time taken
-    const calculatedTotalTime = Math.floor((Date.now() - totalStartTime.current) / 1000);
+    const calculatedTotalTime = Math.floor(
+      (Date.now() - totalStartTime.current) / 1000
+    );
     setTotalTime(calculatedTotalTime);
 
     const { totalScore, maxScore, percentage } = scoreCalculator.calculateScore(
@@ -158,7 +175,7 @@ export function QuizContainer({
     return (
       <QuizResult
         quiz={quiz}
-        userAnswers={{...quizState.userAnswers, _totalTime: totalTime} as any}
+        userAnswers={{ ...quizState.userAnswers, _totalTime: totalTime } as any}
         onRetry={handleRetry}
         onExit={onExit}
       />
@@ -166,7 +183,10 @@ export function QuizContainer({
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-8 clay-shadow">
+    <div
+      className="min-h-screen bg-white dark:bg-background py-8 clay-shadow"
+      onMouseUp={onTextSelection}
+    >
       <div className="container mx-auto px-4 max-w-3xl">
         {/* Back Button */}
         <button
@@ -190,7 +210,9 @@ export function QuizContainer({
         {/* Progress Section */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Progress
+            </span>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               Question {quizState.currentQuestionIndex + 1} of {totalQuestions}
             </span>

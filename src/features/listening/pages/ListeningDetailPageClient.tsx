@@ -1,11 +1,15 @@
-'use client';
+"use client";
 
 import { use } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { Breadcrumb } from "../components/Breadcrumb";
-import { ListeningContentCard, LoadingState, NotFoundState } from "../components/ListeningContentCard";
+import {
+  ListeningContentCard,
+  LoadingState,
+  NotFoundState,
+} from "../components/ListeningContentCard";
 import { useListeningDetailLogic } from "../hooks/useListeningDetailLogic";
 
 interface ListeningDetailPageClientProps {
@@ -14,13 +18,15 @@ interface ListeningDetailPageClientProps {
 
 /**
  * ListeningDetailPageClient Component
- * 
+ *
  * Main client component for listening exercise detail page.
  * Handles quiz display, transcript visibility, and word addition.
- * 
+ *
  * @component
  */
-export function ListeningDetailPageClient({ params }: ListeningDetailPageClientProps) {
+export function ListeningDetailPageClient({
+  params,
+}: ListeningDetailPageClientProps) {
   const { level: paramLevel, id } = use(params);
   const level = paramLevel.toUpperCase();
   const { user } = useAuth();
@@ -51,16 +57,29 @@ export function ListeningDetailPageClient({ params }: ListeningDetailPageClientP
 
   if (showQuiz && quiz) {
     return (
-      <QuizContainer
-        quiz={quiz}
-        onExit={() => setShowQuiz(false)}
-        onComplete={handleQuizComplete}
-      />
+      <>
+        <QuizContainer
+          quiz={quiz}
+          onExit={() => setShowQuiz(false)}
+          onComplete={handleQuizComplete}
+          onTextSelection={handleTextSelection}
+        />
+        <AddWordDialog
+          open={showAddWord}
+          onClose={() => setShowAddWord(false)}
+          initialWord={selectedText}
+          sourceType="listening"
+          sourceId={id}
+        />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-8">
+    <div
+      className="min-h-screen bg-white dark:bg-background py-8"
+      onMouseUp={handleTextSelection}
+    >
       <div className="container mx-auto px-4 max-w-4xl">
         <Breadcrumb
           items={[

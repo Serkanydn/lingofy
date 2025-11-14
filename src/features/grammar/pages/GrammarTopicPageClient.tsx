@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ interface GrammarTopicPageClientProps {
 
 /**
  * GrammarTopicPageClient Component
- * 
+ *
  * Topic detail page showing explanation, examples, practice text, and quiz.
  * Features:
  * - Breadcrumb navigation
@@ -31,7 +31,7 @@ interface GrammarTopicPageClientProps {
  * - Add word dialog
  * - Loading skeleton
  * - Not found state
- * 
+ *
  * @component
  */
 export function GrammarTopicPageClient({
@@ -52,7 +52,7 @@ export function GrammarTopicPageClient({
     handleAddWord,
     handleCloseAddWord,
   } = useGrammarTopicLogic(topicId);
-  
+
   const { canTake, remaining, used, isPremium, maxQuizzes } = useQuizLimit();
 
   if (isLoading) {
@@ -94,20 +94,31 @@ export function GrammarTopicPageClient({
 
   if (showQuiz && quizQuestions) {
     return (
-      <QuizContainer
-        quiz={{
-          id: topicId,
-          title: topic.title,
-          questions: quizQuestions,
-        }}
-        onExit={handleExitQuiz}
-        onComplete={handleQuizComplete}
-      />
+      <>
+        <QuizContainer
+          quiz={{
+            id: topicId,
+            title: topic.title,
+            questions: quizQuestions,
+          }}
+          onExit={handleExitQuiz}
+          onComplete={handleQuizComplete}
+          onTextSelection={handleTextSelection}
+        />
+        <AddWordDialog
+          open={showAddWord}
+          onClose={handleCloseAddWord}
+          initialWord={selectedText}
+        />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-8">
+    <div
+      className="min-h-screen bg-white dark:bg-background py-8"
+      onMouseUp={handleTextSelection}
+    >
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Breadcrumb */}
         <Breadcrumb
@@ -117,12 +128,21 @@ export function GrammarTopicPageClient({
             { label: topic.title },
           ]}
         />
-        
+
         {/* Quiz Limit Warning */}
-        {!isPremium && <div className="mb-6"><QuizLimitWarning remaining={remaining} used={used} maxQuizzes={maxQuizzes} /></div>}
+        {!isPremium && (
+          <div className="mb-6">
+            <QuizLimitWarning
+              remaining={remaining}
+              used={used}
+              maxQuizzes={maxQuizzes}
+            />
+          </div>
+        )}
 
         {/* Content Card */}
-        <div className="bg-white dark:bg-card rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] overflow-hidden p-8">{/* Header */}
+        <div className="bg-white dark:bg-card rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] overflow-hidden p-8">
+          {/* Header */}
           <TopicHeader title={topic.title} />
 
           {/* Explanation Section */}

@@ -62,6 +62,7 @@ export function ContentSection({ section }: ContentSectionProps) {
                 <p
                   className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
                   onMouseUp={section.onTextSelect}
+                  
                 >
                   {example}
                 </p>

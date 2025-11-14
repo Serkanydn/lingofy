@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useParams } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -11,16 +11,16 @@ import { useReadingDetailLogic } from "../hooks/useReadingDetailLogic";
 
 /**
  * ReadingDetailPageClient Component
- * 
+ *
  * Main client component for reading article detail page.
  * Handles quiz display, word addition, and text selection.
- * 
+ *
  * @component
  */
 export function ReadingDetailPageClient() {
   const { id: contentId, level } = useParams() as { id: string; level: string };
   const { user } = useAuth();
-  
+
   const {
     reading,
     isLoading,
@@ -34,6 +34,7 @@ export function ReadingDetailPageClient() {
     handleTextSelection,
     handleQuizComplete,
   } = useReadingDetailLogic(contentId, user?.id);
+  console.log("showAddWord", showAddWord);
 
   if (isLoading) {
     return <LoadingState />;
@@ -45,16 +46,30 @@ export function ReadingDetailPageClient() {
 
   if (showQuiz && quiz) {
     return (
-      <QuizContainer
-        quiz={quiz}
-        onExit={() => setShowQuiz(false)}
-        onComplete={handleQuizComplete}
-      />
+      <>
+        <QuizContainer
+          quiz={quiz}
+          onExit={() => setShowQuiz(false)}
+          onComplete={handleQuizComplete}
+          onTextSelection={handleTextSelection}
+        />
+
+        <AddWordDialog
+          open={showAddWord}
+          onClose={() => setShowAddWord(false)}
+          initialWord={selectedText}
+          sourceType="reading"
+          sourceId={contentId}
+        />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-8 clay-shadow">
+    <div
+      className="min-h-screen bg-white dark:bg-background py-8 clay-shadow"
+      onMouseUp={handleTextSelection}
+    >
       <div className="container mx-auto px-4 max-w-4xl">
         <Breadcrumb
           items={[
