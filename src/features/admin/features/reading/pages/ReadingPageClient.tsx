@@ -3,36 +3,29 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import {
   PageHeader,
   ContentCard,
   FilterBar,
-  Pagination,
+  DataTable,
   DeleteConfirmDialog,
+  type DataTableColumn,
 } from "@/features/admin/shared/components";
-import { AddReadingDialog, EditReadingDialog } from "../components";
-import { useReadingContent, useDeleteReading } from "../hooks";
+import { ReadingForm, type ReadingFormData } from "../components";
+import { useReadingContent, useDeleteReading, useCreateReading, useUpdateReading } from "../hooks";
 
 export function ReadingPageClient() {
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingReading, setEditingReading] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedReading, setSelectedReading] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [premiumFilter, setPremiumFilter] = useState<string>("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const { data: readings, isLoading } = useReadingContent();
+  const createReading = useCreateReading();
+  const updateReading = useUpdateReading();
   const deleteReading = useDeleteReading();
 
   const filteredReadings =
@@ -45,16 +38,9 @@ export function ReadingPageClient() {
           (premiumFilter === "free" && !reading.is_premium))
     ) || [];
 
-  const totalPages = Math.ceil(filteredReadings.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedReadings = filteredReadings.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
   const handleEdit = (reading: any) => {
-    setSelectedReading(reading);
-    setShowEditDialog(true);
+    setEditingReading(reading);
+    setShowForm(true);
   };
 
   const handleDelete = (reading: any) => {
@@ -70,6 +56,92 @@ export function ReadingPageClient() {
     }
   };
 
+  const handleFormSubmit = async (data: ReadingFormData) => {
+    const { questions, ...readingData } = data;
+    
+    if (editingReading) {
+      await updateReading.mutateAsync({
+        id: editingReading.id,
+        data: {
+          ...readingData,
+          audio_url: readingData.audio_asset_id ? '' : '',
+          updated_at: new Date().toISOString(),
+        },
+        questions,
+      });
+    } else {
+      await createReading.mutateAsync({
+        ...readingData,
+        audio_url: readingData.audio_asset_id ? '' : '',
+        updated_at: new Date().toISOString(),
+        questions,
+      });
+    }
+    setShowForm(false);
+    setEditingReading(null);
+  };
+
+  const handleFormToggle = () => {
+    if (showForm) {
+      setEditingReading(null);
+    }
+    setShowForm(!showForm);
+  };
+
+  const columns: DataTableColumn<any>[] = [
+    {
+      header: 'Title',
+      accessor: 'title',
+      render: (reading) => (
+        <div>
+          <div className="font-medium">{reading.title}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+            {reading.content?.substring(0, 80)}...
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Level',
+      accessor: 'level',
+      render: (reading) => <Badge variant="outline">{reading.level}</Badge>,
+    },
+    {
+      header: 'Type',
+      accessor: 'is_premium',
+      render: (reading) =>
+        reading.is_premium ? (
+          <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
+        ) : (
+          <Badge variant="secondary">Free</Badge>
+        ),
+    },
+    {
+      header: 'Created',
+      accessor: 'created_at',
+      render: (reading) => (
+        <div className="text-sm">
+          {new Date(reading.created_at).toLocaleDateString()}
+        </div>
+      ),
+    },
+    {
+      header: 'Actions',
+      accessor: (reading) => reading.id,
+      className: 'text-right',
+      render: (reading) => (
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(reading)} className="rounded-xl">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => handleDelete(reading)} className="rounded-xl">
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -84,13 +156,25 @@ export function ReadingPageClient() {
           description="Manage reading passages and comprehension content"
           action={
             <Button
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => {
+                setEditingReading(null);
+                setShowForm(true);
+              }}
               className="rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Reading
             </Button>
           }
+        />
+
+        <ReadingForm
+          isOpen={showForm}
+          onToggle={handleFormToggle}
+          onSubmit={handleFormSubmit}
+          initialData={editingReading || undefined}
+          isLoading={createReading.isPending || updateReading.isPending}
+          mode={editingReading ? "edit" : "create"}
         />
 
         <ContentCard
@@ -101,7 +185,6 @@ export function ReadingPageClient() {
               searchQuery={searchQuery}
               onSearchChange={(value) => {
                 setSearchQuery(value);
-                setCurrentPage(1);
               }}
               searchPlaceholder="Search reading..."
               filters={[
@@ -109,7 +192,6 @@ export function ReadingPageClient() {
                   value: levelFilter,
                   onChange: (value) => {
                     setLevelFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: "all", label: "All Levels" },
@@ -125,7 +207,6 @@ export function ReadingPageClient() {
                   value: premiumFilter,
                   onChange: (value) => {
                     setPremiumFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: "all", label: "All Types" },
@@ -137,90 +218,23 @@ export function ReadingPageClient() {
             />
           }
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Level</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedReadings.map((reading) => (
-                <TableRow key={reading.id}>
-                  <TableCell>
-                    <div className="font-medium">{reading.title}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                      {reading.content?.substring(0, 80)}...
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{reading.level}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {reading.is_premium ? (
-                      <Badge className="bg-orange-500 hover:bg-orange-600">
-                        Premium
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">Free</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {new Date(reading.created_at).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(reading)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(reading)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={filteredReadings}
+            keyExtractor={(reading) => reading.id}
+            isLoading={isLoading}
+            pagination={{
+              enabled: true,
+              defaultItemsPerPage: 10,
+            }}
+            emptyState={
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">No reading passages found</p>
+              </div>
+            }
+          />
         </ContentCard>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onItemsPerPageChange={(value) => {
-            setItemsPerPage(value);
-            setCurrentPage(1);
-          }}
-          totalItems={filteredReadings.length}
-        />
       </div>
-
-      <AddReadingDialog
-        open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-      />
-
-      <EditReadingDialog
-        open={showEditDialog}
-        onClose={() => {
-          setShowEditDialog(false);
-          setSelectedReading(null);
-        }}
-        reading={selectedReading}
-      />
 
       <DeleteConfirmDialog
         open={showDeleteDialog}

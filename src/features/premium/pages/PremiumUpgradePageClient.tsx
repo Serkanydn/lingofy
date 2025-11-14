@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { addPremiumToUser } from "../services/addPremiumService";
 import { UpgradePlanCard } from "../components/UpgradePlanCard";
+import { useSettingsStore } from "@/features/admin/features/settings/store/settingsStore";
 
 const MONTHLY_PRICE = 9.99;
 const ANNUAL_PRICE = 99.99;
@@ -69,6 +70,7 @@ export function PremiumUpgradePageClient() {
   const [error, setError] = useState("");
   const router = useRouter();
   const { user, profile } = useAuth();
+  const maxFreeQuizzes = useSettingsStore((state) => state.getMaxFreeQuizzes());
 
   const handleUpgrade = async (plan: PricingPlan) => {
     // Development mode: directly add premium
@@ -95,6 +97,9 @@ export function PremiumUpgradePageClient() {
         <h1 className="text-4xl font-bold mb-4">Upgrade to Premium</h1>
         <p className="text-xl text-muted-foreground">
           Take your English learning to the next level with our premium features
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Free users are limited to {maxFreeQuizzes} quizzes per day
         </p>
       </div>
 

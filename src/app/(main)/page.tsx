@@ -19,10 +19,13 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { useSettingsStore } from "@/features/admin/features/settings";
 
 export default function HomePage() {
   const { user, profile, isPremium } = useAuth();
   useTheme(); // Apply theme on mount
+  const siteName = useSettingsStore((state) => state.getSiteName());
+  const siteDescription = useSettingsStore((state) => state.getSiteDescription());
 
   const features = [
     {
@@ -60,11 +63,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold mb-4 bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Welcome to Learn&Quiz English
+          Welcome to {siteName}
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Master English at your own pace with engaging content, interactive
-          quizzes, and personalized learning
+          {siteDescription}
         </p>
         {!user && (
           <div className="mt-8 flex gap-4 justify-center">

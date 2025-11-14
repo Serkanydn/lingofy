@@ -3,30 +3,22 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import { PageHeader, ContentCard, FilterBar, Pagination, DeleteConfirmDialog } from '@/features/admin/shared/components';
-import { AddListeningDialog, EditListeningDialog } from '../components';
-import { useListeningContent, useDeleteListening } from '../hooks';
+import { PageHeader, ContentCard, FilterBar, DataTable, DeleteConfirmDialog, type DataTableColumn } from '@/features/admin/shared/components';
+import { ListeningForm, type ListeningFormData } from '../components';
+import { useListeningContent, useDeleteListening, useCreateListening, useUpdateListening } from '../hooks';
 
 export function ListeningPageClient() {
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingListening, setEditingListening] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedListening, setSelectedListening] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [premiumFilter, setPremiumFilter] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const { data: listenings, isLoading } = useListeningContent();
+  const createListening = useCreateListening();
+  const updateListening = useUpdateListening();
   const deleteListening = useDeleteListening();
 
   const filteredListenings =
@@ -39,13 +31,9 @@ export function ListeningPageClient() {
           (premiumFilter === 'free' && !listening.is_premium))
     ) || [];
 
-  const totalPages = Math.ceil(filteredListenings.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedListenings = filteredListenings.slice(startIndex, startIndex + itemsPerPage);
-
   const handleEdit = (listening: any) => {
-    setSelectedListening(listening);
-    setShowEditDialog(true);
+    setEditingListening(listening);
+    setShowForm(true);
   };
 
   const handleDelete = (listening: any) => {
@@ -61,6 +49,92 @@ export function ListeningPageClient() {
     }
   };
 
+  const handleFormSubmit = async (data: ListeningFormData) => {
+    const { questions, duration, ...listeningData } = data;
+    
+    if (editingListening) {
+      await updateListening.mutateAsync({
+        id: editingListening.id,
+        data: {
+          ...listeningData,
+          description: editingListening.description || '',
+          duration_seconds: duration || 0,
+          updated_at: new Date().toISOString(),
+        },
+        questions,
+      });
+    } else {
+      await createListening.mutateAsync({
+        ...listeningData,
+        description: '',
+        duration_seconds: duration || 0,
+        updated_at: new Date().toISOString(),
+        questions,
+      });
+    }
+    setShowForm(false);
+    setEditingListening(null);
+  };
+
+  const handleFormToggle = () => {
+    if (showForm) {
+      setEditingListening(null);
+    }
+    setShowForm(!showForm);
+  };
+
+  const columns: DataTableColumn<any>[] = [
+    {
+      header: 'Title',
+      accessor: 'title',
+      render: (listening) => (
+        <div>
+          <div className="font-medium">{listening.title}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+            {listening.description}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Level',
+      accessor: 'level',
+      render: (listening) => <Badge variant="outline">{listening.level}</Badge>,
+    },
+    {
+      header: 'Type',
+      accessor: 'is_premium',
+      render: (listening) =>
+        listening.is_premium ? (
+          <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
+        ) : (
+          <Badge variant="secondary">Free</Badge>
+        ),
+    },
+    {
+      header: 'Created',
+      accessor: 'created_at',
+      render: (listening) => (
+        <div className="text-sm">{new Date(listening.created_at).toLocaleDateString()}</div>
+      ),
+    },
+    {
+      header: 'Actions',
+      accessor: (listening) => listening.id,
+      className: 'text-right',
+      render: (listening) => (
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(listening)} className="rounded-xl">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => handleDelete(listening)} className="rounded-xl">
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -75,13 +149,25 @@ export function ListeningPageClient() {
           description="Manage listening exercises and audio content"
           action={
             <Button
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => {
+                setEditingListening(null);
+                setShowForm(true);
+              }}
               className="rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Listening
             </Button>
           }
+        />
+
+        <ListeningForm
+          isOpen={showForm}
+          onToggle={handleFormToggle}
+          onSubmit={handleFormSubmit}
+          initialData={editingListening || undefined}
+          isLoading={createListening.isPending || updateListening.isPending}
+          mode={editingListening ? "edit" : "create"}
         />
 
         <ContentCard
@@ -92,7 +178,6 @@ export function ListeningPageClient() {
               searchQuery={searchQuery}
               onSearchChange={(value) => {
                 setSearchQuery(value);
-                setCurrentPage(1);
               }}
               searchPlaceholder="Search listening..."
               filters={[
@@ -100,7 +185,6 @@ export function ListeningPageClient() {
                   value: levelFilter,
                   onChange: (value) => {
                     setLevelFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: 'all', label: 'All Levels' },
@@ -116,7 +200,6 @@ export function ListeningPageClient() {
                   value: premiumFilter,
                   onChange: (value) => {
                     setPremiumFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: 'all', label: 'All Types' },
@@ -128,75 +211,23 @@ export function ListeningPageClient() {
             />
           }
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Level</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedListenings.map((listening) => (
-                <TableRow key={listening.id}>
-                  <TableCell>
-                    <div className="font-medium">{listening.title}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                      {listening.description}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{listening.level}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {listening.is_premium ? (
-                      <Badge className="bg-orange-500 hover:bg-orange-600">Premium</Badge>
-                    ) : (
-                      <Badge variant="secondary">Free</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">{new Date(listening.created_at).toLocaleDateString()}</div>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(listening)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(listening)}>
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={filteredListenings}
+            keyExtractor={(listening) => listening.id}
+            isLoading={isLoading}
+            pagination={{
+              enabled: true,
+              defaultItemsPerPage: 10,
+            }}
+            emptyState={
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">No listening exercises found</p>
+              </div>
+            }
+          />
         </ContentCard>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onItemsPerPageChange={(value) => {
-            setItemsPerPage(value);
-            setCurrentPage(1);
-          }}
-          totalItems={filteredListenings.length}
-        />
       </div>
-
-      <AddListeningDialog open={showAddDialog} onClose={() => setShowAddDialog(false)} />
-
-      <EditListeningDialog
-        open={showEditDialog}
-        onClose={() => {
-          setShowEditDialog(false);
-          setSelectedListening(null);
-        }}
-        listening={selectedListening}
-      />
 
       <DeleteConfirmDialog
         open={showDeleteDialog}

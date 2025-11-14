@@ -23,7 +23,11 @@ import { Plus, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { DeleteConfirmDialog } from "@/features/admin/shared/components";
-import { useGrammarQuestions, AddQuestionDialog, EditQuestionDialog } from "@/features/admin/features/grammar";
+import { 
+  useGrammarQuestions, 
+  GrammarQuestionForm,
+  type QuestionFormData
+} from "@/features/admin/features/grammar";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -34,14 +38,28 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
   const topicId = resolvedParams.id;
   const router = useRouter();
   
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   
   const { data: questionsData, isLoading } = useGrammarQuestions(topicId);
   const questions = questionsData?.questions || [];
   const topic = questionsData?.topic;
+
+  const handleFormSubmit = async (data: QuestionFormData) => {
+    // TODO: Implement question create/update API call
+    console.log("Question data:", data);
+    setShowForm(false);
+    setEditingQuestion(null);
+  };
+
+  const handleFormToggle = () => {
+    if (showForm) {
+      setEditingQuestion(null);
+    }
+    setShowForm(!showForm);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -68,12 +86,27 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
               Manage quiz questions for this grammar topic
             </p>
           </div>
-          <Button onClick={() => setShowAddDialog(true)}>
+          <Button 
+            onClick={() => {
+              setEditingQuestion(null);
+              setShowForm(true);
+            }}
+            className="rounded-2xl bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Question
           </Button>
         </div>
       </div>
+
+      <GrammarQuestionForm
+        isOpen={showForm}
+        onToggle={handleFormToggle}
+        onSubmit={handleFormSubmit}
+        initialData={editingQuestion || undefined}
+        isLoading={false}
+        mode={editingQuestion ? "edit" : "create"}
+      />
 
       <Card>
         <CardHeader>
@@ -112,8 +145,8 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setSelectedQuestion(question);
-                          setShowEditDialog(true);
+                          setEditingQuestion(question);
+                          setShowForm(true);
                         }}
                       >
                         <Edit className="h-4 w-4" />
@@ -136,22 +169,6 @@ export default function GrammarQuestionsPage({ params }: PageProps) {
           )}
         </CardContent>
       </Card>
-
-      <AddQuestionDialog
-        open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-        topicId={topicId}
-      />
-
-      <EditQuestionDialog
-        open={showEditDialog}
-        onClose={() => {
-          setShowEditDialog(false);
-          setSelectedQuestion(null);
-        }}
-        question={selectedQuestion}
-        topicId={topicId}
-      />
 
       <DeleteConfirmDialog
         open={showDeleteDialog}

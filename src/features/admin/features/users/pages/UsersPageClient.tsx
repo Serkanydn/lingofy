@@ -3,30 +3,21 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye } from 'lucide-react';
-import { PageHeader, ContentCard, FilterBar, Pagination, DataTable, type DataTableColumn } from '@/features/admin/shared/components';
-import { UserDetailsDialog } from '../components';
-import { useUsers } from '../hooks';
-
-type User = {
-  id: string;
-  email: string;
-  full_name: string | null;
-  is_premium: boolean;
-  premium_expires_at: string | null;
-  created_at: string;
-  lemon_squeezy_customer_id: string | null;
-  lemon_squeezy_subscription_id: string | null;
-};
+import { Eye, Edit } from 'lucide-react';
+import { PageHeader, ContentCard, FilterBar, DataTable, type DataTableColumn } from '@/features/admin/shared/components';
+import { UserDetailsDialog, UserForm } from '../components';
+import { useUsers, useUpdateUser } from '../hooks';
+import type { User, UpdateUserFormData } from '../types';
 
 export function UsersPageClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'premium' | 'free'>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const { data: users, isLoading } = useUsers();
+  const updateUser = useUpdateUser();
 
   const filteredUsers =
     users?.filter(
@@ -38,13 +29,31 @@ export function UsersPageClient() {
           (statusFilter === 'free' && !user.is_premium))
     ) || [];
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
-
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    setCurrentPage(1);
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setShowForm(true);
+  };
+
+  const handleFormSubmit = async (data: UpdateUserFormData) => {
+    if (editingUser) {
+      await updateUser.mutateAsync({
+        id: editingUser.id,
+        data,
+      });
+      setShowForm(false);
+      setEditingUser(null);
+    }
+  };
+
+  const handleFormToggle = () => {
+    if (showForm) {
+      setEditingUser(null);
+    }
+    setShowForm(!showForm);
   };
 
   const columns: DataTableColumn<User>[] = [
@@ -101,17 +110,27 @@ export function UsersPageClient() {
       accessor: (user) => user.id,
       className: 'text-right',
       render: (user) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSelectedUser(user);
-            setShowDetailsDialog(true);
-          }}
-          className="rounded-xl"
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEdit(user)}
+            className="rounded-xl"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedUser(user);
+              setShowDetailsDialog(true);
+            }}
+            className="rounded-xl"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -124,6 +143,20 @@ export function UsersPageClient() {
           iconBgClass="bg-linear-to-br from-blue-400 to-blue-600 shadow-[0_4px_14px_rgba(59,130,246,0.4)]"
           title="Users Management"
           description="Manage all registered users and their subscriptions"
+        />
+
+        <UserForm
+          isOpen={showForm}
+          onToggle={handleFormToggle}
+          onSubmit={handleFormSubmit}
+          initialData={editingUser ? {
+            full_name: editingUser.full_name || undefined,
+            is_premium: editingUser.is_premium,
+            premium_expires_at: editingUser.premium_expires_at,
+          } : undefined}
+          isLoading={updateUser.isPending}
+          mode="edit"
+          userEmail={editingUser?.email}
         />
 
         <ContentCard
@@ -139,7 +172,6 @@ export function UsersPageClient() {
                   value: statusFilter,
                   onChange: (value: any) => {
                     setStatusFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: 'all', label: 'All Status' },
@@ -153,9 +185,13 @@ export function UsersPageClient() {
         >
           <DataTable
             columns={columns}
-            data={paginatedUsers}
+            data={filteredUsers}
             keyExtractor={(user) => user.id}
             isLoading={isLoading}
+            pagination={{
+              enabled: true,
+              defaultItemsPerPage: 10,
+            }}
             emptyState={
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">No users found</p>
@@ -163,18 +199,6 @@ export function UsersPageClient() {
             }
           />
         </ContentCard>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onItemsPerPageChange={(value) => {
-            setItemsPerPage(value);
-            setCurrentPage(1);
-          }}
-          totalItems={filteredUsers.length}
-        />
       </div>
 
       <UserDetailsDialog

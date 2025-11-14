@@ -7,6 +7,7 @@ interface ActionButtonsProps {
   hasQuiz: boolean;
   onStartQuiz: () => void;
   onAddWord: () => void;
+  disabled?: boolean;
 }
 
 /**
@@ -21,14 +22,16 @@ export function ActionButtons({
   hasQuiz,
   onStartQuiz,
   onAddWord,
+  disabled = false,
 }: ActionButtonsProps) {
   if (!hasQuiz) return null;
 
   return (
     <div className="flex gap-4">
       <Button
-        className="flex-1 rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
+        className="flex-1 rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={onStartQuiz}
+        disabled={disabled}
       >
         <PlayCircleIcon className="mr-2 h-6 w-6" />
         Take the Quiz

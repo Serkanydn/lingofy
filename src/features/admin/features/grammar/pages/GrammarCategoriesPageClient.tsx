@@ -26,19 +26,18 @@ import {
   Pagination,
   DeleteConfirmDialog,
 } from "@/features/admin/shared/components";
-import {
-  AddGrammarCategoryDialog,
-  EditGrammarCategoryDialog,
-} from "../components";
+import { GrammarCategoryForm, type CategoryFormData } from "../components/GrammarCategoryForm";
 import {
   useGrammarCategories,
   useDeleteGrammarCategory,
   useToggleGrammarCategory,
+  useCreateGrammarCategory,
+  useUpdateGrammarCategory,
 } from "../hooks/useGrammarCategories";
 
 export function GrammarCategoriesPageClient() {
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,12 +46,14 @@ export function GrammarCategoriesPageClient() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: categories, isLoading } = useGrammarCategories();
+  const createCategory = useCreateGrammarCategory();
+  const updateCategory = useUpdateGrammarCategory();
   const deleteCategory = useDeleteGrammarCategory();
   const toggleCategory = useToggleGrammarCategory();
 
   const handleEdit = (category: any) => {
-    setSelectedCategory(category);
-    setShowEditDialog(true);
+    setEditingCategory(category);
+    setShowForm(true);
   };
 
   const handleDelete = (category: any) => {
@@ -73,6 +74,26 @@ export function GrammarCategoriesPageClient() {
       id: category.id,
       isActive: !category.is_active,
     });
+  };
+
+  const handleFormSubmit = async (data: CategoryFormData) => {
+    if (editingCategory) {
+      await updateCategory.mutateAsync({
+        id: editingCategory.id,
+        data: data,
+      });
+    } else {
+      await createCategory.mutateAsync(data);
+    }
+    setShowForm(false);
+    setEditingCategory(null);
+  };
+
+  const handleFormToggle = () => {
+    if (showForm) {
+      setEditingCategory(null);
+    }
+    setShowForm(!showForm);
   };
 
   const filteredCategories =
@@ -111,13 +132,25 @@ export function GrammarCategoriesPageClient() {
           description="Manage grammar topic categories"
           action={
             <Button
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => {
+                setEditingCategory(null);
+                setShowForm(true);
+              }}
               className="rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
           }
+        />
+
+        <GrammarCategoryForm
+          isOpen={showForm}
+          onToggle={handleFormToggle}
+          onSubmit={handleFormSubmit}
+          initialData={editingCategory || undefined}
+          isLoading={createCategory.isPending || updateCategory.isPending}
+          mode={editingCategory ? "edit" : "create"}
         />
 
         <ContentCard
@@ -245,20 +278,6 @@ export function GrammarCategoriesPageClient() {
           totalItems={filteredCategories.length}
         />
       </div>
-
-      <AddGrammarCategoryDialog
-        open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-      />
-
-      <EditGrammarCategoryDialog
-        open={showEditDialog}
-        onClose={() => {
-          setShowEditDialog(false);
-          setSelectedCategory(null);
-        }}
-        category={selectedCategory}
-      />
 
       <DeleteConfirmDialog
         open={showDeleteDialog}

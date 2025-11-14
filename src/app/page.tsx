@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PlayCircle, Trophy, Crown, Sparkles, Target, Zap } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useSettingsStore } from "@/features/admin/features/settings";
+import { MaintenancePage } from "@/shared/components/MaintenancePage";
 
 const features = [
   {
@@ -46,9 +48,14 @@ const achievements = [
 ];
 
 export default function Home() {
-  const { isLoading } = useAuth();
+  const { isLoading, isAdmin } = useAuth();
+  const siteName = useSettingsStore((state) => state.getSiteName());
+  const siteDescription = useSettingsStore((state) => state.getSiteDescription());
+  const isMaintenanceMode = useSettingsStore((state) => state.getIsMaintenanceMode());
+  const maintenanceMessage = useSettingsStore((state) => state.getMaintenanceMessage());
+  const settingsLoading = useSettingsStore((state) => state.isLoading);
 
-  if (isLoading) {
+  if (isLoading || settingsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -57,6 +64,11 @@ export default function Home() {
         </div>
       </div>
     );
+  }
+
+  // Show maintenance page for non-admin users
+  if (isMaintenanceMode && !isAdmin) {
+    return <MaintenancePage message={maintenanceMessage || undefined} />;
   }
 
   return (
@@ -68,7 +80,7 @@ export default function Home() {
             {/* Left Content */}
             <div className="text-center lg:text-left order-2 lg:order-1">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-gray-900 dark:text-white leading-tight">
-                Your English
+                {siteName}
                 <br />
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-orange-600">
                   Adventure Starts
@@ -77,7 +89,7 @@ export default function Home() {
                 Now.
               </h1>
               <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Transform learning into a game. Complete quests, earn badges, and master English with confidence. Ready to level up?
+                {siteDescription}. Ready to level up?
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button

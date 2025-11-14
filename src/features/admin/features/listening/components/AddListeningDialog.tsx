@@ -24,6 +24,7 @@ import { useCreateListening } from "../hooks";
 import { Level } from "@/shared/types/common.types";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuestionManager, type Question } from "./QuestionManager";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { FlashcardPractice } from "../components/FlashcardPractice";
-import { AddWordDialog } from "../components/addWordDialog";
 import { UpdateWordDialog } from "../components/UpdateWordDialog";
 import { WordsSidebar } from "../components/WordsSidebar";
 import { WordsHeader } from "../components/WordsHeader";
@@ -31,9 +31,9 @@ import type { UserWord } from "../hooks/useWords";
  * @component
  */
 export function MyWordsPageClient() {
+  const router = useRouter();
   const { isPremium } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showAddDialog, setShowAddDialog] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [showFlashcards, setShowFlashcards] = useState(false);
   const [editWord, setEditWord] = useState<UserWord | null>(null);
@@ -104,7 +104,7 @@ export function MyWordsPageClient() {
           <WordsHeader
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            onAddWord={() => setShowAddDialog(true)}
+            onAddWord={() => router.push("/my-words/add")}
             isDarkMode={isDarkMode}
             onToggleDarkMode={toggleDarkMode}
           />
@@ -152,7 +152,7 @@ export function MyWordsPageClient() {
             <div className="mt-6">
               <EmptyStates
                 type="no-words"
-                onAddWord={() => setShowAddDialog(true)}
+                onAddWord={() => router.push("/my-words/add")}
               />
             </div>
           )}
@@ -160,14 +160,6 @@ export function MyWordsPageClient() {
       </div>
 
       {/* Dialogs */}
-      <AddWordDialog
-        open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-        initialCategoryId={
-          selectedCategory === "uncategorized" ? null : selectedCategory
-        }
-      />
-
       {editWord && (
         <UpdateWordDialog
           word={editWord}

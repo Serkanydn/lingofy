@@ -10,6 +10,8 @@ import { Breadcrumb } from "../components/Breadcrumb";
 import { TopicHeader, ContentSection } from "../components/Headers";
 import { ActionButtons } from "../components/ActionButtons";
 import { EmptyState } from "../components/EmptyState";
+import { useQuizLimit } from "@/features/statistics/hooks/useQuizLimit";
+import { QuizLimitWarning } from "@/features/statistics/components/QuizLimitWarning";
 
 interface GrammarTopicPageClientProps {
   categorySlug: string;
@@ -50,6 +52,8 @@ export function GrammarTopicPageClient({
     handleAddWord,
     handleCloseAddWord,
   } = useGrammarTopicLogic(topicId);
+  
+  const { canTake, remaining, used, isPremium, maxQuizzes } = useQuizLimit();
 
   if (isLoading) {
     return (
@@ -113,10 +117,12 @@ export function GrammarTopicPageClient({
             { label: topic.title },
           ]}
         />
+        
+        {/* Quiz Limit Warning */}
+        {!isPremium && <div className="mb-6"><QuizLimitWarning remaining={remaining} used={used} maxQuizzes={maxQuizzes} /></div>}
 
         {/* Content Card */}
-        <div className="bg-white dark:bg-card rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] overflow-hidden p-8">
-          {/* Header */}
+        <div className="bg-white dark:bg-card rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] overflow-hidden p-8">{/* Header */}
           <TopicHeader title={topic.title} />
 
           {/* Explanation Section */}
@@ -166,6 +172,7 @@ export function GrammarTopicPageClient({
             hasQuiz={!!quizQuestions?.length}
             onStartQuiz={handleStartQuiz}
             onAddWord={handleAddWord}
+            disabled={!canTake}
           />
         </div>
       </div>

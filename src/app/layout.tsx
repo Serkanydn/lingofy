@@ -5,6 +5,7 @@ import { QueryProvider } from "@/shared/components/providers/QueryProvider";
 import ToastProvider from "@/shared/providers/toastProvider";
 import { AuthProvider } from "@/features/auth/components/AuthProvider";
 import { ThemeProvider } from "@/shared/providers/ThemeProvider";
+import { SettingsInitializer } from "@/shared/components/SettingsInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider>
+              <SettingsInitializer />
               <ToastProvider>{children}</ToastProvider>
             </ThemeProvider>
           </AuthProvider>

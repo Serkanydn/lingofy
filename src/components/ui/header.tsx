@@ -32,12 +32,14 @@ import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { useSettingsStore } from "@/features/admin/features/settings";
 
 export function Header() {
   const router = useRouter();
   const { user, profile, isPremium, isAdmin } = useAuth();
   const pathname = usePathname();
   const { isDark: isDarkMode, toggleTheme: toggleDarkMode } = useTheme();
+  const siteName = useSettingsStore((state) => state.getSiteName());
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -74,7 +76,7 @@ export function Header() {
               </div>
             </div>
             <span className="font-bold text-[17px] text-gray-900 dark:text-white">
-              Learn&Quiz English
+              {siteName}
             </span>
           </Link>
 
@@ -93,7 +95,7 @@ export function Header() {
                       : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   )}
                 >
-                  <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                  <item.icon className="mr-3 h-5 w-5 shrink-0" />
                   {item.name}
                 </Link>
               );

@@ -14,6 +14,7 @@ import {
 import { cn } from "@/shared/lib/utils";
 import { PremiumBadge } from "@/features/premium/components/PremiumBadge";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useSettingsStore } from "@/features/admin/features/settings";
 
 const navigation = [
   {
@@ -60,6 +61,7 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname();
   const { user, profile, isPremium } = useAuth();
+  const siteName = useSettingsStore((state) => state.getSiteName());
 
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col pt-16">
@@ -89,7 +91,7 @@ export function Sidebar() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                <item.icon className="mr-3 h-5 w-5 shrink-0" />
                 {item.name}
                 {item.requiresPremium && <PremiumBadge />}
               </Link>

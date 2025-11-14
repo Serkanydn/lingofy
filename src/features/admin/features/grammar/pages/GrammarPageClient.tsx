@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, List } from 'lucide-react';
-import { PageHeader, ContentCard, FilterBar, Pagination, DataTable, DeleteConfirmDialog, type DataTableColumn } from '@/features/admin/shared/components';
-import { AddGrammarDialog, EditGrammarDialog } from '../components';
-import { useGrammarTopics, useDeleteGrammarTopic } from '../hooks';
+import { PageHeader, ContentCard, FilterBar, DataTable, DeleteConfirmDialog, type DataTableColumn } from '@/features/admin/shared/components';
+import { GrammarForm, type GrammarFormData } from '../components/GrammarForm';
+import { useGrammarTopics, useDeleteGrammarTopic, useCreateGrammarTopic, useUpdateGrammarTopic } from '../hooks';
+import { useActiveGrammarCategories } from '../hooks/useGrammarCategories';
 
 type GrammarTopic = {
   id: string;
@@ -19,17 +20,18 @@ type GrammarTopic = {
 };
 
 export function GrammarPageClient() {
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingTopic, setEditingTopic] = useState<GrammarTopic | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<GrammarTopic | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [premiumFilter, setPremiumFilter] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const { data: topics, isLoading } = useGrammarTopics();
+  const { data: categories } = useActiveGrammarCategories();
   const deleteTopic = useDeleteGrammarTopic();
+  const createTopic = useCreateGrammarTopic();
+  const updateTopic = useUpdateGrammarTopic();
 
   const filteredTopics =
     topics?.filter(
@@ -41,18 +43,33 @@ export function GrammarPageClient() {
           (premiumFilter === 'free' && !topic.is_premium))
     ) || [];
 
-  const totalPages = Math.ceil(filteredTopics.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedTopics = filteredTopics.slice(startIndex, startIndex + itemsPerPage);
-
   const handleEdit = (topic: GrammarTopic) => {
-    setSelectedTopic(topic);
-    setShowEditDialog(true);
+    setEditingTopic(topic);
+    setShowForm(true);
+    // Scroll to top to show the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = (topic: GrammarTopic) => {
     setSelectedTopic(topic);
     setShowDeleteDialog(true);
+  };
+
+  const handleFormSubmit = async (data: GrammarFormData) => {
+    if (editingTopic) {
+      await updateTopic.mutateAsync({ id: editingTopic.id, data });
+    } else {
+      await createTopic.mutateAsync(data);
+    }
+    setShowForm(false);
+    setEditingTopic(null);
+  };
+
+  const handleFormToggle = () => {
+    if (showForm) {
+      setEditingTopic(null);
+    }
+    setShowForm(!showForm);
   };
 
   const confirmDelete = async () => {
@@ -137,14 +154,32 @@ export function GrammarPageClient() {
                 </Button>
               </Link>
               <Button
-                onClick={() => setShowAddDialog(true)}
+                onClick={() => {
+                  setEditingTopic(null);
+                  setShowForm(!showForm);
+                }}
                 className="rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Add Topic
+                {showForm ? "Hide Form" : "Add Topic"}
               </Button>
             </div>
           }
+        />
+
+        {/* Inline Grammar Form */}
+        <GrammarForm
+          isOpen={showForm}
+          onToggle={handleFormToggle}
+          onSubmit={handleFormSubmit}
+          initialData={editingTopic ? {
+            ...editingTopic,
+            category_id: editingTopic.category_id || "",
+            mini_text: editingTopic.mini_text || "",
+          } as Partial<GrammarFormData> : undefined}
+          categories={categories}
+          isLoading={createTopic.isPending || updateTopic.isPending}
+          mode={editingTopic ? "edit" : "create"}
         />
 
         <ContentCard
@@ -155,7 +190,6 @@ export function GrammarPageClient() {
               searchQuery={searchQuery}
               onSearchChange={(value) => {
                 setSearchQuery(value);
-                setCurrentPage(1);
               }}
               searchPlaceholder="Search topics..."
               filters={[
@@ -163,7 +197,6 @@ export function GrammarPageClient() {
                   value: categoryFilter,
                   onChange: (value) => {
                     setCategoryFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: 'all', label: 'All Categories' },
@@ -174,7 +207,6 @@ export function GrammarPageClient() {
                   value: premiumFilter,
                   onChange: (value) => {
                     setPremiumFilter(value);
-                    setCurrentPage(1);
                   },
                   options: [
                     { value: 'all', label: 'All Types' },
@@ -188,9 +220,13 @@ export function GrammarPageClient() {
         >
           <DataTable
             columns={columns}
-            data={paginatedTopics}
+            data={filteredTopics}
             keyExtractor={(topic) => topic.id}
             isLoading={isLoading}
+            pagination={{
+              enabled: true,
+              defaultItemsPerPage: 10,
+            }}
             emptyState={
               <div className="text-center py-8">
                 <p className="text-gray-500 dark:text-gray-400">No grammar topics found</p>
@@ -198,31 +234,9 @@ export function GrammarPageClient() {
             }
           />
         </ContentCard>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onItemsPerPageChange={(value) => {
-            setItemsPerPage(value);
-            setCurrentPage(1);
-          }}
-          totalItems={filteredTopics.length}
-        />
       </div>
 
-      <AddGrammarDialog open={showAddDialog} onClose={() => setShowAddDialog(false)} />
-
-      <EditGrammarDialog
-        open={showEditDialog}
-        onClose={() => {
-          setShowEditDialog(false);
-          setSelectedTopic(null);
-        }}
-        topic={selectedTopic as any}
-      />
-
+      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={showDeleteDialog}
         onClose={() => {

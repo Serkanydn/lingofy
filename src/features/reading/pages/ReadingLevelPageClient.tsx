@@ -9,6 +9,8 @@ import { FilterBar } from "../components/FilterBar";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { EmptyState } from "../components/EmptyState";
 import { Breadcrumb } from "../components/Breadcrumb";
+import { useQuizLimit } from "@/features/statistics/hooks/useQuizLimit";
+import { QuizLimitWarning } from "@/features/statistics/components/QuizLimitWarning";
 import type { Level } from "@/shared/types/common.types";
 
 interface ReadingLevelPageClientProps {
@@ -29,6 +31,7 @@ export function ReadingLevelPageClient({ params }: ReadingLevelPageClientProps) 
   const { data: readings, isLoading } = useReadingByLevel(level);
   const { user, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
+  const { canTake, remaining, used, isPremium: isPremiumFromLimit, maxQuizzes } = useQuizLimit();
 
   // Filter states
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
@@ -126,6 +129,13 @@ export function ReadingLevelPageClient({ params }: ReadingLevelPageClientProps) 
             {level} Reading Articles
           </h1>
         </div>
+        
+        {/* Quiz Limit Warning */}
+        {!isPremiumFromLimit && (
+          <div className="mb-6">
+            <QuizLimitWarning remaining={remaining} used={used} maxQuizzes={maxQuizzes} />
+          </div>
+        )}
 
         <FilterBar
           sortBy={sortBy}
