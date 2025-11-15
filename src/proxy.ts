@@ -3,16 +3,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function proxy(req: NextRequest) {
+  if (req.nextUrl.pathname.startsWith("/reset-password")) {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({
     request: req,
   });
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: {
-        name: 'lingofy-auth-token',
+        name: "lingofy-auth-token",
       },
       cookies: {
         getAll() {

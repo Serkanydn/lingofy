@@ -1,3 +1,4 @@
+import { getSupabaseServerClient } from "@/shared/lib/supabase/client";
 import { BaseService } from "@/shared/services/supabase/baseService";
 import { User } from "@supabase/supabase-js";
 
@@ -34,7 +35,10 @@ export class AuthService extends BaseService<AuthUser> {
     return data;
   }
 
-  async signInWithOAuth(provider: 'google' | 'github' | 'facebook', redirectTo: string) {
+  async signInWithOAuth(
+    provider: "google" | "github" | "facebook",
+    redirectTo: string
+  ) {
     const { data, error } = await this.supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -56,13 +60,19 @@ export class AuthService extends BaseService<AuthUser> {
     return data;
   }
 
-  async signUp(email: string, password: string, metadata?: Record<string, any>) {
+  async signUp(
+    email: string,
+    password: string,
+    metadata?: Record<string, any>
+  ) {
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
-      options: metadata ? {
-        data: metadata,
-      } : undefined,
+      options: metadata
+        ? {
+            data: metadata,
+          }
+        : undefined,
     });
 
     if (error) throw error;
@@ -76,18 +86,50 @@ export class AuthService extends BaseService<AuthUser> {
 
   async resetPassword(email: string) {
     const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
     });
 
     if (error) throw error;
   }
 
   async updatePassword(newPassword: string) {
-    const { error } = await this.supabase.auth.updateUser({
-      password: newPassword,
-    });
+    try {
+      console.log("updatePassword: Calling API route...");
 
-    if (error) throw error;
+      const response = await fetch("/api/auth/update-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+
+      const responseData = await response.json();
+
+      console.log("updatePassword: API response:", {
+        status: response.status,
+        ok: response.ok,
+        data: responseData,
+      });
+
+      if (!response.ok) {
+        return {
+          data: null,
+          error: new Error(responseData.error || "Failed to update password"),
+        };
+      }
+
+      return {
+        data: { user: responseData.user },
+        error: null,
+      };
+    } catch (err: any) {
+      console.error("updatePassword: Fetch error:", err);
+      return {
+        data: null,
+        error: err instanceof Error ? err : new Error(String(err)),
+      };
+    }
   }
 
   async getSession() {
@@ -110,6 +152,5 @@ export class AuthService extends BaseService<AuthUser> {
     return session;
   }
 }
-
 
 export const authService = new AuthService();

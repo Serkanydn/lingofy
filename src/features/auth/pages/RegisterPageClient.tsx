@@ -132,11 +132,17 @@ export function RegisterPageClient() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <Link href="/login" className="w-full">
-                    <Button className="w-full rounded-2xl h-11 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
-                      Go to Sign In
-                    </Button>
+                <Link href="/login" className="w-full">
+                  <Button className="w-full rounded-2xl h-11 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
+                    Go to Sign In
+                  </Button>
+                </Link>
+                <p className="text-center text-sm text-muted-foreground">
+                  Forgot your password?{' '}
+                  <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                    Reset it
                   </Link>
+                </p>
                   <Button
                     variant="outline"
                     onClick={() => setShowSuccessAlert(false)}
