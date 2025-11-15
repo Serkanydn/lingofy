@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import type { FieldArrayPath } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -23,8 +26,10 @@ import { Plus, X } from "lucide-react";
 import { useCreateGrammarTopic } from "../hooks/useGrammarTopics";
 import { useActiveGrammarCategories } from "../hooks/useGrammarCategories";
 import { Level } from "@/shared/types/common.types";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { createGrammarTopicSchema, type CreateGrammarTopicFormData } from "../types/validation";
 
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
+const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 interface AddGrammarDialogProps {
   open: boolean;
@@ -32,59 +37,37 @@ interface AddGrammarDialogProps {
 }
 
 export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
-  const [title, setTitle] = useState("");
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [level, setLevel] = useState<Level>("B1");
-  const [explanation, setExplanation] = useState("");
-  const [miniText, setMiniText] = useState("");
-  const [examples, setExamples] = useState<string[]>([""]);
-  const [orderIndex, setOrderIndex] = useState("1");
-  const [isPremium, setIsPremium] = useState(false);
+  const form = useForm<CreateGrammarTopicFormData>({
+    resolver: zodResolver(createGrammarTopicSchema),
+    defaultValues: {
+      title: "",
+      category_id: "",
+      difficulty_level: "B1",
+      explanation: "",
+      mini_text: "",
+      examples: [""],
+      order_index: 1,
+      is_premium: false,
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+  type ExamplesArrayName = FieldArrayPath<CreateGrammarTopicFormData>;
+  const { fields, append, remove } = useFieldArray<CreateGrammarTopicFormData>({ control: form.control, name: "examples" as ExamplesArrayName });
 
   const createTopic = useCreateGrammarTopic();
   const { data: categories, isLoading: categoriesLoading } = useActiveGrammarCategories();
 
-  const handleAddExample = () => {
-    setExamples([...examples, ""]);
-  };
+  const handleAddExample = () => append("");
+  const handleRemoveExample = (index: number) => remove(index);
 
-  const handleRemoveExample = (index: number) => {
-    setExamples(examples.filter((_, i) => i !== index));
-  };
-
-  const handleExampleChange = (index: number, value: string) => {
-    const newExamples = [...examples];
-    newExamples[index] = value;
-    setExamples(newExamples);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!categoryId) return;
-
+  const onSubmit = async (data: CreateGrammarTopicFormData) => {
     await createTopic.mutateAsync({
-      title,
-      category_id: categoryId,
-      difficulty_level: level,
-      explanation,
-      mini_text: miniText,
-      examples: examples.filter((ex) => ex.trim() !== ""),
-      order_index: parseInt(orderIndex),
-      is_premium: isPremium,
+      ...data,
       updated_at: new Date().toISOString(),
       content_id: crypto.randomUUID(),
     });
-
-    // Reset form
-    setTitle("");
-    setCategoryId("");
-    setLevel("B1");
-    setExplanation("");
-    setMiniText("");
-    setExamples([""]);
-    setOrderIndex("1");
-    setIsPremium(false);
+    form.reset();
     onClose();
   };
 
@@ -101,23 +84,28 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Present Perfect vs Past Simple"
-                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-                required
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Present Perfect vs Past Simple" className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={categoryId} onValueChange={setCategoryId} required disabled={categoriesLoading}>
+              <FormLabel>Category *</FormLabel>
+              <Select value={form.watch("category_id")} onValueChange={(v) => form.setValue("category_id", v)} disabled={categoriesLoading}>
                 <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select category"} />
                 </SelectTrigger>
@@ -132,11 +120,12 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="level">Difficulty Level *</Label>
-              <Select value={level} onValueChange={(val) => setLevel(val as Level)} required>
+              <FormLabel>Difficulty Level *</FormLabel>
+              <Select value={form.watch("difficulty_level") as string} onValueChange={(val) => form.setValue("difficulty_level", val as Level)}>
                 <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
@@ -148,65 +137,80 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="orderIndex">Order Index</Label>
-              <Input
-                id="orderIndex"
-                type="number"
-                value={orderIndex}
-                onChange={(e) => setOrderIndex(e.target.value)}
-                className="rounded-2xl border-2 border-gray-200 dark:border-gray-700"
-                min="1"
+              <FormField
+                control={form.control}
+                name="order_index"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Order Index</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={1} className="rounded-2xl border-2 border-gray-200 dark:border-gray-700" value={field.value ?? 1} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
           </div>
 
           <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
-            <input
-              type="checkbox"
-              id="isPremium"
-              checked={isPremium}
-              onChange={(e) => setIsPremium(e.target.checked)}
-              className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500 focus:ring-2 focus:ring-offset-2"
-            />
-            <Label htmlFor="isPremium" className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2">
-              <span>👑</span> Premium Content
-            </Label>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="explanation">Explanation *</Label>
-            <Textarea
-              id="explanation"
-              value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
-              placeholder="Explain the grammar concept..."
-              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-              rows={4}
-              required
+            <FormField
+              control={form.control}
+              name="is_premium"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-3">
+                    <FormControl>
+                      <input type="checkbox" checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} id="isPremium" className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500 focus:ring-2 focus:ring-offset-2" />
+                    </FormControl>
+                    <FormLabel htmlFor="isPremium" className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2">
+                      <span>👑</span> Premium Content
+                    </FormLabel>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Examples *</Label>
-            {examples.map((example, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={example}
-                  onChange={(e) => handleExampleChange(index, e.target.value)}
-                  placeholder={`Example ${index + 1}`}
-                  className="rounded-2xl border-2 border-gray-200 dark:border-gray-700"
+            <FormField
+              control={form.control}
+              name="explanation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Explanation *</FormLabel>
+                  <FormControl>
+                    <Textarea rows={4} placeholder="Explain the grammar concept..." className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormLabel>Examples *</FormLabel>
+            {fields.map((fieldItem, index) => (
+              <div key={fieldItem.id} className="flex gap-2">
+                <FormField
+                  control={form.control}
+                  name={`examples.${index}`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input placeholder={`Example ${index + 1}`} className="rounded-2xl border-2 border-gray-200 dark:border-gray-700" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {examples.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveExample(index)}
-                    className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
-                  >
+                {fields.length > 1 && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveExample(index)} className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20">
                     <X className="h-4 w-4 text-red-600" />
                   </Button>
                 )}
@@ -225,36 +229,31 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="miniText">Practice Text *</Label>
-            <Textarea
-              id="miniText"
-              value={miniText}
-              onChange={(e) => setMiniText(e.target.value)}
-              placeholder="A short text demonstrating the grammar concept..."
-              className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-              rows={6}
-              required
+            <FormField
+              control={form.control}
+              name="mini_text"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Practice Text *</FormLabel>
+                  <FormControl>
+                    <Textarea rows={6} placeholder="A short text demonstrating the grammar concept..." className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
           <div className="flex gap-3 pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300"
-            >
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={createTopic.isPending}
-            >
+            <Button type="submit" className="flex-1 rounded-2xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300" disabled={createTopic.isPending}>
               {createTopic.isPending ? "Creating..." : "Create Topic"}
             </Button>
           </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

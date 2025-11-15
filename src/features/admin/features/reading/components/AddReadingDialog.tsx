@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -19,12 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateReading } from "../hooks";
 import { Level } from "@/shared/types/common.types";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 import { QuestionManager, Question } from "./QuestionManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { QuestionFormData, readingFormSchema, type ReadingFormData } from "../types/validation";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -34,54 +37,53 @@ interface AddReadingDialogProps {
 }
 
 export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
-  const [title, setTitle] = useState("");
-  const [level, setLevel] = useState<string>("");
-  const [content, setContent] = useState("");
+  const form = useForm<ReadingFormData>({
+    resolver: zodResolver(readingFormSchema),
+    defaultValues: {
+      title: "",
+      level: "B1",
+      content: "",
+      audio_url: "",
+      is_premium: false,
+      order_index: 1,
+      updated_at: new Date().toISOString(),
+      questions: [],
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
-  const [orderIndex, setOrderIndex] = useState("1");
   const [isUploading, setIsUploading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
 
   const createReading = useCreateReading();
+  useEffect(() => {
+    form.setValue("questions", questions as QuestionFormData[], { shouldDirty: true });
+  }, [questions, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!level) return;
-
+  const onSubmitForm = async (data: ReadingFormData) => {
     let audioAssetId: string | undefined = undefined;
 
-    // Upload audio file if provided
     if (audioFile) {
       try {
         setIsUploading(true);
-        
-        console.log('Starting audio upload:', {
-          name: audioFile.name,
-          // size: audioFile.size,
-          type: audioFile.type,
-        });
-        
-        // Use the new audio asset upload service
+
         const result = await uploadAudioAsset({
           file: audioFile,
-          contentType: 'reading',
+          contentType: "reading",
         });
 
         if (!result.success || !result.audioAsset) {
-          const errorMsg = result.error || 'Failed to upload audio';
-          console.error('Upload failed:', errorMsg);
+          const errorMsg = result.error || "Failed to upload audio";
           alert(`Failed to upload audio file: ${errorMsg}`);
           setIsUploading(false);
           return;
         }
 
-        console.log('Audio uploaded successfully:', result.audioAsset);
         audioAssetId = result.audioAsset.id;
       } catch (error) {
-        console.error("Audio upload error:", error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        const errorMsg = error instanceof Error ? error.message : "Unknown error";
         alert(`Failed to upload audio file: ${errorMsg}`);
         setIsUploading(false);
         return;
@@ -91,24 +93,28 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
     }
 
     await createReading.mutateAsync({
-      title,
-      level: level as Level,
-      content,
-      audio_url: audioAssetId ? '' : '', // Keep for backward compatibility, can be removed later
+      title: data.title,
+      level: data.level as Level,
+      content: data.content,
+      audio_url: audioAssetId ? "" : "",
       audio_asset_id: audioAssetId,
-      is_premium: isPremium,
-      order_index: parseInt(orderIndex),
+      is_premium: !!data.is_premium,
+      order_index: Number(data.order_index || 1),
       updated_at: new Date().toISOString(),
       questions,
     });
 
-    // Reset form
-    setTitle("");
-    setLevel("");
-    setContent("");
+    form.reset({
+      title: "",
+      level: "B1",
+      content: "",
+      audio_url: "",
+      is_premium: false,
+      order_index: 1,
+      updated_at: new Date().toISOString(),
+      questions: [],
+    });
     setAudioFile(null);
-    setIsPremium(false);
-    setOrderIndex("1");
     setQuestions([]);
     onClose();
   };
@@ -128,7 +134,8 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6" noValidate>
           <Tabs defaultValue="content" className="w-full">
             <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
               <TabsTrigger value="content" className="rounded-xl">
@@ -142,44 +149,62 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
             <TabsContent value="content" className="space-y-6 mt-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., My Daily Routine"
-                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-                    required
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title *</FormLabel>
+                        <FormControl>
+                          <Input id="title" placeholder="e.g., My Daily Routine" className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
 
                 <div className="space-y-2 ">
-                  <Label htmlFor="level">Level *</Label>
-                  <Select value={level} onValueChange={setLevel} required>
-                    <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LEVELS.map((lvl) => (
-                        <SelectItem key={lvl} value={lvl}>
-                          {lvl}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormField
+                    control={form.control}
+                    name="level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Level *</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={(val) => field.onChange(val as Level)}>
+                            <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {LEVELS.map((lvl) => (
+                                <SelectItem key={lvl} value={lvl}>
+                                  {lvl}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Content *</Label>
-                <Textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Enter the reading text (use double line breaks for paragraphs)..."
-                  className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
-                  rows={12}
-                  required
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Content *</FormLabel>
+                      <FormControl>
+                        <Textarea id="content" placeholder="Enter the reading text (use double line breaks for paragraphs)..." className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" rows={12} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
 
@@ -201,30 +226,46 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
 
               <div className="grid grid-cols-2 gap-4 items-start">
                 <div className="space-y-2">
-                  <Label htmlFor="orderIndex">Order Index</Label>
-                  <Input
-                    id="orderIndex"
-                    type="number"
-                    value={orderIndex}
-                    onChange={(e) => setOrderIndex(e.target.value)}
-                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700"
-                    min="1"
+                  <FormField
+                    control={form.control}
+                    name="order_index"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Order Index</FormLabel>
+                        <FormControl>
+                          <Input id="orderIndex" type="number" className="rounded-2xl border-2 border-gray-200 dark:border-gray-700" value={Number(field.value ?? 1)} min={1} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
 
                 <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
-                  <Checkbox
-                    id="isPremium"
-                    checked={isPremium}
-                    onCheckedChange={(checked) => setIsPremium(checked as boolean)}
-                    className="h-5 w-5 rounded-lg border-2 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                  <FormField
+                    control={form.control}
+                    name="is_premium"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-3">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            id="isPremium"
+                            className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500"
+                            checked={!!field.value}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        </FormControl>
+                        <Label
+                          htmlFor="isPremium"
+                          className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
+                        >
+                          <span>👑</span> Premium Content
+                        </Label>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Label
-                    htmlFor="isPremium"
-                    className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
-                  >
-                    <span>👑</span> Premium Content
-                  </Label>
                 </div>
               </div>
             </TabsContent>
@@ -238,7 +279,12 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={() => {
+                form.reset();
+                setAudioFile(null);
+                setQuestions([]);
+                onClose();
+              }}
               className="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300"
             >
               Cancel
@@ -255,7 +301,8 @@ export function AddReadingDialog({ open, onClose }: AddReadingDialogProps) {
                 : "Create Reading"}
             </Button>
           </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

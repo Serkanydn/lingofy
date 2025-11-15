@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X } from "lucide-react";
 import { useGrammarQuestions } from "../hooks";
+import { useForm, useFieldArray } from "react-hook-form";
+import type { FieldArrayPath } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { grammarQuestionSchema, type GrammarQuestionFormData } from "../types/validation";
 
 interface AddQuestionDialogProps {
   open: boolean;
@@ -26,53 +31,36 @@ export function AddQuestionDialog({
   onClose,
   topicId,
 }: AddQuestionDialogProps) {
-  const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState<string[]>(["", "", "", ""]);
-  const [correctAnswer, setCorrectAnswer] = useState("");
-  const [explanation, setExplanation] = useState("");
-
   const { data: questionsData } = useGrammarQuestions(topicId);
 
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
+  const form = useForm<GrammarQuestionFormData>({
+    resolver: zodResolver(grammarQuestionSchema),
+    defaultValues: {
+      question: "",
+      options: ["", "", "", ""],
+      correct_answer: "",
+      explanation: "",
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
 
-  const handleAddOption = () => {
-    setOptions([...options, ""]);
-  };
+  type OptionsArrayName = FieldArrayPath<GrammarQuestionFormData>;
+  const { fields, append, remove } = useFieldArray<GrammarQuestionFormData>({ control: form.control, name: "options" as OptionsArrayName });
 
-  const handleRemoveOption = (index: number) => {
-    if (options.length > 2) {
-      setOptions(options.filter((_, i) => i !== index));
+  useEffect(() => {
+    if (!open) {
+      form.reset({ question: "", options: ["", "", "", ""], correct_answer: "", explanation: "" });
     }
-  };
+  }, [open, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmitForm = async (data: GrammarQuestionFormData) => {
     if (!questionsData?.topic?.content_id) {
+      onClose();
       return;
     }
 
-    const filteredOptions = options.filter((opt) => opt.trim() !== "");
-
-    if (filteredOptions.length < 2) {
-      alert("Please provide at least 2 options");
-      return;
-    }
-
-    if (!filteredOptions.includes(correctAnswer)) {
-      alert("Correct answer must be one of the options");
-      return;
-    }
-
-    // Reset form
-    setQuestion("");
-    setOptions(["", "", "", ""]);
-    setCorrectAnswer("");
-    setExplanation("");
+    form.reset({ question: "", options: ["", "", "", ""], correct_answer: "", explanation: "" });
     onClose();
   };
 
@@ -86,88 +74,96 @@ export function AddQuestionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="question">Question *</Label>
-            <Textarea
-              id="question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Enter the question text..."
-              rows={3}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Answer Options *</Label>
-            {options.map((option, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Option ${index + 1}`}
-                />
-                {options.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveOption(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6" noValidate>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="question"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Question *</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Enter the question text..." rows={3} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddOption}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Option
-            </Button>
-          </div>
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="correctAnswer">Correct Answer *</Label>
-            <Input
-              id="correctAnswer"
-              value={correctAnswer}
-              onChange={(e) => setCorrectAnswer(e.target.value)}
-              placeholder="Enter the exact correct answer from options above"
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Must match one of the options exactly
-            </p>
-          </div>
+            <div className="space-y-2">
+              <Label>Answer Options *</Label>
+              {fields.map((fieldItem, index) => (
+                <div key={fieldItem.id} className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`options.${index}`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input placeholder={`Option ${index + 1}`} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {fields.length > 2 && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={() => append("")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Option
+              </Button>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="explanation">Explanation *</Label>
-            <Textarea
-              id="explanation"
-              value={explanation}
-              onChange={(e) => setExplanation(e.target.value)}
-              placeholder="Explain why this is the correct answer..."
-              rows={4}
-              required
-            />
-          </div>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="correct_answer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correct Answer *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter the exact correct answer from options above" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <p className="text-xs text-muted-foreground">Must match one of the options exactly</p>
+            </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="explanation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Explanation *</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Explain why this is the correct answer..." rows={4} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1">
+                Save
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -22,10 +24,11 @@ import {
 import { useUpdateReading } from "../hooks";
 import { useReadingQuestions } from "@/features/reading/hooks/useReading";
 import { Level } from "@/shared/types/common.types";
-import { ReadingText } from "@/features/reading/types/service.types";
+import { ReadingText, type ReadingQuestionInput } from "@/features/reading/types/service.types";
 import { QuestionManager, Question } from "./QuestionManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { readingFormSchema, type ReadingFormData, type QuestionFormData } from "../types/validation";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -40,13 +43,23 @@ export function EditReadingDialog({
   onClose,
   reading,
 }: EditReadingDialogProps) {
-  const [title, setTitle] = useState("");
-  const [level, setLevel] = useState<string>("B1");
-  const [content, setContent] = useState("");
+  const form = useForm<ReadingFormData>({
+    resolver: zodResolver(readingFormSchema),
+    defaultValues: {
+      title: "",
+      level: "B1",
+      content: "",
+      audio_url: "",
+      is_premium: false,
+      order_index: 1,
+      updated_at: new Date().toISOString(),
+      questions: [],
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [currentAudioUrl, setCurrentAudioUrl] = useState("");
-  const [orderIndex, setOrderIndex] = useState("1");
-  const [isPremium, setIsPremium] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -65,17 +78,22 @@ export function EditReadingDialog({
       console.log('Audio asset:', reading.audio_asset);
       console.log('Audio asset ID:', reading.audio_asset_id);
       console.log('Audio URL:', reading.audio_url);
-      
-      setTitle(reading.title);
-      setLevel(reading.level);
-      setContent(reading.content);
+
+      form.reset({
+        title: reading.title,
+        level: reading.level,
+        content: reading.content,
+        audio_url: reading.audio_url || "",
+        is_premium: reading.is_premium,
+        order_index: reading.order_index,
+        updated_at: new Date().toISOString(),
+        questions: [],
+      });
       // Check both audio_url and audio_asset for audio file
       const audioUrl = reading.audio_asset?.cdn_url || reading.audio_asset?.storage_url || reading.audio_url || "";
       console.log('Resolved audio URL:', audioUrl);
       setCurrentAudioUrl(audioUrl);
       setAudioFile(null);
-      setOrderIndex(String(reading.order_index));
-      setIsPremium(reading.is_premium);
     }
 
     // Reset state when dialog closes
@@ -92,29 +110,21 @@ export function EditReadingDialog({
     }
   }, [fetchedQuestions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    form.setValue("questions", questions as QuestionFormData[], { shouldDirty: true });
+  }, [questions, form]);
 
+  const onSubmitForm = async (data: ReadingFormData) => {
     if (!reading) return;
 
     let audioAssetId: string | undefined = reading.audio_asset_id;
 
-    // Upload new audio file if provided
     if (audioFile) {
       try {
         setIsUploading(true);
 
-        const { uploadAudioAsset } = await import(
-          "@/shared/services/audioUploadService"
-        );
+        const { uploadAudioAsset } = await import("@/shared/services/audioUploadService");
 
-        console.log("Starting audio upload:", {
-          name: audioFile.name,
-          size: audioFile.size,
-          type: audioFile.type,
-        });
-
-        // Use the new audio asset upload service
         const result = await uploadAudioAsset({
           file: audioFile,
           contentType: "reading",
@@ -122,18 +132,14 @@ export function EditReadingDialog({
 
         if (!result.success || !result.audioAsset) {
           const errorMsg = result.error || "Failed to upload audio";
-          console.error("Upload failed:", errorMsg);
           alert(`Failed to upload audio file: ${errorMsg}`);
           setIsUploading(false);
           return;
         }
 
-        console.log("Audio uploaded successfully:", result.audioAsset);
         audioAssetId = result.audioAsset.id;
       } catch (error) {
-        console.error("Audio upload error:", error);
-        const errorMsg =
-          error instanceof Error ? error.message : "Unknown error";
+        const errorMsg = error instanceof Error ? error.message : "Unknown error";
         alert(`Failed to upload audio file: ${errorMsg}`);
         setIsUploading(false);
         return;
@@ -142,20 +148,29 @@ export function EditReadingDialog({
       }
     }
 
+    const mappedQuestions: ReadingQuestionInput[] = questions.map((q) => ({
+      text: q.text,
+      type: q.type,
+      options: Array.isArray(q.options) ? q.options : [],
+      correct_answer: q.type === "fill_blank" ? (q.correct_answer ?? "") : undefined,
+      points: q.points,
+      order_index: q.order_index,
+    }));
+
     await updateReading.mutateAsync({
       id: reading.id,
       data: {
-        title,
-        level: level as Level,
-        content,
-        audio_url: audioAssetId ? "" : currentAudioUrl, // Keep for backward compatibility
+        title: data.title,
+        level: data.level as Level,
+        content: data.content,
+        audio_url: audioAssetId ? "" : currentAudioUrl,
         audio_asset_id: audioAssetId,
-        order_index: parseInt(orderIndex),
-        is_premium: isPremium,
+        order_index: Number(data.order_index || 1),
+        is_premium: !!data.is_premium,
         content_id: reading.content_id,
         updated_at: new Date().toISOString(),
       },
-      questions,
+      questions: mappedQuestions,
     });
 
     onClose();
@@ -178,7 +193,8 @@ export function EditReadingDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6" noValidate>
           <Tabs defaultValue="content" className="w-full">
             <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
               <TabsTrigger value="content" className="rounded-xl">
@@ -192,63 +208,62 @@ export function EditReadingDialog({
             <TabsContent value="content" className="space-y-6 mt-6">
               <div className="flex justify-between gap-4">
                 <div className="space-y-2 flex-1">
-                  <Label
-                    htmlFor="title"
-                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-                  >
-                    Title *
-                  </Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., The History of Coffee"
-                    required
-                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Title *</FormLabel>
+                        <FormControl>
+                          <Input id="title" placeholder="e.g., The History of Coffee" className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
 
                 <div className="space-y-2 flex-1">
-                  <Label
-                    htmlFor="level"
-                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-                  >
-                    Level *
-                  </Label>
-                  <Select
-                    value={level}
-                    onValueChange={(val) => setLevel(val as Level)}
-                    required
-                  >
-                    <SelectTrigger className="rounded-2xl border-2 w-full border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300">
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LEVELS.map((lvl) => (
-                        <SelectItem key={lvl} value={lvl}>
-                          {lvl}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormField
+                    control={form.control}
+                    name="level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Level *</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={(val) => field.onChange(val as Level)}>
+                            <SelectTrigger className="rounded-2xl border-2 w-full border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300">
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {LEVELS.map((lvl) => (
+                                <SelectItem key={lvl} value={lvl}>
+                                  {lvl}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label
-                  htmlFor="content"
-                  className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-                >
-                  Reading Text *
-                </Label>
-                <Textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Enter the reading text..."
-                  rows={12}
-                  required
-                  className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Reading Text *</FormLabel>
+                      <FormControl>
+                        <Textarea id="content" placeholder="Enter the reading text..." rows={12} className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
 
@@ -288,38 +303,47 @@ export function EditReadingDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="orderIndex"
-                    className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-                  >
-                    Order Index
-                  </Label>
-                  <Input
-                    id="orderIndex"
-                    type="number"
-                    value={orderIndex}
-                    onChange={(e) => setOrderIndex(e.target.value)}
-                    min="1"
-                    className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300"
+                  <FormField
+                    control={form.control}
+                    name="order_index"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Order Index</FormLabel>
+                        <FormControl>
+                          <Input id="orderIndex" type="number" min="1" className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-300" value={Number(field.value ?? 1)} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
 
               <div className="flex items-center space-x-3 p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
-                <Checkbox
-                  id="isPremium"
-                  checked={isPremium}
-                  onCheckedChange={(checked) =>
-                    setIsPremium(checked as boolean)
-                  }
-                  className="h-5 w-5 rounded-lg border-2 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                <FormField
+                  control={form.control}
+                  name="is_premium"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-3">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          id="isPremium"
+                          className="h-5 w-5 rounded-lg border-2 border-orange-300 text-orange-500 focus:ring-orange-500"
+                          checked={!!field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <Label
+                        htmlFor="isPremium"
+                        className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
+                      >
+                        <span>👑</span> Premium Content
+                      </Label>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <Label
-                  htmlFor="isPremium"
-                  className="text-sm font-semibold text-orange-700 dark:text-orange-400 cursor-pointer flex items-center gap-2"
-                >
-                  <span>👑</span> Premium Content
-                </Label>
               </div>
             </TabsContent>
 
@@ -358,7 +382,12 @@ export function EditReadingDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={() => {
+                form.reset();
+                setAudioFile(null);
+                setQuestions([]);
+                onClose();
+              }}
               className="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300"
             >
               Cancel
@@ -375,7 +404,8 @@ export function EditReadingDialog({
                 : "Update Reading"}
             </Button>
           </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

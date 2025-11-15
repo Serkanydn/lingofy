@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,10 @@ import {
   useAssignWordToCategory,
   UserWord,
 } from "../hooks/useWords";
+import { useForm, useFieldArray, type FieldArrayPath } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { updateWordSchema, type UpdateWordInput } from "../types/validation";
 
 interface UpdateWordDialogProps {
   open: boolean;
@@ -39,66 +44,55 @@ export function UpdateWordDialog({
   onClose,
   word,
 }: UpdateWordDialogProps) {
-  const [wordText, setWordText] = useState(word.word);
-  const [description, setDescription] = useState(word.description);
-  const [exampleSentences, setExampleSentences] = useState<string[]>(
-    word.example_sentences || [""]
-  );
-  const [categoryId, setCategoryId] = useState<string>(
-    (word as any).category_id || "none"
-  );
   const updateWord = useUpdateWord();
   const assignToCategory = useAssignWordToCategory();
   const { data: categories } = useWordCategories();
+  const form = useForm<UpdateWordInput>({
+    resolver: zodResolver(updateWordSchema),
+    defaultValues: {
+      word: word.word,
+      description: word.description,
+      example_sentences: (word.example_sentences && word.example_sentences.length > 0) ? word.example_sentences : [""],
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+  type EXAMPLE_SENTENCES_NAME = FieldArrayPath<UpdateWordInput>;
+  const { fields, append, remove } = useFieldArray<UpdateWordInput>({ control: form.control, name: "example_sentences" as EXAMPLE_SENTENCES_NAME });
+  const [categoryId, setCategoryId] = React.useState<string>(word.category_id ?? "none");
 
   useEffect(() => {
-    if (open) {
-      setWordText(word.word);
-      setDescription(word.description);
-      setExampleSentences(word.example_sentences || [""]);
-      setCategoryId((word as any).category_id || "none");
+    if (open && word) {
+      form.reset({
+        word: word.word,
+        description: word.description,
+        example_sentences: (word.example_sentences && word.example_sentences.length > 0) ? word.example_sentences : [""],
+      });
+      setCategoryId(word.category_id ?? "none");
     }
-  }, [open, word]);
+  }, [open, word, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (
-      !wordText ||
-      !description ||
-      exampleSentences.filter((s) => s.trim()).length === 0
-    ) {
-      toast.error(
-        "Please fill in all required fields and at least one example"
-      );
-      return;
-    }
-
+  const onSubmit = async (data: UpdateWordInput) => {
     try {
       await updateWord.mutateAsync({
         id: word.id,
         updates: {
-          word: wordText,
-          description,
-          example_sentences: exampleSentences.filter((s) => s.trim()),
+          word: data.word,
+          description: data.description,
+          example_sentences: data.example_sentences.filter((s) => s.trim()),
         },
       });
-
-      // Update category if changed
-      const currentCategoryId = (word as any).category_id || "none";
+      const currentCategoryId = word.category_id ?? "none";
       if (categoryId !== currentCategoryId) {
         await assignToCategory.mutateAsync({
           wordId: word.id,
           categoryId: categoryId === "none" ? null : categoryId,
         });
       }
-
       toast.success("Word updated successfully!");
       onClose();
     } catch (error) {
-      console.error("Error updating word:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update word";
+      const errorMessage = error instanceof Error ? error.message : "Failed to update word";
       toast.error(errorMessage);
     }
   };
@@ -112,33 +106,37 @@ export function UpdateWordDialog({
             Update the word in your vocabulary collection
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="word" className="text-sm font-semibold">
-              English Word *
-            </Label>
-            <Input
-              id="word"
-              value={wordText}
-              onChange={(e) => setWordText(e.target.value)}
-              placeholder="e.g., excellent"
-              required
-              className="rounded-2xl h-12 text-base border-2"
+            <FormField
+              control={form.control}
+              name="word"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-semibold">English Word *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., excellent" className="rounded-2xl h-12 text-base border-2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-semibold">
-              Description *
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g., An adjective meaning very good or of high quality"
-              rows={3}
-              required
-              className="rounded-2xl text-base border-2"
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-semibold">Description *</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="e.g., An adjective meaning very good or of high quality" rows={3} className="rounded-2xl text-base border-2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
@@ -170,46 +168,28 @@ export function UpdateWordDialog({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold">Example Sentences *</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setExampleSentences([...exampleSentences, ""])}
-                className="rounded-2xl border-2"
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => append("")} className="rounded-2xl border-2">
                 <Plus className="mr-1 h-3 w-3" />
                 Add Example
               </Button>
             </div>
             <div className="space-y-3">
-              {exampleSentences.map((example, index) => (
-                <div key={index} className="flex gap-2">
-                  <Textarea
-                    value={example}
-                    onChange={(e) => {
-                      const updated = [...exampleSentences];
-                      updated[index] = e.target.value;
-                      setExampleSentences(updated);
-                    }}
-                    placeholder={`Example ${
-                      index + 1
-                    }: She did an excellent job on the project.`}
-                    rows={2}
-                    required={index === 0}
-                    className="rounded-2xl text-base border-2"
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`example_sentences.${index}`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Textarea rows={2} className="rounded-2xl text-base border-2" placeholder={`Example ${index + 1}: She did an excellent job on the project.`} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {exampleSentences.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setExampleSentences(
-                          exampleSentences.filter((_, i) => i !== index)
-                        );
-                      }}
-                      className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 h-10 w-10"
-                    >
+                  {fields.length > 1 && (
+                    <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 h-10 w-10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
@@ -219,23 +199,15 @@ export function UpdateWordDialog({
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 rounded-2xl h-12 text-base border-2"
-            >
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-2xl h-12 text-base border-2">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1 rounded-2xl h-12 text-base bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={updateWord.isPending}
-            >
+            <Button type="submit" className="flex-1 rounded-2xl h-12 text-base bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300" disabled={updateWord.isPending}>
               {updateWord.isPending ? "Updating..." : "Update Word"}
             </Button>
           </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,12 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useAddWord,
-  useWordCategories,
-  useAssignWordToCategory,
-} from "../hooks/useWords";
+import { useAddWord, useWordCategories, useAssignWordToCategory } from "../hooks/useWords";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useForm, useFieldArray } from "react-hook-form";
+import type { FieldArrayPath } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { addWordSchema, type AddWordInput } from "../types/validation";
 
 interface AddWordDialogProps {
   open: boolean;
@@ -47,71 +49,60 @@ export function AddWordDialog({
   initialCategoryId = null,
 }: AddWordDialogProps) {
   const { isPremium } = useAuth();
-  const [word, setWord] = useState(initialWord);
-  const [description, setDescription] = useState("");
-  const [exampleSentences, setExampleSentences] = useState<string[]>([""]);
-  const [categoryId, setCategoryId] = useState<string>("none");
   const addWord = useAddWord();
   const assignToCategory = useAssignWordToCategory();
   const { data: categories } = useWordCategories();
+  const form = useForm<AddWordInput>({
+    resolver: zodResolver(addWordSchema),
+    defaultValues: {
+      word: initialWord || "",
+      description: "",
+      example_sentences: [""],
+      source_type: sourceType,
+      source_id: sourceId,
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+  type ExampleSentencesArrayName = FieldArrayPath<AddWordInput>;
+  const { fields, append, remove } = useFieldArray<AddWordInput>({ control: form.control, name: "example_sentences" as ExampleSentencesArrayName });
+  const premiumDisabled = !isPremium && !!initialWord;
+  const [categoryId, setCategoryId] = React.useState<string>("none");
 
-  useEffect(() => {
-    if (open) {
-      setWord(initialWord);
-      setCategoryId(initialCategoryId || "none");
+useEffect(() => {
+  if (open) {
+    form.reset({
+      word: initialWord || "",
+      description: "",
+      example_sentences: [""],
+      source_type: sourceType,
+      source_id: sourceId,
+    });
+    setCategoryId(initialCategoryId || "none");
+  }
+}, [open, initialWord, initialCategoryId, sourceType, sourceId, form]);
+
+const onSubmit = async (data: AddWordInput) => {
+  try {
+    const newWord = await addWord.mutateAsync({
+      word: data.word,
+      description: data.description,
+      example_sentences: data.example_sentences.filter((s) => s.trim()),
+      source_type: data.source_type,
+      source_id: data.source_id,
+    });
+    if (categoryId && categoryId !== "none") {
+      await assignToCategory.mutateAsync({ wordId: newWord.id, categoryId });
     }
-  }, [open, initialWord, initialCategoryId]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    console.log("word", word);
-    console.log("description", description);
-    console.log("exampleSentences", exampleSentences);
-
-    if (
-      !word ||
-      !description ||
-      exampleSentences.filter((s) => s.trim()).length === 0
-    ) {
-      toast.error(
-        "Please fill in all required fields and at least one example"
-      );
-      return;
-    }
-
-    try {
-      const newWord = await addWord.mutateAsync({
-        word,
-        description,
-        example_sentences: exampleSentences.filter((s) => s.trim()),
-        source_type: sourceType,
-        source_id: sourceId,
-      });
-
-      // Assign the word to the selected category (or leave uncategorized)
-      if (categoryId && categoryId !== "none") {
-        await assignToCategory.mutateAsync({
-          wordId: newWord.id,
-          categoryId,
-        });
-      }
-
-      toast.success("Word added to your collection!");
-
-      // Reset form
-      setWord("");
-      setDescription("");
-      setExampleSentences([""]);
-      setCategoryId("none");
-      onClose();
-    } catch (error) {
-      console.error("Error adding word:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to add word";
-      toast.error(errorMessage);
-    }
-  };
+    toast.success("Word added to your collection!");
+    form.reset();
+    setCategoryId("none");
+    onClose();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to add word";
+    toast.error(errorMessage);
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={onClose} >
@@ -153,35 +144,37 @@ export function AddWordDialog({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="word" className="text-sm font-semibold">
-              English Word *
-            </Label>
-            <Input
-              id="word"
-              value={word}
-              onChange={(e) => setWord(e.target.value)}
-              placeholder="e.g., excellent"
-              required
-              disabled={!isPremium && !!initialWord}
-              className="rounded-2xl h-12 text-base border-2"
+            <FormField
+              control={form.control}
+              name="word"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-semibold">English Word *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., excellent" disabled={premiumDisabled} className="rounded-2xl h-12 text-base border-2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-semibold">
-              Description *
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g., An adjective meaning very good or of high quality"
-              rows={3}
-              required
-              disabled={!isPremium && !!initialWord}
-              className="rounded-2xl text-base border-2"
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-semibold">Description *</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="e.g., An adjective meaning very good or of high quality" rows={3} disabled={premiumDisabled} className="rounded-2xl text-base border-2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
@@ -192,7 +185,7 @@ export function AddWordDialog({
             <Select 
               value={categoryId} 
               onValueChange={setCategoryId}
-              disabled={!isPremium && !!initialWord}
+              disabled={premiumDisabled}
             >
               <SelectTrigger className="w-full rounded-2xl h-12 border-2">
                 <SelectValue placeholder="Select a category (optional)" />
@@ -217,49 +210,28 @@ export function AddWordDialog({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold">Example Sentences *</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setExampleSentences([...exampleSentences, ""])}
-                className="rounded-2xl border-2"
-                disabled={!isPremium && !!initialWord}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => append("")} className="rounded-2xl border-2" disabled={premiumDisabled}>
                 <Plus className="mr-1 h-3 w-3" />
                 Add Example
               </Button>
             </div>
             <div className="space-y-3">
-              {exampleSentences.map((example, index) => (
-                <div key={index} className="flex gap-2">
-                  <Textarea
-                    value={example}
-                    onChange={(e) => {
-                      const updated = [...exampleSentences];
-                      updated[index] = e.target.value;
-                      setExampleSentences(updated);
-                    }}
-                    placeholder={`Example ${
-                      index + 1
-                    }: She did an excellent job on the project.`}
-                    rows={2}
-                    required={index === 0}
-                    disabled={!isPremium && !!initialWord}
-                    className="rounded-2xl text-base border-2"
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`example_sentences.${index}`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Textarea rows={2} disabled={premiumDisabled} className="rounded-2xl text-base border-2" placeholder={`Example ${index + 1}: She did an excellent job on the project.`} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {exampleSentences.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setExampleSentences(
-                          exampleSentences.filter((_, i) => i !== index)
-                        );
-                      }}
-                      disabled={!isPremium && !!initialWord}
-                      className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 h-10 w-10"
-                    >
+                  {fields.length > 1 && (
+                    <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} disabled={premiumDisabled} className="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 h-10 w-10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
@@ -269,23 +241,15 @@ export function AddWordDialog({
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 rounded-2xl h-12 text-base border-2"
-            >
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-2xl h-12 text-base border-2">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1 rounded-2xl h-12 text-base bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300"
-              disabled={addWord.isPending || (!isPremium && !!initialWord)}
-            >
+            <Button type="submit" className="flex-1 rounded-2xl h-12 text-base bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300" disabled={addWord.isPending || premiumDisabled}>
               {addWord.isPending ? "Adding..." : "Add Word"}
             </Button>
           </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
