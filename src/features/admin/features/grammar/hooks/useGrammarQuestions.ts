@@ -34,7 +34,7 @@ export function useGrammarQuestions(topicId: string) {
       if (topicError) throw topicError;
       if (!topic) throw new Error("Topic not found");
 
-      const typedTopic = topic as GrammarTopic;
+      const typedTopic = topic as any;
 
       // Get questions using quiz service
       const questions = await quizService.getQuizByContentId(topicId);

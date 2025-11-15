@@ -1,14 +1,14 @@
 'use client'
 
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
 import { BookOpen, Headphones, BookText, BookMarked, Crown, BarChart3, Home } from 'lucide-react'
-import { useAuthStore } from '@/lib/store/authStore'
 import { useState } from 'react'
+import { useAuthStore } from '@/features/auth/store/useAuthStore'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/shared/lib/utils'
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },

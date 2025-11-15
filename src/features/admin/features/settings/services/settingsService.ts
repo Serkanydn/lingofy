@@ -54,7 +54,6 @@ class SettingsService {
 
       const { data, error } = await supabase
         .from('app_settings')
-        // @ts-expect-error - Table type will be available after running the migration
         .insert(insertData)
         .select()
         .single();
@@ -71,7 +70,6 @@ class SettingsService {
 
     const { data, error } = await supabase
       .from('app_settings')
-      // @ts-expect-error - Table type will be available after running the migration
       .update(updateData)
       .eq('id', existing.id)
       .select()

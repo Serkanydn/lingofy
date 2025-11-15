@@ -1,4 +1,4 @@
-import { QuizQuestion, UserAnswer } from "@/types/content.types";
+import { QuizQuestion, UserAnswer } from "../types/quiz.types";
 import { quizValidator } from "./quizValidator";
 
 export const scoreCalculator = {
@@ -11,11 +11,11 @@ export const scoreCalculator = {
     let maxScore = 0;
 
     questions.forEach((question) => {
-      maxScore += question.points;
+      maxScore += question.points!;
       const userAnswer = userAnswers[question.id];
 
       if (quizValidator.isAnswerCorrect(question, userAnswer)) {
-        totalScore += question.points;
+        totalScore += question.points!;
       }
     });
 

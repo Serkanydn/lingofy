@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Clock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { ListeningExercise } from "../types/listening.types";
 import type { Level } from "@/shared/types/common.types";
+import { ListeningExercise } from "../types/service.types";
 
 interface ListeningCardProps {
   listening: ListeningExercise;

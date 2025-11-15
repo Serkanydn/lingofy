@@ -17,7 +17,7 @@ export type QuizQuestion = {
   correct_answer: number
   explanation: string | null
   order_index: number
-  points?: number
+  points: number
   type: QuestionType
 }
 
