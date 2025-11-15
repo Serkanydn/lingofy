@@ -78,6 +78,24 @@ export class CategoryService extends BaseService<WordCategory> {
     if (error) throw error;
   }
 
+  async deleteCategoryCascade(id: string, userId: string): Promise<void> {
+    const { error: wordsError } = await this.supabase
+      .from("user_words")
+      .delete()
+      .eq("category_id", id)
+      .eq("user_id", userId);
+
+    if (wordsError) throw wordsError;
+
+    const { error } = await this.supabase
+      .from(this.tableName)
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userId);
+
+    if (error) throw error;
+  }
+
   async reorderCategories(userId: string, categoryIds: string[]): Promise<void> {
     const updates = categoryIds.map((id, index) => ({
       id,

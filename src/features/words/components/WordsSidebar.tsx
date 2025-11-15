@@ -2,9 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Folder, Plus, ArrowLeft } from "lucide-react";
+import { Folder, Plus, ArrowLeft, MoreVertical, Pencil, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { WordCategory } from "../hooks/useWords";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface WordsSidebarProps {
   categories: WordCategory[] | undefined;
@@ -12,6 +18,8 @@ interface WordsSidebarProps {
   onCategorySelect: (categoryId: string | null) => void;
   onAddCategory: () => void;
   wordsInCategory: (categoryId: string | null) => number;
+  onEditCategory?: (category: WordCategory) => void;
+  onDeleteCategory?: (category: WordCategory) => void;
 }
 
 /**
@@ -32,6 +40,8 @@ export function WordsSidebar({
   onCategorySelect,
   onAddCategory,
   wordsInCategory,
+  onEditCategory,
+  onDeleteCategory,
 }: WordsSidebarProps) {
   const router = useRouter();
 
@@ -79,26 +89,51 @@ export function WordsSidebar({
             </button>
 
             {categories?.map((category) => (
-              <button
+              <div
                 key={category.id}
-                onClick={() => onCategorySelect(category.id)}
-                className={`w-full text-left px-3 py-2 rounded-xl transition-colors flex items-center justify-between ${
+                className={`w-full px-3 py-2 rounded-xl transition-colors flex items-center justify-between ${
                   selectedCategory === category.id
                     ? "bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400"
                     : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <button
+                  className="flex items-center gap-2 flex-1 text-left"
+                  onClick={() => onCategorySelect(category.id)}
+                >
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: category.color }}
                   />
                   <span className="text-sm font-medium">{category.name}</span>
+                </button>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="rounded-full">
+                    {wordsInCategory(category.id)}
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-xl">
+                      <DropdownMenuItem
+                        onClick={() => onEditCategory?.(category)}
+                        className="gap-2"
+                      >
+                        <Pencil className="h-4 w-4" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onDeleteCategory?.(category)}
+                        className="gap-2 text-red-600 dark:text-red-400"
+                      >
+                        <Trash className="h-4 w-4" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <Badge variant="secondary" className="rounded-full">
-                  {wordsInCategory(category.id)}
-                </Badge>
-              </button>
+              </div>
             ))}
           </div>
         </div>

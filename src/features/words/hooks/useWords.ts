@@ -175,6 +175,23 @@ export function useDeleteCategory() {
   });
 }
 
+export function useDeleteCategoryCascade() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (categoryId: string) => {
+      const user = await authService.getCurrentUser();
+      if (!user) throw new Error("User not authenticated");
+      const { categoryService } = await import("../services/categoryService");
+      return categoryService.deleteCategoryCascade(categoryId, user.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["word-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["user-words"] });
+    },
+  });
+}
+
 export function useAssignWordToCategory() {
   const queryClient = useQueryClient();
 

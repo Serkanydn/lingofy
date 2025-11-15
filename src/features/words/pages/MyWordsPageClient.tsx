@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { FlashcardPractice } from "../components/FlashcardPractice";
 import { UpdateWordDialog } from "../components/UpdateWordDialog";
+import { AddWordDialog } from "../components/addWordDialog";
 import { WordsSidebar } from "../components/WordsSidebar";
 import { WordsHeader } from "../components/WordsHeader";
 import { WordsActionBar } from "../components/WordsActionBar";
@@ -13,9 +14,11 @@ import { WordsPagination } from "../components/WordsPagination";
 import { EmptyStates } from "../components/EmptyStates";
 import { PremiumGate } from "../components/PremiumGate";
 import { CategoryDialog } from "../components/CategoryDialog";
+import { EditCategoryDialog } from "../components/EditCategoryDialog";
+import { DeleteCategoryDialog } from "../components/DeleteCategoryDialog";
 import { DeleteConfirmDialog } from "../components/DeleteConfirmDialog";
 import { useMyWordsLogic } from "../hooks/useMyWordsLogic";
-import type { UserWord } from "../hooks/useWords";
+import type { UserWord, WordCategory } from "../hooks/useWords";
 
 /**
  * MyWordsPageClient Component
@@ -39,6 +42,9 @@ export function MyWordsPageClient() {
   const [editWord, setEditWord] = useState<UserWord | null>(null);
   const [deleteWord, setDeleteWord] = useState<UserWord | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showAddWord, setShowAddWord] = useState(false);
+  const [editCategory, setEditCategory] = useState<WordCategory | null>(null);
+  const [deleteCategory, setDeleteCategory] = useState<WordCategory | null>(null);
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
@@ -95,6 +101,8 @@ export function MyWordsPageClient() {
         onCategorySelect={setSelectedCategory}
         onAddCategory={() => setShowCategoryDialog(true)}
         wordsInCategory={wordsInCategory}
+        onEditCategory={(cat) => setEditCategory(cat)}
+        onDeleteCategory={(cat) => setDeleteCategory(cat)}
       />
 
       {/* Main Content */}
@@ -104,7 +112,7 @@ export function MyWordsPageClient() {
           <WordsHeader
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            onAddWord={() => router.push("/my-words/add")}
+            onAddWord={() => setShowAddWord(true)}
             isDarkMode={isDarkMode}
             onToggleDarkMode={toggleDarkMode}
           />
@@ -152,7 +160,7 @@ export function MyWordsPageClient() {
             <div className="mt-6">
               <EmptyStates
                 type="no-words"
-                onAddWord={() => router.push("/my-words/add")}
+                onAddWord={() => setShowAddWord(true)}
               />
             </div>
           )}
@@ -177,6 +185,29 @@ export function MyWordsPageClient() {
         word={deleteWord}
         open={!!deleteWord}
         onClose={() => setDeleteWord(null)}
+      />
+
+      <EditCategoryDialog
+        open={!!editCategory}
+        onClose={() => setEditCategory(null)}
+        category={editCategory}
+      />
+
+      <DeleteCategoryDialog
+        open={!!deleteCategory}
+        onClose={() => setDeleteCategory(null)}
+        category={deleteCategory}
+        onDeleted={() => {
+          if (deleteCategory && selectedCategory === deleteCategory.id) {
+            setSelectedCategory(null);
+          }
+        }}
+      />
+
+      <AddWordDialog
+        open={showAddWord}
+        onClose={() => setShowAddWord(false)}
+        initialCategoryId={selectedCategory}
       />
     </div>
   );

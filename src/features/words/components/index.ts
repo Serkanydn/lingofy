@@ -12,3 +12,5 @@ export { EmptyStates } from './EmptyStates';
 export { PremiumGate } from './PremiumGate';
 export { CategoryDialog } from './CategoryDialog';
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';
+export { EditCategoryDialog } from './EditCategoryDialog';
+export { DeleteCategoryDialog } from './DeleteCategoryDialog';
