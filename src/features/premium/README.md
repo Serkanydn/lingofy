@@ -203,7 +203,7 @@ Array of 6 premium features displayed on pricing page:
 
 ### Payment Integration
 - **LemonSqueezy**: Payment processing for subscriptions
-- **Checkout API**: `/api/create-checkout` creates checkout sessions
+- **Checkout API**: `/api/premium/create-checkout` creates checkout sessions
 - **Webhook**: `/api/webhook` handles subscription events
 - **Premium Service**: `addPremiumService` adds premium status to users
 
@@ -218,7 +218,7 @@ Array of 6 premium features displayed on pricing page:
 ### Checkout Flow
 1. User selects plan (monthly/yearly)
 2. Clicks subscribe button
-3. Frontend calls `/api/create-checkout` with plan type
+3. Frontend calls `/api/premium/create-checkout` with plan type
 4. Backend creates LemonSqueezy checkout session
 5. User redirected to LemonSqueezy checkout page
 6. On successful payment, webhook updates user's premium status
