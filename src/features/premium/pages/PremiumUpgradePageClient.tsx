@@ -23,7 +23,7 @@ interface PricingPlan {
 
 const plans: PricingPlan[] = [
   {
-    id: process.env.LEMONSQUEEZY_MONTHLY_VARIANT_ID!,
+    id: process.env.NEXT_PUBLIC_LEMONSQUEEZY_MONTHLY_VARIANT_ID!,
     title: "Monthly Plan",
     price: MONTHLY_PRICE,
     interval: "month",
@@ -37,7 +37,7 @@ const plans: PricingPlan[] = [
     ],
   },
   {
-    id: process.env.LEMONSQUEEZY_ANNUAL_VARIANT_ID!,
+    id: process.env.NEXT_PUBLIC_LEMONSQUEEZY_ANNUAL_VARIANT_ID!,
     title: "Annual Plan",
     price: ANNUAL_PRICE,
     interval: "year",

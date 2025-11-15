@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PlanType } from '@/features/premium/types/premium.types'
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
 )
 
 export async function POST(req: NextRequest) {

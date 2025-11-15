@@ -2,18 +2,18 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 
 // Log environment variables for debugging
 console.log('R2 Config:', {
-  accountId: process.env.CLOUDFLARE_R2_ACCOUNT_ID,
-  bucketName: process.env.CLOUDFLARE_R2_BUCKET_NAME,
-  hasAccessKey: !!process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
-  hasSecretKey: !!process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
+  accountId: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ACCOUNT_ID,
+  bucketName: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME,
+  hasAccessKey: !!process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ACCESS_KEY_ID,
+  hasSecretKey: !!process.env.NEXT_PUBLIC_CLOUDFLARE_R2_SECRET_ACCESS_KEY,
 });
 
 const r2Client = new S3Client({
   region: "auto",
-  endpoint: `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: `https://${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
   },
 });
 
@@ -53,7 +53,7 @@ export async function uploadAudioToR2(
 
   // Upload to R2
   const command = new PutObjectCommand({
-    Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME!,
+    Bucket: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME!,
     Key: key,
     Body: buffer,
     ContentType: contentType,
@@ -63,10 +63,10 @@ export async function uploadAudioToR2(
   await r2Client.send(command);
 
   // Construct public URL
-  const url = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+  const url = `${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
   
   // Also construct direct storage URL as fallback
-  const storageUrl = `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.CLOUDFLARE_R2_BUCKET_NAME}/${key}`;
+  const storageUrl = `https://${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME}/${key}`;
 
   return { url, key, storageUrl };
 }
@@ -76,7 +76,7 @@ export async function uploadAudioToR2(
  */
 export async function deleteAudioFromR2(key: string): Promise<void> {
   const command = new DeleteObjectCommand({
-    Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME!,
+    Bucket: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME!,
     Key: key,
   });
 
@@ -88,7 +88,7 @@ export async function deleteAudioFromR2(key: string): Promise<void> {
  */
 export function extractR2KeyFromUrl(url: string): string | null {
   try {
-    const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
+    const publicUrl = process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL!;
     if (url.startsWith(publicUrl)) {
       return url.replace(`${publicUrl}/`, "");
     }

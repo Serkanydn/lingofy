@@ -3,9 +3,9 @@ export async function createCheckout(
   userEmail: string,
   userId: string
 ) {
-  const API_KEY = process.env.LEMON_SQUEEZY_API_KEY;
+  const API_KEY = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_API_KEY;
   const IS_TEST_MODE =
-    process.env.LEMON_SQUEEZY_TEST_MODE === "true";
+    process.env.NEXT_PUBLIC_LEMON_SQUEEZY_TEST_MODE === "true";
 
   if (!API_KEY) {
     throw new Error("LEMON_SQUEEZY_API_KEY is not configured");
@@ -34,7 +34,7 @@ export async function createCheckout(
         store: {
           data: {
             type: "stores",
-            id: process.env.LEMON_SQUEEZY_STORE_ID,
+            id: process.env.NEXT_PUBLIC_LEMON_SQUEEZY_STORE_ID,
           },
         },
         variant: {
@@ -50,7 +50,7 @@ export async function createCheckout(
   console.log("Creating checkout:", {
     testMode: IS_TEST_MODE,
     variantId,
-    storeId: process.env.LEMON_SQUEEZY_STORE_ID,
+    storeId: process.env.NEXT_PUBLIC_LEMON_SQUEEZY_STORE_ID,
   });
 
   const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
