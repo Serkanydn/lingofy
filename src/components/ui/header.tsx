@@ -48,7 +48,7 @@ export function Header() {
   };
 
   const mainMenuItems = [
-    { href: "/", name: "Home", icon: Home },
+    // { href: "/", name: "Home", icon: Home },
     { href: "/reading", name: "Reading Hub", icon: BookOpen },
     { href: "/listening", name: "Listening Hub", icon: Headphones },
     { href: "/grammar", name: "Grammar", icon: GraduationCap },
@@ -69,7 +69,7 @@ export function Header() {
         "
         >
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <div className="flex items-center gap-3 group">
             <div className="relative">
               <div className="bg-linear-to-br from-orange-400 to-orange-600 text-white p-2.5 rounded-2xl shadow-[0_4px_14px_rgba(249,115,22,0.4)] group-hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300">
                 <GraduationCap className="w-5 h-5" />
@@ -78,7 +78,7 @@ export function Header() {
             <span className="font-bold text-[17px] text-gray-900 dark:text-white">
               {siteName}
             </span>
-          </Link>
+          </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-2">

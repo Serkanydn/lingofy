@@ -3,21 +3,30 @@
 import { Header } from "@/components/ui/header";
 import { Sidebar } from "./Sidebar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSettingsStore } from "@/features/admin/features/settings";
 import { MaintenancePage } from "@/shared/components/MaintenancePage";
+import { useEffect } from "react";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoading, isAdmin } = useAuth();
+  const { isLoading, isAdmin, user } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const isMyWordsPage = pathname === "/my-words";
   const isMaintenanceMode = useSettingsStore((state) => state.getIsMaintenanceMode());
   const maintenanceMessage = useSettingsStore((state) => state.getMaintenanceMessage());
   const settingsLoading = useSettingsStore((state) => state.isLoading);
+
+  // Redirect authenticated users from home page to reading page
+  useEffect(() => {
+    if (!isLoading && user && pathname === "/") {
+      router.replace("/reading");
+    }
+  }, [isLoading, user, pathname, router]);
   
   if (isLoading || settingsLoading) {
     return (

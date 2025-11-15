@@ -1,7 +1,9 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { Home } from 'lucide-react'
 import { 
   AuthBrandingPanel,
   AuthMobileLogo,
@@ -31,6 +33,16 @@ export function LoginPageClient() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <AuthMobileLogo />
+
+          {/* Home Button */}
+          <div className="mb-4">
+            <Link href="/">
+              <Button variant="ghost" className="rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800">
+                <Home className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
 
           <Card className="border-border/50 shadow-lg">
             <CardHeader className="space-y-1 text-center pb-6">

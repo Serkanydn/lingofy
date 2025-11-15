@@ -11,6 +11,9 @@ export async function proxy(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: {
+        name: 'lingofy-auth-token',
+      },
       cookies: {
         getAll() {
           return req.cookies.getAll();
@@ -55,7 +58,12 @@ export async function proxy(req: NextRequest) {
       req.nextUrl.pathname.startsWith("/register");
 
     if (isAuthPage) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/reading", req.url));
+    }
+
+    // Redirect authenticated users from home page to reading page
+    if (req.nextUrl.pathname === "/") {
+      return NextResponse.redirect(new URL("/reading", req.url));
     }
   }
 
@@ -101,6 +109,7 @@ function isPremiumRoute(pathname: string): boolean {
 
 export const config = {
   matcher: [
+    "/",
     "/login",
     "/register",
     "/profile",

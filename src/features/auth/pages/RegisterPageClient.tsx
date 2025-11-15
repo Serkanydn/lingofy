@@ -84,6 +84,16 @@ export function RegisterPageClient() {
           {/* Mobile Logo */}
           <AuthMobileLogo />
 
+          {/* Home Button */}
+          <div className="mb-4">
+            <Link href="/">
+              <Button variant="ghost" className="rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800">
+                <Home className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+
           {showSuccessAlert ? (
             <Card className="border-green-200 dark:border-green-800 shadow-lg">
               <CardHeader className="space-y-1 text-center pb-6">

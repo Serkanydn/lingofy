@@ -19,7 +19,11 @@ export function useLogin() {
     try {
       await authService.signInWithEmail(data.email, data.password)
       
-      router.push('/')
+      // Get redirectTo parameter from URL
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirectTo = urlParams.get('redirectTo') || '/'
+      
+      router.push(redirectTo)
       router.refresh()
       toast.success('Successfully signed in!')
     } catch (error: any) {
