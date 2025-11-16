@@ -40,6 +40,7 @@ export function useCreateGrammarCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
       toast.success("Category created successfully");
     },
     onError: (error: any) => {
@@ -57,6 +58,7 @@ export function useUpdateGrammarCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
       toast.success("Category updated successfully");
     },
     onError: (error: any) => {
@@ -74,6 +76,7 @@ export function useDeleteGrammarCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
       toast.success("Category deleted successfully");
     },
     onError: (error: any) => {
@@ -91,6 +94,7 @@ export function useToggleGrammarCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
       toast.success("Category status updated");
     },
     onError: (error: any) => {
@@ -108,6 +112,7 @@ export function useReorderGrammarCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
       toast.success("Categories reordered successfully");
     },
     onError: (error: any) => {

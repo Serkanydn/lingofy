@@ -48,6 +48,7 @@ export const grammarTopicSchema = z.object({
     .trim(),
   category_id: z
     .string()
+    .trim()
     .uuid("Invalid category ID")
     .min(1, "Category is required"),
   difficulty_level: levelSchema,

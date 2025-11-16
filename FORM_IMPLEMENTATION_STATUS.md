@@ -120,6 +120,8 @@ export function Dialog({ open, onClose }: Props) {
 ## Remaining Components to Update
 
 ### Grammar Feature
+- [x] `GrammarForm.tsx` – Category selection, UX improvements, sanitization
+- [x] `GrammarPageClient.tsx` – Memoized filters, options, columns
 - [ ] `AddGrammarDialog.tsx`
 - [ ] `AddQuestionDialog.tsx`
 
@@ -198,3 +200,23 @@ After completing all components, test:
 3. Update listening dialogs with exercise + question validation
 4. Update reading dialogs with text + question validation
 5. Update `QuestionManager.tsx` component to use useFieldArray
+## Admin Grammar Form Test Scenarios
+
+### Category Selection
+- Open Admin Grammar page and click "Add Topic".
+- Verify category dropdown is disabled during loading and shows appropriate placeholder.
+- Select a category; ensure the badge shows the selected category name.
+- Edit an existing topic; ensure the dropdown pre-selects `topic.category.id` or falls back to `topic.category_id`.
+
+### Validation and Submission
+- Try submitting without a category; expect validation error on category field.
+- Provide a title shorter than 3 chars; expect validation error.
+- Enter examples with duplicates and trailing spaces; expect duplicates removed and whitespace trimmed on submit.
+- Ensure submit button disables while saving and shows external loading state when mutations are pending.
+
+### Filtering and Data Table
+- Use search, category, and premium filters; verify the topics list updates responsively.
+- Confirm categories error banner appears when category fetch fails.
+
+### State Consistency
+- After category CRUD operations on Categories page, return to Grammar page and verify active categories refresh in the dropdown.

@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { Level } from "@/shared/types/common.types";
@@ -32,6 +33,9 @@ interface GrammarFormProps {
   categories?: Array<{ id: string; name: string; icon?: string }>;
   isLoading?: boolean;
   mode?: "create" | "edit";
+  categoriesLoading?: boolean;
+  categoriesError?: boolean;
+  onCategoryChange?: (categoryId: string) => void;
 }
 
 export type GrammarFormData = CreateGrammarTopicFormData;
@@ -44,6 +48,9 @@ export function GrammarForm({
   categories = [],
   isLoading = false,
   mode = "create",
+  categoriesLoading = false,
+  categoriesError = false,
+  onCategoryChange,
 }: GrammarFormProps) {
   const form = useForm<CreateGrammarTopicFormData>({
     resolver: zodResolver(createGrammarTopicSchema),
@@ -78,15 +85,19 @@ export function GrammarForm({
       });
     }
   }, [initialData, form]);
+console.log("form.getValues() :>> ", form.getValues());
 
   const onSubmitForm = async (data: CreateGrammarTopicFormData) => {
     try {
       await onSubmit({
         ...data,
-        examples: data.examples.map((ex) => ex.trim()).filter(Boolean),
+        title: data.title.trim(),
+        explanation: data.explanation.trim(),
+        mini_text: data.mini_text.trim(),
+        examples: Array.from(new Set(data.examples.map((ex) => ex.trim()).filter(Boolean))),
       });
-    } catch (error: any) {
-      const message = error?.message || "Failed to save grammar topic";
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to save grammar topic";
       toast.error(message);
     }
   };
@@ -119,10 +130,9 @@ export function GrammarForm({
         </Button>
       </div>
 
-      {isOpen && (
-        <CardContent className="pt-0 pb-6 border-t border-gray-200 dark:border-gray-800">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6 mt-6" noValidate>
+      <CardContent className="pt-0 pb-6 border-t border-gray-200 dark:border-gray-800" hidden={!isOpen}>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6 mt-6" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <FormField
@@ -148,9 +158,23 @@ export function GrammarForm({
                       <FormItem>
                         <FormLabel className="text-sm font-semibold">Category *</FormLabel>
                         <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="rounded-2xl border-2 h-12">
-                              <SelectValue placeholder="Select category" />
+                          <Select
+                            value={field.value}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              if (onCategoryChange) onCategoryChange(val);
+                            }}
+                          >
+                            <SelectTrigger className="rounded-2xl border-2 h-12" disabled={categoriesLoading || categoriesError || categories.length === 0}>
+                              <SelectValue
+                                placeholder={
+                                  categoriesLoading
+                                    ? "Loading categories..."
+                                    : categoriesError
+                                      ? "Failed to load categories"
+                                      : "Select category"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {categories.map((cat) => (
@@ -164,6 +188,12 @@ export function GrammarForm({
                             </SelectContent>
                           </Select>
                         </FormControl>
+
+                        {!categoriesLoading && !categoriesError && categories.length === 0 && (
+                          <div className="mt-2">
+                            <Badge variant="destructive">No active categories</Badge>
+                          </div>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -207,11 +237,11 @@ export function GrammarForm({
                       <FormItem>
                         <FormLabel className="text-sm font-semibold">Order Index</FormLabel>
                         <FormControl>
-                        <Input type="number" className="rounded-2xl border-2 h-12" value={Number(field.value ?? 1)} min={1} onChange={(e) => {
-                          const parsed = parseInt(e.target.value || "1", 10);
-                          const clamped = Number.isNaN(parsed) ? 1 : Math.max(1, parsed);
-                          field.onChange(clamped);
-                        }} />
+                          <Input type="number" className="rounded-2xl border-2 h-12" value={Number(field.value ?? 1)} min={1} onChange={(e) => {
+                            const parsed = parseInt(e.target.value || "1", 10);
+                            const clamped = Number.isNaN(parsed) ? 1 : Math.max(1, parsed);
+                            field.onChange(clamped);
+                          }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -341,7 +371,6 @@ export function GrammarForm({
             </form>
           </Form>
         </CardContent>
-      )}
     </Card>
   );
 }

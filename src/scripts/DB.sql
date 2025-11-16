@@ -1,6 +1,20 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.app_settings (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  site_name text NOT NULL DEFAULT 'Learn Quiz English'::text,
+  site_description text NOT NULL DEFAULT 'Master English through interactive quizzes'::text,
+  contact_email text NOT NULL DEFAULT 'contact@learnquiz.com'::text,
+  support_email text NOT NULL DEFAULT 'support@learnquiz.com'::text,
+  max_free_quizzes_per_day integer NOT NULL DEFAULT 5 CHECK (max_free_quizzes_per_day >= 0 AND max_free_quizzes_per_day <= 100),
+  enable_new_registrations boolean NOT NULL DEFAULT true,
+  maintenance_mode boolean NOT NULL DEFAULT false,
+  maintenance_message text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT app_settings_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.audio_assets (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   storage_url text NOT NULL UNIQUE,
@@ -37,7 +51,6 @@ CREATE TABLE public.grammar_categories (
 );
 CREATE TABLE public.grammar_topics (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
-  category text NOT NULL,
   title text NOT NULL,
   explanation text NOT NULL,
   examples jsonb NOT NULL,
@@ -47,6 +60,7 @@ CREATE TABLE public.grammar_topics (
   updated_at timestamp with time zone DEFAULT now(),
   is_premium boolean DEFAULT false,
   category_id uuid,
+  difficulty_level text,
   CONSTRAINT grammar_topics_pkey PRIMARY KEY (id),
   CONSTRAINT grammar_topics_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.grammar_categories(id)
 );
@@ -55,14 +69,12 @@ CREATE TABLE public.listening_content (
   title text NOT NULL,
   level text NOT NULL CHECK (level = ANY (ARRAY['A1'::text, 'A2'::text, 'B1'::text, 'B2'::text, 'C1'::text])),
   description text,
-  audio_url text NOT NULL,
   duration_seconds integer,
   transcript text,
   is_premium boolean DEFAULT false,
   order_index integer,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  quiz_content_id uuid,
   audio_asset_id uuid,
   CONSTRAINT listening_content_pkey PRIMARY KEY (id),
   CONSTRAINT listening_content_audio_asset_id_fkey FOREIGN KEY (audio_asset_id) REFERENCES public.audio_assets(id)
@@ -98,6 +110,7 @@ CREATE TABLE public.questions (
   created_at timestamp with time zone DEFAULT now(),
   order_index smallint,
   type USER-DEFINED,
+  correct_answer text,
   CONSTRAINT questions_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.reading_content (

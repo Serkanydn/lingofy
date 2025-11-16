@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -9,53 +9,57 @@ import { PageHeader, ContentCard, FilterBar, DataTable, DeleteConfirmDialog, typ
 import { GrammarForm, type GrammarFormData } from '../components/GrammarForm';
 import { useGrammarTopics, useDeleteGrammarTopic, useCreateGrammarTopic, useUpdateGrammarTopic } from '../hooks';
 import { useActiveGrammarCategories } from '../hooks/useGrammarCategories';
+import type { GrammarRule } from '@/features/grammar/types/service.types';
 
-type GrammarTopic = {
-  id: string;
-  title: string;
-  mini_text: string | null;
-  category_id: string | null;
-  is_premium: boolean;
-  created_at: string;
-};
 
 export function GrammarPageClient() {
   const [showForm, setShowForm] = useState(false);
-  const [editingTopic, setEditingTopic] = useState<GrammarTopic | null>(null);
+  const [editingTopic, setEditingTopic] = useState<GrammarRule | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState<GrammarTopic | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<GrammarRule | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [premiumFilter, setPremiumFilter] = useState<string>('all');
   const { data: topics, isLoading } = useGrammarTopics();
-  const { data: categories } = useActiveGrammarCategories();
+  const { data: categories, isLoading: categoriesLoading, isError: categoriesError } = useActiveGrammarCategories();
   const deleteTopic = useDeleteGrammarTopic();
   const createTopic = useCreateGrammarTopic();
   const updateTopic = useUpdateGrammarTopic();
 
-  const filteredTopics =
-    topics?.filter(
-      (topic) =>
-        topic.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (categoryFilter === 'all' || topic.category_id === categoryFilter) &&
-        (premiumFilter === 'all' ||
-          (premiumFilter === 'premium' && topic.is_premium) ||
-          (premiumFilter === 'free' && !topic.is_premium))
-    ) || [];
+  const filteredTopics = useMemo(() => {
+    if (!topics) return [];
+    const q = searchQuery.toLowerCase();
+    return topics.filter((topic) => {
+      if (!topic.title?.toLowerCase().includes(q)) return false;
+      if (categoryFilter !== 'all' && topic.category_id !== categoryFilter) return false;
+      if (premiumFilter !== 'all') {
+        if (premiumFilter === 'premium' && !topic.is_premium) return false;
+        if (premiumFilter === 'free' && topic.is_premium) return false;
+      }
+      return true;
+    });
+  }, [topics, searchQuery, categoryFilter, premiumFilter]);
 
-  const handleEdit = (topic: GrammarTopic) => {
+  const categoryOptions = useMemo(() => [
+    { value: 'all', label: 'All Categories' },
+    ...((categories?.map((category) => ({ value: category.id, label: category.name })) || []))
+  ], [categories]);
+  const categoryPlaceholder = useMemo(() => (
+    categoriesLoading ? 'Loading categories...' : (categoriesError ? 'Failed to load categories' : 'Select Category')
+  ), [categoriesLoading, categoriesError]);
+
+  const handleEdit = useCallback((topic: GrammarRule) => {
     setEditingTopic(topic);
     setShowForm(true);
-    // Scroll to top to show the form
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
-  const handleDelete = (topic: GrammarTopic) => {
+  const handleDelete = useCallback((topic: GrammarRule) => {
     setSelectedTopic(topic);
     setShowDeleteDialog(true);
-  };
+  }, []);
 
-  const handleFormSubmit = async (data: GrammarFormData) => {
+  const handleFormSubmit = useCallback(async (data: GrammarFormData) => {
     if (editingTopic) {
       await updateTopic.mutateAsync({ id: editingTopic.id, data });
     } else {
@@ -74,24 +78,24 @@ export function GrammarPageClient() {
     }
     setShowForm(false);
     setEditingTopic(null);
-  };
+  }, [editingTopic, updateTopic, createTopic]);
 
-  const handleFormToggle = () => {
+  const handleFormToggle = useCallback(() => {
     if (showForm) {
       setEditingTopic(null);
     }
-    setShowForm(!showForm);
-  };
+    setShowForm((prev) => !prev);
+  }, [showForm]);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (selectedTopic) {
       await deleteTopic.mutateAsync(selectedTopic.id);
       setShowDeleteDialog(false);
       setSelectedTopic(null);
     }
-  };
+  }, [selectedTopic, deleteTopic]);
 
-  const columns: DataTableColumn<GrammarTopic>[] = [
+  const columns: DataTableColumn<GrammarRule>[] = useMemo(() => [
     {
       header: 'Title',
       accessor: 'title',
@@ -108,7 +112,7 @@ export function GrammarPageClient() {
       header: 'Category',
       accessor: 'category_id',
       render: (topic) => (
-        <Badge variant="outline">{topic.category_id || 'Uncategorized'}</Badge>
+        <Badge variant="outline">{(typeof topic.category?.name === 'string' && topic.category?.name) || topic.category_id || 'Uncategorized'}</Badge>
       ),
     },
     {
@@ -143,7 +147,7 @@ export function GrammarPageClient() {
         </div>
       ),
     },
-  ];
+  ], [handleEdit, handleDelete]);
 
   return (
     <div className="min-h-screen py-8">
@@ -185,12 +189,17 @@ export function GrammarPageClient() {
           onSubmit={handleFormSubmit}
           initialData={editingTopic ? {
             ...editingTopic,
-            category_id: editingTopic.category_id || "",
+            category_id: (editingTopic.category?.id ?? editingTopic.category_id) || "",
             mini_text: editingTopic.mini_text || "",
           } as Partial<GrammarFormData> : undefined}
           categories={categories}
           isLoading={createTopic.isPending || updateTopic.isPending}
           mode={editingTopic ? "edit" : "create"}
+          categoriesLoading={categoriesLoading}
+          categoriesError={categoriesError}
+          onCategoryChange={(value) => {
+            setCategoryFilter(value);
+          }}
         />
 
         <ContentCard
@@ -209,10 +218,8 @@ export function GrammarPageClient() {
                   onChange: (value) => {
                     setCategoryFilter(value);
                   },
-                  options: [
-                    { value: 'all', label: 'All Categories' },
-                    // Add dynamic categories here
-                  ],
+                  options: categoryOptions,
+                  placeholder: categoryPlaceholder,
                 },
                 {
                   value: premiumFilter,
@@ -229,6 +236,11 @@ export function GrammarPageClient() {
             />
           }
         >
+          {categoriesError && (
+            <div className="mb-4 p-3 rounded-xl border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">
+              Failed to load categories
+            </div>
+          )}
           <DataTable
             columns={columns}
             data={filteredTopics}

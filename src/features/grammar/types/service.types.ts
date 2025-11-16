@@ -18,7 +18,7 @@ export interface GrammarRule {
   category?: GrammarCategory;
   explanation: string;
   examples: string[];
-  mini_text: string;
+  mini_text: string | null;
   difficulty_level: Level;
   is_premium: boolean;
   order_index: number;
