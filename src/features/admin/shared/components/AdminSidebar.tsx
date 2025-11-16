@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
-const navigation = [
+export const navigation = [
   {
     name: "Dashboard",
     href: "/admin",
@@ -62,7 +62,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 bg-white/80 dark:bg-card/80 backdrop-blur-lg border-r border-gray-200/50 dark:border-gray-700/50 pt-16">
+    <aside className="hidden md:block fixed inset-y-0 left-0 w-64 bg-white/80 dark:bg-card/80 backdrop-blur-lg border-r border-gray-200/50 dark:border-gray-700/50 pt-16">
       <nav className="flex flex-col h-full px-4 py-6 space-y-1">
         {navigation.map((item) => {
           const isActive = pathname === item.href;

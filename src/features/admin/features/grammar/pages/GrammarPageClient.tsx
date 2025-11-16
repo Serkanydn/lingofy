@@ -59,7 +59,18 @@ export function GrammarPageClient() {
     if (editingTopic) {
       await updateTopic.mutateAsync({ id: editingTopic.id, data });
     } else {
-      await createTopic.mutateAsync(data);
+      await createTopic.mutateAsync({
+        title: data.title,
+        category_id: data.category_id,
+        difficulty_level: data.difficulty_level,
+        explanation: data.explanation,
+        mini_text: data.mini_text,
+        examples: data.examples,
+        updated_at: new Date().toISOString(),
+        order_index: data.order_index,
+        is_premium: data.is_premium,
+        content_id: data.content_id ?? '',
+      });
     }
     setShowForm(false);
     setEditingTopic(null);

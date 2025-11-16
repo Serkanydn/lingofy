@@ -24,21 +24,21 @@ import {
   BarChart3,
   Settings,
   Shield,
-  Moon,
-  Sun,
   Home,
+  Menu,
 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "./sheet";
 import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useTheme } from "@/shared/hooks/useTheme";
+ 
 import { useSettingsStore } from "@/features/admin/features/settings";
 
 export function Header() {
   const router = useRouter();
   const { user, profile, isPremium, isAdmin } = useAuth();
   const pathname = usePathname();
-  const { isDark: isDarkMode, toggleTheme: toggleDarkMode } = useTheme();
+  
   const siteName = useSettingsStore((state) => state.getSiteName());
 
   const handleLogout = async () => {
@@ -69,19 +69,19 @@ export function Header() {
         "
         >
           {/* Logo */}
-          <div className="flex items-center gap-3 group">
+          <div className="flex items-center gap-3 group min-w-0">
             <div className="relative">
               <div className="bg-linear-to-br from-orange-400 to-orange-600 text-white p-2.5 rounded-2xl shadow-[0_4px_14px_rgba(249,115,22,0.4)] group-hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300">
                 <GraduationCap className="w-5 h-5" />
               </div>
             </div>
-            <span className="font-bold text-[17px] text-gray-900 dark:text-white">
+            <span className="font-bold text-[17px] text-gray-900 dark:text-white truncate max-w-[40vw] lg:max-w-none">
               {siteName}
             </span>
           </div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden lg:flex items-center gap-2">
             {mainMenuItems.map((item) => {
               const isActive = isActiveLink(item.href);
               return (
@@ -104,19 +104,45 @@ export function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-3">
-            {/* Dark Mode Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              className="relative w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 clay-shadow-inset"
-            >
-              {isDarkMode ? (
-                <Sun className="h-[18px] w-[18px] text-orange-500" />
-              ) : (
-                <Moon className="h-[18px] w-[18px] text-gray-600" />
-              )}
-            </Button>
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
+                  >
+                    <Menu className="h-[18px] w-[18px]" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left">
+                  <SheetHeader>
+                    <SheetTitle className="text-lg">{siteName}</SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col gap-1 px-4">
+                    {mainMenuItems.map((item) => {
+                      const isActive = isActiveLink(item.href);
+                      return (
+                        <SheetClose asChild key={item.href}>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-4 py-3 text-[15px] font-medium rounded-xl",
+                              isActive
+                                ? "text-orange-600 dark:text-orange-500 bg-orange-50/80 dark:bg-orange-500/10"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60"
+                            )}
+                          >
+                            <item.icon className="mr-3 h-5 w-5" />
+                            {item.name}
+                          </Link>
+                        </SheetClose>
+                      );
+                    })}
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
 
             {user ? (
               <DropdownMenu>
@@ -202,6 +228,7 @@ export function Header() {
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
                   </DropdownMenuItem>
+                  
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

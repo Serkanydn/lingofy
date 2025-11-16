@@ -1,13 +1,17 @@
-import { getSupabaseServerClient } from "@/shared/lib/supabase/client";
+import { getSupabaseClient2, getSupabaseServerClient } from "@/shared/lib/supabase/client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export class BaseService<T = any> {
-  protected supabase: SupabaseClient;
+  // protected supabase: SupabaseClient;
   protected tableName: string;
 
   constructor(tableName: string) {
-    this.supabase = getSupabaseServerClient();
+    // this.supabase = getSupabaseServerClient();
     this.tableName = tableName;
+  }
+
+  get supabase(): SupabaseClient {
+    return getSupabaseClient2();
   }
 
   async getAll(): Promise<T[]> {
@@ -30,7 +34,7 @@ export class BaseService<T = any> {
     return data as T;
   }
 
-    async getReadingDetailById(id: string | number): Promise<T | null> {
+  async getReadingDetailById(id: string | number): Promise<T | null> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select("*")

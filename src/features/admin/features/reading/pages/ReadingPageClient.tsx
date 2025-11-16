@@ -39,8 +39,12 @@ export function ReadingPageClient() {
     ) || [];
 
   const handleEdit = (reading: any) => {
-    setEditingReading(reading);
+    console.log("[ReadingPageClient] Edit clicked", reading);
+    const assetId = reading.audio_asset_id || reading.audio_asset?.id;
+    const enriched = assetId ? { ...reading, audio_asset_id: assetId } : reading;
+    setEditingReading(enriched);
     setShowForm(true);
+    window.scrollTo({ top: 200, behavior: "smooth" });
   };
 
   const handleDelete = (reading: any) => {
@@ -57,31 +61,54 @@ export function ReadingPageClient() {
   };
 
   const handleFormSubmit = async (data: ReadingFormData) => {
-    const { questions, ...readingData } = data;
-    
+    console.log("[ReadingPageClient] Form submit received", data);
+    const { questions, audio_asset, ...readingData } = data;
+
+    if (!navigator.onLine) {
+      console.error("[ReadingPageClient] Offline - cannot submit");
+      alert("You're offline. Please check your network connection.");
+      return;
+    }
+
     if (editingReading) {
-      await updateReading.mutateAsync({
-        id: editingReading.id,
-        data: {
+      try {
+        console.log("[ReadingPageClient] Updating reading", { id: editingReading.id, readingData, questions });
+        await updateReading.mutateAsync({
+          id: editingReading.id,
+          data: {
+            ...readingData,
+            audio_url: readingData.audio_asset_id ? '' : '',
+            updated_at: new Date().toISOString(),
+          },
+          questions,
+        });
+        console.log("[ReadingPageClient] Update success");
+      } catch (error) {
+        console.error("[ReadingPageClient] Update error", error);
+        alert("Failed to update reading. Please check permissions or try again.");
+      }
+      // setShowForm(false);
+    } else {
+      try {
+        console.log("[ReadingPageClient] Creating reading", { readingData, questions });
+        await createReading.mutateAsync({
           ...readingData,
           audio_url: readingData.audio_asset_id ? '' : '',
           updated_at: new Date().toISOString(),
-        },
-        questions,
-      });
-    } else {
-      await createReading.mutateAsync({
-        ...readingData,
-        audio_url: readingData.audio_asset_id ? '' : '',
-        updated_at: new Date().toISOString(),
-        questions,
-      });
+          questions,
+        });
+        console.log("[ReadingPageClient] Create success");
+      } catch (error) {
+        console.error("[ReadingPageClient] Create error", error);
+        alert("Failed to create reading. Please check connectivity and try again.");
+      }
     }
-    setShowForm(false);
-    setEditingReading(null);
+
+    // setEditingReading(null);
   };
 
   const handleFormToggle = () => {
+    console.log("[ReadingPageClient] Toggle form", { current: showForm });
     if (showForm) {
       setEditingReading(null);
     }

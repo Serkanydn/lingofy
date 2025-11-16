@@ -13,6 +13,9 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown, Save, KeyRound } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useTheme } from '@/shared/hooks/useTheme'
 import { toast } from 'sonner'
 
 const profileSchema = z.object({
@@ -37,6 +40,7 @@ export default function UserSettingsPageClient() {
   const router = useRouter()
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
+  const { mode, setTheme } = useTheme()
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -132,6 +136,29 @@ export default function UserSettingsPageClient() {
                   {profile?.premium_expires_at && (
                     <p className="text-xs text-muted-foreground">Expires {new Date(profile.premium_expires_at).toLocaleDateString()}</p>
                   )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[20px] clay-shadow">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Appearance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium">Theme</Label>
+                  <Select value={mode} onValueChange={(v) => setTheme(v as 'system' | 'light' | 'dark')}>
+                    <SelectTrigger className="rounded-2xl h-10 w-full">
+                      <SelectValue placeholder="Select theme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>

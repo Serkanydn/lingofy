@@ -1,40 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/shared/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
+import { LoginForm } from '../components/LoginForm'
+import type { LoginInput } from '../types/validation'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async (data: LoginInput) => {
     setIsLoading(true)
     setError('')
-
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
       })
-
       if (error) throw error
-
-      router.push('/') // Redirect to home page after successful login
+      router.push('/');
       router.refresh()
-    } catch (error: any) {
-      setError(error.message || 'Failed to login')
+    } catch (err: any) {
+      setError(err.message || 'Failed to login')
     } finally {
       setIsLoading(false)
     }
@@ -57,33 +50,7 @@ export default function LoginPage() {
             </Alert>
           )}
           
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
+          <LoginForm onSubmit={handleLogin} isSubmitting={isLoading} />
 
           <div className="mt-4 text-center text-sm">
             <p className="text-muted-foreground">

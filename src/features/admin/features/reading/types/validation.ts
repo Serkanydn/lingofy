@@ -18,10 +18,7 @@ export const readingTextSchema = z.object({
     .max(200, "Title must not exceed 200 characters")
     .trim(),
   level: levelSchema,
-  content: z
-    .string()
-    .min(50, "Content must be at least 50 characters")
-    .trim(),
+  content: z.string().min(50, "Content must be at least 50 characters").trim(),
   is_premium: z.boolean(),
   order_index: z
     .number()
@@ -41,20 +38,14 @@ export const updateReadingTextSchema = readingTextSchema.partial().extend({
 
 // Question option schema
 export const questionOptionSchema = z.object({
-  text: z
-    .string()
-    .min(1, "Option text is required")
-    .trim(),
+  text: z.string().min(1, "Option text is required").trim(),
   is_correct: z.boolean(),
 });
 
 // Question schema with discriminated union
 export const baseQuestionSchema = z.object({
   id: z.string().uuid().optional(),
-  text: z
-    .string()
-    .min(10, "Question must be at least 10 characters")
-    .trim(),
+  text: z.string().min(10, "Question must be at least 10 characters").trim(),
   points: z
     .number()
     .int("Points must be an integer")
@@ -72,20 +63,14 @@ export const multipleChoiceQuestionSchema = baseQuestionSchema.extend({
     .array(questionOptionSchema)
     .min(2, "At least 2 options are required")
     .max(6, "Maximum 6 options allowed")
-    .refine(
-      (options) => options.filter((opt) => opt.is_correct).length === 1,
-      {
-        message: "Exactly one option must be marked as correct",
-      }
-    ),
+    .refine((options) => options.filter((opt) => opt.is_correct).length === 1, {
+      message: "Exactly one option must be marked as correct",
+    }),
 });
 
 export const fillBlankQuestionSchema = baseQuestionSchema.extend({
   type: z.literal("fill_blank"),
-  correct_answer: z
-    .string()
-    .min(1, "Correct answer is required")
-    .trim(),
+  correct_answer: z.string().min(1, "Correct answer is required").trim(),
   options: z.array(questionOptionSchema).length(0).optional(),
 });
 
@@ -94,12 +79,9 @@ export const trueFalseQuestionSchema = baseQuestionSchema.extend({
   options: z
     .array(questionOptionSchema)
     .length(2, "True/False questions must have exactly 2 options")
-    .refine(
-      (options) => options.filter((opt) => opt.is_correct).length === 1,
-      {
-        message: "Exactly one option must be marked as correct",
-      }
-    ),
+    .refine((options) => options.filter((opt) => opt.is_correct).length === 1, {
+      message: "Exactly one option must be marked as correct",
+    }),
 });
 
 export const questionSchema = z.discriminatedUnion("type", [
@@ -111,6 +93,28 @@ export const questionSchema = z.discriminatedUnion("type", [
 // Form schema with questions
 export const readingFormSchema = readingTextSchema.extend({
   questions: z.array(questionSchema).optional(),
+  audio_asset: z
+    .object({
+      id: z.string().uuid(),
+      storage_url: z.string().url().optional(),
+      cdn_url: z.string().url().optional(),
+      original_filename: z.string().optional(),
+      file_size_bytes: z.number().int().positive().optional(),
+      duration_seconds: z.any().optional(),
+      format: z.enum(["mp3", "wav", "ogg", "m4a"]).optional(),
+      bitrate: z.any().optional(),
+      sample_rate: z.any().optional(),
+      content_type: z.enum(["reading", "listening", "pronunciation", "general"]).optional(),
+      language: z.string().optional(),
+      storage_provider: z.string().optional(),
+      storage_bucket: z.string().optional(),
+      storage_path: z.string().optional(),
+      is_optimized: z.boolean().optional(),
+      is_active: z.boolean().optional(),
+      created_at: z.any().optional(),
+      updated_at: z.any().optional(),
+    })
+    .optional(),
 });
 
 // Type exports
@@ -121,7 +125,9 @@ export type UpdateReadingTextFormData = z.infer<typeof updateReadingTextSchema>;
 export type QuestionType = z.infer<typeof questionTypeSchema>;
 export type QuestionOption = z.infer<typeof questionOptionSchema>;
 export type QuestionFormData = z.infer<typeof questionSchema>;
-export type MultipleChoiceQuestion = z.infer<typeof multipleChoiceQuestionSchema>;
+export type MultipleChoiceQuestion = z.infer<
+  typeof multipleChoiceQuestionSchema
+>;
 export type FillBlankQuestion = z.infer<typeof fillBlankQuestionSchema>;
 export type TrueFalseQuestion = z.infer<typeof trueFalseQuestionSchema>;
 

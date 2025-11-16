@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,12 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, ChevronUp, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Upload, X, AlertCircle } from "lucide-react";
 import { Level } from "@/shared/types/common.types";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 import { QuestionManager, Question } from "./QuestionManager";
+import { readingFormSchema, type ReadingFormData } from "../types/validation";
 
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
+const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 interface ReadingFormProps {
   isOpen: boolean;
@@ -30,15 +33,7 @@ interface ReadingFormProps {
   mode?: "create" | "edit";
 }
 
-export interface ReadingFormData {
-  title: string;
-  level: Level;
-  content: string;
-  audio_asset_id?: string;
-  is_premium: boolean;
-  order_index: number;
-  questions: Question[];
-}
+
 
 export function ReadingForm({
   isOpen,
@@ -48,61 +43,84 @@ export function ReadingForm({
   isLoading = false,
   mode = "create",
 }: ReadingFormProps) {
-  const [formData, setFormData] = useState<ReadingFormData>({
-    title: "",
-    level: "A1",
-    content: "",
-    is_premium: false,
-    order_index: 1,
-    questions: [],
+  const form = useForm<ReadingFormData>({
+    resolver: zodResolver(readingFormSchema),
+    mode: "onBlur",
+    reValidateMode: "onChange",
+    defaultValues: {
+      title: initialData?.title ?? "",
+      level: initialData?.level ?? "A1",
+      content: initialData?.content ?? "",
+      is_premium: initialData?.is_premium ?? false,
+      order_index: initialData?.order_index ?? 1,
+      audio_asset_id: initialData?.audio_asset_id,
+      questions: initialData?.questions ?? [],
+    },
   });
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue, trigger } = form;
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
-      setFormData((prev) => ({ ...prev, ...initialData }));
+      console.log("[ReadingForm] Received initialData", initialData);
+      reset({
+        title: initialData.title ?? "",
+        level: initialData.level ?? "A1",
+        content: initialData.content ?? "",
+        is_premium: initialData.is_premium ?? false,
+        order_index: initialData.order_index ?? 1,
+        audio_asset_id: initialData.audio_asset_id,
+        questions: initialData.questions ?? [],
+        audio_asset: initialData?.audio_asset,
+      });
     }
-  }, [initialData]);
+  }, [initialData, reset]);
 
-  const handleChange = (field: keyof ReadingFormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      console.log("[ReadingForm] Selected audio file", e.target.files[0]);
       setAudioFile(e.target.files[0]);
     }
   };
 
   const handleRemoveAudio = () => {
+    console.log("[ReadingForm] Removing selected local audio file");
     setAudioFile(null);
-    handleChange("audio_asset_id", undefined);
+    setValue("audio_asset_id", undefined, { shouldValidate: true });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRemoveAudioAsset = () => {
+    console.log("[ReadingForm] Clearing existing audio asset from form");
+    setValue("audio_asset_id", undefined, { shouldValidate: true });
+    setValue("audio_asset", undefined, { shouldValidate: true });
+    // Also clear the local file so the UI stays consistent
+    setAudioFile(null);
+  };
 
-    let audioAssetId = formData.audio_asset_id;
+  const onInvalidSubmit = (invalidErrors: any) => {
+    console.error("[ReadingForm] Validation failed", invalidErrors);
+    alert("Please fix validation errors before submitting.");
+  };
 
-    // Upload audio file if provided
+  const onSubmitForm = async (data: ReadingFormData) => {
+    console.log("[ReadingForm] Submit triggered", { mode, data });
+    let audioAssetId = data.audio_asset_id;
     if (audioFile) {
       try {
         setIsUploading(true);
-        const result = await uploadAudioAsset({
-          file: audioFile,
-          contentType: "reading",
-        });
-
+        console.log("[ReadingForm] Uploading audio file...");
+        const result = await uploadAudioAsset({ file: audioFile, contentType: "reading" });
         if (!result.success || !result.audioAsset) {
           alert(`Failed to upload audio file: ${result.error || "Unknown error"}`);
           setIsUploading(false);
           return;
         }
-
+        console.log("[ReadingForm] Audio upload success", result.audioAsset);
         audioAssetId = result.audioAsset.id;
       } catch (error) {
-        console.error("Audio upload error:", error);
+        console.error("[ReadingForm] Audio upload error", error);
         alert(`Failed to upload audio file: ${error instanceof Error ? error.message : "Unknown error"}`);
         setIsUploading(false);
         return;
@@ -110,20 +128,36 @@ export function ReadingForm({
         setIsUploading(false);
       }
     }
-
-    await onSubmit({
-      ...formData,
-      audio_asset_id: audioAssetId,
-    });
+    try {
+      console.log("[ReadingForm] Calling parent onSubmit with payload", { ...data, audio_asset_id: audioAssetId });
+      await onSubmit({ ...data, audio_asset_id: audioAssetId });
+      if (mode === "create") {
+        console.log("[ReadingForm] Create mode: resetting form while keeping it open");
+        reset({
+          title: "",
+          level: "A1",
+          content: "",
+          is_premium: false,
+          order_index: 1,
+          audio_asset_id: undefined,
+          questions: [],
+        });
+        setAudioFile(null);
+      }
+    } catch (e) {
+      console.error("[ReadingForm] Submit error", e);
+      alert("Failed to save reading. Please try again or check connectivity/permissions.");
+    }
   };
 
   const handleReset = () => {
-    setFormData({
+    reset({
       title: "",
       level: "A1",
       content: "",
       is_premium: false,
       order_index: 1,
+      audio_asset_id: undefined,
       questions: [],
     });
     setAudioFile(null);
@@ -161,14 +195,14 @@ export function ReadingForm({
       {/* Form Content - Collapsible */}
       {isOpen && (
         <CardContent className="pt-0 pb-6 border-t border-gray-200 dark:border-gray-800">
-          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <form onSubmit={handleSubmit(onSubmitForm, onInvalidSubmit)} className="space-y-6 mt-6" noValidate>
             <Tabs defaultValue="content" className="w-full">
               <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
                 <TabsTrigger value="content" className="rounded-xl">
                   Content Details
                 </TabsTrigger>
                 <TabsTrigger value="questions" className="rounded-xl">
-                  Questions ({formData.questions.length})
+                  Questions ({(watch("questions") || []).length})
                 </TabsTrigger>
               </TabsList>
 
@@ -181,20 +215,27 @@ export function ReadingForm({
                     </Label>
                     <Input
                       id="title"
-                      value={formData.title}
-                      onChange={(e) => handleChange("title", e.target.value)}
+                      {...register("title")}
                       placeholder="e.g., My Daily Routine"
-                      className="rounded-2xl border-2 h-12"
-                      required
+                      className={`rounded-2xl border-2 h-12 ${errors.title ? "border-red-500" : ""}`}
+                      onBlur={() => trigger("title")}
+                      aria-invalid={errors.title ? "true" : "false"}
+                      aria-describedby={errors.title ? "title-error" : undefined}
                     />
+                    {errors.title && (
+                      <span id="title-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.title.message as string}
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="level" className="text-sm font-semibold">
                       Level *
                     </Label>
-                    <Select value={formData.level} onValueChange={(value) => handleChange("level", value)}>
-                      <SelectTrigger className="rounded-2xl border-2 h-12">
+                    <Select value={watch("level")} onValueChange={(value) => setValue("level", value as Level, { shouldValidate: true })}>
+                      <SelectTrigger className={`rounded-2xl border-2 h-12 ${errors.level ? "border-red-500" : ""}`} onBlur={() => trigger("level")}>
                         <SelectValue placeholder="Select level" />
                       </SelectTrigger>
                       <SelectContent>
@@ -205,6 +246,12 @@ export function ReadingForm({
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors.level && (
+                      <span role="alert" className="text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.level.message as string}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -215,12 +262,19 @@ export function ReadingForm({
                   </Label>
                   <Textarea
                     id="content"
-                    value={formData.content}
-                    onChange={(e) => handleChange("content", e.target.value)}
+                    {...register("content")}
                     placeholder="Enter the reading passage text..."
-                    className="rounded-2xl border-2 resize-none min-h-[200px]"
-                    required
+                    className={`rounded-2xl border-2 resize-none min-h-[200px] ${errors.content ? "border-red-500" : ""}`}
+                    onBlur={() => trigger("content")}
+                    aria-invalid={errors.content ? "true" : "false"}
+                    aria-describedby={errors.content ? "content-error" : undefined}
                   />
+                  {errors.content && (
+                    <span id="content-error" role="alert" className="text-xs text-red-600 flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.content.message as string}
+                    </span>
+                  )}
                 </div>
 
                 {/* Audio Upload */}
@@ -228,7 +282,20 @@ export function ReadingForm({
                   <Label htmlFor="audio" className="text-sm font-semibold">
                     Audio File (Optional)
                   </Label>
-                  {audioFile ? (
+                  {watch("audio_asset") && (
+                    <div className="flex items-center gap-2 p-4 rounded-2xl border-2 border-green-200 bg-green-50 dark:bg-green-900/10">
+                      <span className="flex-1 text-sm">{watch("audio_asset")?.original_filename}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveAudioAsset}
+                        className="rounded-xl"
+                      >
+                        <X className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>)}
+                  {!watch("audio_asset") && audioFile && (
                     <div className="flex items-center gap-2 p-4 rounded-2xl border-2 border-green-200 bg-green-50 dark:bg-green-900/10">
                       <span className="flex-1 text-sm">{audioFile.name}</span>
                       <Button
@@ -240,8 +307,9 @@ export function ReadingForm({
                       >
                         <X className="h-4 w-4 text-red-600" />
                       </Button>
-                    </div>
-                  ) : (
+                    </div>)}
+
+                  {!watch("audio_asset") && !audioFile &&
                     <div className="relative">
                       <Input
                         id="audio"
@@ -259,8 +327,7 @@ export function ReadingForm({
                           Click to upload audio file
                         </span>
                       </Label>
-                    </div>
-                  )}
+                    </div>}
                 </div>
 
                 {/* Order & Premium */}
@@ -272,11 +339,17 @@ export function ReadingForm({
                     <Input
                       id="orderIndex"
                       type="number"
-                      value={formData.order_index}
-                      onChange={(e) => handleChange("order_index", parseInt(e.target.value) || 1)}
-                      className="rounded-2xl border-2 h-12"
+                      {...register("order_index", { valueAsNumber: true })}
+                      className={`rounded-2xl border-2 h-12 ${errors.order_index ? "border-red-500" : ""}`}
+                      onBlur={() => trigger("order_index")}
                       min="1"
                     />
+                    {errors.order_index && (
+                      <span role="alert" className="text-xs text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.order_index.message as string}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-end">
@@ -284,8 +357,8 @@ export function ReadingForm({
                       <input
                         type="checkbox"
                         id="isPremium"
-                        checked={formData.is_premium}
-                        onChange={(e) => handleChange("is_premium", e.target.checked)}
+                        checked={watch("is_premium")}
+                        onChange={(e) => setValue("is_premium", e.target.checked, { shouldValidate: true })}
                         className="h-5 w-5 rounded-lg border-2 border-amber-300 text-amber-500 focus:ring-amber-500"
                       />
                       <Label
@@ -299,11 +372,19 @@ export function ReadingForm({
                 </div>
               </TabsContent>
 
-              <TabsContent value="questions" className="mt-6">
-                <QuestionManager
-                  questions={formData.questions}
-                  onChange={(questions) => handleChange("questions", questions)}
-                />
+              <TabsContent value="questions" className="mt-6" onBlur={() => trigger("questions")}>
+                <div className={`${errors.questions ? "border-2 border-red-500 rounded-2xl p-2" : ""}`}>
+                  <QuestionManager
+                    questions={watch("questions")?.map(q => ({ ...q, options: q.options ?? [] })) || []}
+                    onChange={(questions) => setValue("questions", questions as ReadingFormData["questions"], { shouldValidate: true })}
+                  />
+                </div>
+                {errors.questions && (
+                  <div role="alert" className="text-xs text-red-600 flex items-center gap-1 mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    Exactly one option must be marked correct for multiple-choice questions
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
 
@@ -314,7 +395,7 @@ export function ReadingForm({
                 variant="outline"
                 onClick={() => {
                   handleReset();
-                  onToggle();
+                  if (mode !== "create") onToggle();
                 }}
                 className="flex-1 rounded-2xl border-2 h-12"
               >

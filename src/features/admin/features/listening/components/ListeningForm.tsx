@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,28 +20,36 @@ import { ChevronDown, ChevronUp, Upload, X } from "lucide-react";
 import { Level } from "@/shared/types/common.types";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
 import { QuestionManager, type Question } from "./QuestionManager";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { z } from "zod";
+import { levelSchema, questionSchema } from "../types/validation";
+import { toast } from "sonner";
 
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
+const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+type ListeningFormValues = z.infer<typeof listeningFormUiSchema>;
 
 interface ListeningFormProps {
   isOpen: boolean;
   onToggle: () => void;
-  onSubmit: (data: ListeningFormData) => Promise<void>;
-  initialData?: Partial<ListeningFormData>;
+  onSubmit: (data: ListeningFormValues & { audio_asset_id: string }) => Promise<void>;
+  initialData?: Partial<ListeningFormValues>;
   isLoading?: boolean;
   mode?: "create" | "edit";
 }
 
-export interface ListeningFormData {
-  title: string;
-  level: Level;
-  transcript: string;
-  audio_asset_id: string;
-  duration?: number;
-  is_premium: boolean;
-  order_index: number;
-  questions: Question[];
-}
+const listeningFormUiSchema = z.object({
+  title: z.string().min(3).max(200).trim(),
+  level: levelSchema,
+  transcript: z.string().min(20).trim(),
+  duration: z
+    .union([z.coerce.number().int().positive().max(3600), z.literal(0)])
+    .optional(),
+  is_premium: z.boolean(),
+  order_index: z.coerce.number().int().positive(),
+  audio_asset_id: z.string().uuid().optional(),
+  questions: z.array(questionSchema).default([]),
+});
 
 export function ListeningForm({
   isOpen,
@@ -49,27 +59,35 @@ export function ListeningForm({
   isLoading = false,
   mode = "create",
 }: ListeningFormProps) {
-  const [formData, setFormData] = useState<Omit<ListeningFormData, "audio_asset_id"> & { audio_asset_id?: string }>({
-    title: "",
-    level: "A1",
-    transcript: "",
-    duration: undefined,
-    is_premium: false,
-    order_index: 1,
-    questions: [],
-  });
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  const defaultValues = useMemo<Partial<ListeningFormValues>>(
+    () => ({
+      title: "",
+      level: "A1",
+      transcript: "",
+      duration: undefined,
+      is_premium: false,
+      order_index: 1,
+      questions: [],
+      ...initialData,
+    }),
+    [initialData]
+  );
+
+  const form = useForm<ListeningFormValues>({
+    resolver: zodResolver(listeningFormUiSchema) as any,
+    defaultValues,
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+
   useEffect(() => {
     if (initialData) {
-      setFormData((prev) => ({ ...prev, ...initialData }));
+      form.reset(defaultValues);
     }
-  }, [initialData]);
-
-  const handleChange = (field: keyof ListeningFormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  }, [initialData, form, defaultValues]);
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -79,73 +97,47 @@ export function ListeningForm({
 
   const handleRemoveAudio = () => {
     setAudioFile(null);
-    handleChange("audio_asset_id", undefined);
+    form.setValue("audio_asset_id", undefined);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    let audioAssetId = formData.audio_asset_id;
-
-    // Audio is required for listening
+  const onSubmitForm = async (values: ListeningFormValues) => {
+    let audioAssetId = values.audio_asset_id;
     if (!audioAssetId && !audioFile) {
-      alert("Audio file is required for listening content");
+      toast.error("Audio file is required for listening content");
       return;
     }
-
-    // Upload audio file if provided
     if (audioFile) {
       try {
         setIsUploading(true);
-        const result = await uploadAudioAsset({
-          file: audioFile,
-          contentType: "listening",
-        });
-
+        const result = await uploadAudioAsset({ file: audioFile, contentType: "listening" });
         if (!result.success || !result.audioAsset) {
-          alert(`Failed to upload audio file: ${result.error || "Unknown error"}`);
+          toast.error(result.error || "Failed to upload audio file");
           setIsUploading(false);
           return;
         }
-
         audioAssetId = result.audioAsset.id;
       } catch (error) {
-        console.error("Audio upload error:", error);
-        alert(`Failed to upload audio file: ${error instanceof Error ? error.message : "Unknown error"}`);
+        const msg = error instanceof Error ? error.message : "Failed to upload audio file";
+        toast.error(msg);
         setIsUploading(false);
         return;
       } finally {
         setIsUploading(false);
       }
     }
-
     if (!audioAssetId) {
-      alert("Audio file is required");
+      toast.error("Audio file is required");
       return;
     }
-
-    await onSubmit({
-      ...formData,
+    const payload: ListeningFormValues & { audio_asset_id: string } = {
+      ...values,
       audio_asset_id: audioAssetId,
-    } as ListeningFormData);
-  };
-
-  const handleReset = () => {
-    setFormData({
-      title: "",
-      level: "A1",
-      transcript: "",
-      duration: undefined,
-      is_premium: false,
-      order_index: 1,
-      questions: [],
-    });
-    setAudioFile(null);
+    };
+    await onSubmit(payload);
   };
 
   return (
     <Card className="mb-6 rounded-3xl border-2 border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300">
-      {/* Header - Always Visible */}
       <div
         className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
         onClick={onToggle}
@@ -164,203 +156,172 @@ export function ListeningForm({
           </div>
         </div>
         <Button variant="ghost" size="icon" className="rounded-xl">
-          {isOpen ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
+          {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
         </Button>
       </div>
 
-      {/* Form Content - Collapsible */}
       {isOpen && (
         <CardContent className="pt-0 pb-6 border-t border-gray-200 dark:border-gray-800">
-          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-            <Tabs defaultValue="content" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
-                <TabsTrigger value="content" className="rounded-xl">
-                  Content Details
-                </TabsTrigger>
-                <TabsTrigger value="questions" className="rounded-xl">
-                  Questions ({formData.questions.length})
-                </TabsTrigger>
-              </TabsList>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-6 mt-6" noValidate>
+              <Tabs defaultValue="content" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
+                  <TabsTrigger value="content" className="rounded-xl">Content Details</TabsTrigger>
+                  <TabsTrigger value="questions" className="rounded-xl">
+                    Questions {(form.watch("questions") || []).length}
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="content" className="space-y-6 mt-6">
-                {/* Title & Level */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-sm font-semibold">
-                      Title *
-                    </Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => handleChange("title", e.target.value)}
-                      placeholder="e.g., Airport Conversation"
-                      className="rounded-2xl border-2 h-12"
-                      required
+                <TabsContent value="content" className="space-y-6 mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Airport Conversation" className="rounded-2xl border-2 h-12" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="level"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Level</FormLabel>
+                          <FormControl>
+                            <Select value={field.value} onValueChange={(v) => field.onChange(v as Level)}>
+                              <SelectTrigger className="rounded-2xl border-2 h-12">
+                                <SelectValue placeholder="Select level" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {LEVELS.map((lvl) => (
+                                  <SelectItem key={lvl} value={lvl}>
+                                    {lvl}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="level" className="text-sm font-semibold">
-                      Level *
-                    </Label>
-                    <Select value={formData.level} onValueChange={(value) => handleChange("level", value)}>
-                      <SelectTrigger className="rounded-2xl border-2 h-12">
-                        <SelectValue placeholder="Select level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LEVELS.map((lvl) => (
-                          <SelectItem key={lvl} value={lvl}>
-                            {lvl}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="audio" className="text-sm font-semibold">Audio File</Label>
+                    {audioFile || form.getValues("audio_asset_id") ? (
+                      <div className="flex items-center gap-2 p-4 rounded-2xl border-2 border-blue-200 bg-blue-50 dark:bg-blue-900/10">
+                        <span className="flex-1 text-sm">{audioFile ? audioFile.name : "Audio file uploaded"}</span>
+                        <Button type="button" variant="ghost" size="sm" onClick={handleRemoveAudio} className="rounded-xl">
+                          <X className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <Input id="audio" type="file" accept="audio/*" onChange={handleAudioFileChange} className="hidden" />
+                        <Label htmlFor="audio" className="flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-blue-300 hover:border-blue-400 cursor-pointer transition-colors">
+                          <Upload className="h-5 w-5 text-blue-400" />
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Click to upload audio file</span>
+                        </Label>
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                {/* Audio Upload - Required */}
-                <div className="space-y-2">
-                  <Label htmlFor="audio" className="text-sm font-semibold">
-                    Audio File * (Required)
-                  </Label>
-                  {audioFile || formData.audio_asset_id ? (
-                    <div className="flex items-center gap-2 p-4 rounded-2xl border-2 border-blue-200 bg-blue-50 dark:bg-blue-900/10">
-                      <span className="flex-1 text-sm">
-                        {audioFile ? audioFile.name : "Audio file uploaded"}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRemoveAudio}
-                        className="rounded-xl"
-                      >
-                        <X className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <Input
-                        id="audio"
-                        type="file"
-                        accept="audio/*"
-                        onChange={handleAudioFileChange}
-                        className="hidden"
-                        required={mode === "create"}
-                      />
-                      <Label
-                        htmlFor="audio"
-                        className="flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-blue-300 hover:border-blue-400 cursor-pointer transition-colors"
-                      >
-                        <Upload className="h-5 w-5 text-blue-400" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Click to upload audio file (required)
-                        </span>
-                      </Label>
-                    </div>
-                  )}
-                </div>
-
-                {/* Transcript */}
-                <div className="space-y-2">
-                  <Label htmlFor="transcript" className="text-sm font-semibold">
-                    Transcript *
-                  </Label>
-                  <Textarea
-                    id="transcript"
-                    value={formData.transcript}
-                    onChange={(e) => handleChange("transcript", e.target.value)}
-                    placeholder="Enter the audio transcript..."
-                    className="rounded-2xl border-2 resize-none min-h-[200px]"
-                    required
+                  <FormField
+                    control={form.control}
+                    name="transcript"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold">Transcript</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter the audio transcript..." className="rounded-2xl border-2 resize-none min-h-[200px]" rows={6} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                {/* Duration, Order & Premium */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="duration" className="text-sm font-semibold">
-                      Duration (seconds)
-                    </Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={formData.duration || ""}
-                      onChange={(e) => handleChange("duration", e.target.value ? parseInt(e.target.value) : undefined)}
-                      placeholder="e.g., 120"
-                      className="rounded-2xl border-2 h-12"
-                      min="1"
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="duration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Duration (seconds)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              placeholder="e.g., 120"
+                              className="rounded-2xl border-2 h-12"
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="order_index"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Display Order</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              className="rounded-2xl border-2 h-12"
+                              value={field.value}
+                              onChange={(e) => field.onChange(Number(e.target.value || 1))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="is_premium"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Premium</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center space-x-3 p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border-2 border-amber-100 dark:border-amber-900/30 w-full">
+                              <input type="checkbox" checked={field.value} onChange={(e) => field.onChange(e.target.checked)} className="h-5 w-5 rounded-lg border-2 border-amber-300 text-amber-500 focus:ring-amber-500" />
+                              <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">⭐ Premium</span>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
+                </TabsContent>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="orderIndex" className="text-sm font-semibold">
-                      Display Order
-                    </Label>
-                    <Input
-                      id="orderIndex"
-                      type="number"
-                      value={formData.order_index}
-                      onChange={(e) => handleChange("order_index", parseInt(e.target.value) || 1)}
-                      className="rounded-2xl border-2 h-12"
-                      min="1"
-                    />
-                  </div>
+                <TabsContent value="questions" className="mt-6">
+                  <QuestionManager
+                    questions={(form.watch("questions") || []) as unknown as Question[]}
+                    onChange={(qs: Question[]) => form.setValue("questions", qs as any, { shouldValidate: true })}
+                  />
+                </TabsContent>
+              </Tabs>
 
-                  <div className="flex items-end">
-                    <div className="flex items-center space-x-3 p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border-2 border-amber-100 dark:border-amber-900/30 w-full">
-                      <input
-                        type="checkbox"
-                        id="isPremium"
-                        checked={formData.is_premium}
-                        onChange={(e) => handleChange("is_premium", e.target.checked)}
-                        className="h-5 w-5 rounded-lg border-2 border-amber-300 text-amber-500 focus:ring-amber-500"
-                      />
-                      <Label
-                        htmlFor="isPremium"
-                        className="text-sm font-semibold text-amber-700 dark:text-amber-400 cursor-pointer"
-                      >
-                        ⭐ Premium
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="questions" className="mt-6">
-                <QuestionManager
-                  questions={formData.questions}
-                  onChange={(questions: Question[]) => handleChange("questions", questions)}
-                />
-              </TabsContent>
-            </Tabs>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  handleReset();
-                  onToggle();
-                }}
-                className="flex-1 rounded-2xl border-2 h-12"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 rounded-2xl h-12 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_4px_14px_rgba(59,130,246,0.4)]"
-                disabled={isLoading || isUploading}
-              >
-                {isUploading ? "Uploading..." : isLoading ? "Saving..." : mode === "create" ? "Create Listening" : "Update Listening"}
-              </Button>
-            </div>
-          </form>
+              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+                <Button type="button" variant="outline" onClick={() => { form.reset(defaultValues); setAudioFile(null); onToggle(); }} className="flex-1 rounded-2xl border-2 h-12">Cancel</Button>
+                <Button type="submit" className="flex-1 rounded-2xl h-12 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_4px_14px_rgba(59,130,246,0.4)]" disabled={isLoading || isUploading || form.formState.isSubmitting}>
+                  {isUploading ? "Uploading..." : isLoading || form.formState.isSubmitting ? "Saving..." : mode === "create" ? "Create Listening" : "Update Listening"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       )}
     </Card>

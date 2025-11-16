@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -23,6 +23,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { PremiumSubscription } from '../types';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { updateSubscriptionSchema, type UpdateSubscriptionFormData } from '../types/validation';
 
 interface UpdateSubscriptionFormProps {
   isOpen: boolean;
@@ -41,37 +45,38 @@ export function UpdateSubscriptionForm({
   onCancel,
   isLoading,
 }: UpdateSubscriptionFormProps) {
-  const [isPremium, setIsPremium] = useState(false);
-  const [expiresAt, setExpiresAt] = useState('');
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const form = useForm<UpdateSubscriptionFormData>({
+    resolver: zodResolver(updateSubscriptionSchema),
+    defaultValues: {
+      is_premium: subscription?.is_premium ?? false,
+      premium_expires_at: subscription?.premium_expires_at
+        ? new Date(subscription.premium_expires_at).toISOString().split('T')[0]
+        : null,
+    },
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+  });
 
   useEffect(() => {
     if (subscription) {
-      setIsPremium(subscription.is_premium);
-      setExpiresAt(
-        subscription.premium_expires_at
+      form.reset({
+        is_premium: subscription.is_premium,
+        premium_expires_at: subscription.premium_expires_at
           ? new Date(subscription.premium_expires_at).toISOString().split('T')[0]
-          : ''
-      );
+          : null,
+      });
     }
-  }, [subscription]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      is_premium: isPremium,
-      premium_expires_at: isPremium && expiresAt ? new Date(expiresAt).toISOString() : null,
-    });
-  };
+  }, [subscription, form]);
 
   const handleReset = () => {
     if (subscription) {
-      setIsPremium(subscription.is_premium);
-      setExpiresAt(
-        subscription.premium_expires_at
+      form.reset({
+        is_premium: subscription.is_premium,
+        premium_expires_at: subscription.premium_expires_at
           ? new Date(subscription.premium_expires_at).toISOString().split('T')[0]
-          : ''
-      );
+          : null,
+      });
     }
     onToggle();
   };
@@ -134,7 +139,20 @@ export function UpdateSubscriptionForm({
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+              <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit((data) => {
+                  onSubmit({
+                    is_premium: data.is_premium,
+                    premium_expires_at:
+                      data.is_premium && data.premium_expires_at
+                        ? new Date(data.premium_expires_at).toISOString()
+                        : null,
+                  });
+                })}
+                className="space-y-6 mt-6"
+                noValidate
+              >
                 {/* User Info Card */}
                 <div className="bg-linear-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-4 space-y-2">
                 <div className="flex justify-between text-sm">
@@ -174,40 +192,42 @@ export function UpdateSubscriptionForm({
               </div>
 
               {/* Premium Status Toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
-                <div className="space-y-0.5">
-                  <Label htmlFor="premium-status" className="text-sm font-semibold">
-                    Premium Status
-                  </Label>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Enable or disable premium access
-                  </p>
-                </div>
-                <Switch
-                  id="premium-status"
-                  checked={isPremium}
-                  onCheckedChange={setIsPremium}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="is_premium"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold">Premium Status</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-900/10 border-2 border-orange-100 dark:border-orange-900/30">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="premium-status" className="text-sm font-semibold">Premium Status</Label>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Enable or disable premium access</p>
+                        </div>
+                        <Switch id="premium-status" checked={field.value} onCheckedChange={field.onChange} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Expiration Date */}
-              {isPremium && (
-                <div className="space-y-2">
-                  <Label htmlFor="expires-at" className="text-sm font-semibold">
-                    Expiration Date
-                  </Label>
-                  <Input
-                    id="expires-at"
-                    type="date"
-                    value={expiresAt}
-                    onChange={(e) => setExpiresAt(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="rounded-2xl border-2 h-12"
-                  />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Leave empty for unlimited access
-                  </p>
-                </div>
+              {form.watch('is_premium') && (
+                <FormField
+                  control={form.control}
+                  name="premium_expires_at"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold">Expiration Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" min={new Date().toISOString().split('T')[0]} className="rounded-2xl border-2 h-12" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
+                      </FormControl>
+                      <FormMessage />
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Leave empty for unlimited access</p>
+                    </FormItem>
+                  )}
+                />
               )}
 
               {/* Action Buttons */}
@@ -232,15 +252,12 @@ export function UpdateSubscriptionForm({
                     Cancel Subscription
                   </Button>
                 )}
-                <Button
-                  type="submit"
-                  className="flex-1 rounded-2xl h-12 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)]"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Updating...' : 'Update Subscription'}
+                <Button type="submit" className="flex-1 rounded-2xl h-12 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-[0_4px_14px_rgba(249,115,22,0.4)]" disabled={isLoading || form.formState.isSubmitting}>
+                  {isLoading || form.formState.isSubmitting ? 'Updating...' : 'Update Subscription'}
                 </Button>
               </div>
               </form>
+              </Form>
             )}
           </CardContent>
         )}
