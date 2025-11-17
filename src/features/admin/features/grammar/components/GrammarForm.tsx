@@ -57,7 +57,7 @@ export function GrammarForm({
     defaultValues: {
       title: "",
       category_id: "",
-      difficulty_level: "B1",
+      level: "B1",
       explanation: "",
       mini_text: "",
       examples: [""],
@@ -76,7 +76,7 @@ export function GrammarForm({
       form.reset({
         title: initialData.title ?? "",
         category_id: initialData.category_id ?? "",
-        difficulty_level: (initialData.difficulty_level as Level) ?? "B1",
+        level: (initialData.level as Level) ?? "B1",
         explanation: initialData.explanation ?? "",
         mini_text: initialData.mini_text ?? "",
         examples: initialData.examples ?? [""],
@@ -205,7 +205,7 @@ console.log("form.getValues() :>> ", form.getValues());
                 <div className="space-y-2">
                   <FormField
                     control={form.control}
-                    name="difficulty_level"
+                    name="level"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-semibold">Difficulty Level *</FormLabel>
@@ -347,7 +347,7 @@ console.log("form.getValues() :>> ", form.getValues());
                     form.reset({
                       title: "",
                       category_id: "",
-                      difficulty_level: "B1",
+                      level: "B1",
                       explanation: "",
                       mini_text: "",
                       examples: [""],

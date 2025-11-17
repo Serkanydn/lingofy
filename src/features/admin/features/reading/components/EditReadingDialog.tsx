@@ -49,7 +49,6 @@ export function EditReadingDialog({
       title: "",
       level: "B1",
       content: "",
-      audio_url: "",
       is_premium: false,
       order_index: 1,
       updated_at: new Date().toISOString(),
@@ -77,20 +76,17 @@ export function EditReadingDialog({
       console.log('Reading data in dialog:', reading);
       console.log('Audio asset:', reading.audio_asset);
       console.log('Audio asset ID:', reading.audio_asset_id);
-      console.log('Audio URL:', reading.audio_url);
 
       form.reset({
         title: reading.title,
         level: reading.level,
         content: reading.content,
-        audio_url: reading.audio_url || "",
         is_premium: reading.is_premium,
         order_index: reading.order_index,
         updated_at: new Date().toISOString(),
         questions: [],
       });
-      // Check both audio_url and audio_asset for audio file
-      const audioUrl = reading.audio_asset?.cdn_url || reading.audio_asset?.storage_url || reading.audio_url || "";
+      const audioUrl = reading.audio_asset?.cdn_url || reading.audio_asset?.storage_url || "";
       console.log('Resolved audio URL:', audioUrl);
       setCurrentAudioUrl(audioUrl);
       setAudioFile(null);
@@ -163,7 +159,6 @@ export function EditReadingDialog({
         title: data.title,
         level: data.level as Level,
         content: data.content,
-        audio_url: audioAssetId ? "" : currentAudioUrl,
         audio_asset_id: audioAssetId,
         order_index: Number(data.order_index || 1),
         is_premium: !!data.is_premium,

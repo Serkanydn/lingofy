@@ -49,7 +49,7 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
     defaultValues: {
       title: "",
       category_id: "",
-      difficulty_level: "B1",
+      level: "B1",
       explanation: "",
       mini_text: "",
       examples: [""],
@@ -68,7 +68,7 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
       form.reset({
         title: topic.title,
         category_id: topic.category_id,
-        difficulty_level: topic.difficulty_level as Level,
+        level: topic.level as Level,
         explanation: topic.explanation,
         mini_text: topic.mini_text,
         examples: topic.examples.length > 0 ? topic.examples : [""],
@@ -86,7 +86,7 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
       data: {
         title: data.title,
         category_id: data.category_id,
-        difficulty_level: data.difficulty_level as Level,
+        level: data.level as Level,
         explanation: data.explanation,
         mini_text: data.mini_text,
         examples: (data.examples || []).filter((ex) => ex.trim()),
@@ -169,7 +169,7 @@ export function EditGrammarDialog({ open, onClose, topic }: EditGrammarDialogPro
               <div className="space-y-2">
                 <FormField
                   control={form.control}
-                  name="difficulty_level"
+                  name="level"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Difficulty Level *</FormLabel>

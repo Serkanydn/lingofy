@@ -1,10 +1,11 @@
-import { Level } from '@/shared/types/common.types';
+import { Level } from "@/shared/types/common.types";
 
 export interface ListeningExercise {
   id: string;
   title: string;
   description: string;
   audio_asset_id?: string;
+  category?: string;
   audio_asset?: {
     id: string;
     storage_url: string;

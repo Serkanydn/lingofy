@@ -5,7 +5,6 @@ export type ReadingContent = {
   title: string
   content: string
   level: Level
-  audio_url: string
   is_premium: boolean
   order_index: number
   created_at: string

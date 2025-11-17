@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -21,10 +21,10 @@ interface ReadingContentCardProps {
 
 /**
  * ReadingContentCard Component
- * 
+ *
  * Displays the full reading article content with audio player,
  * quiz button, and add word functionality.
- * 
+ *
  * @component
  */
 export function ReadingContentCard({
@@ -35,14 +35,7 @@ export function ReadingContentCard({
   onTextSelection,
   hasQuiz,
 }: ReadingContentCardProps) {
-  // Handle both old (audio_url) and new (audio_asset) formats
-  const audioAsset: AudioAsset | undefined = reading.audio_url
-    ? {
-        id: reading.id,
-        storage_url: reading.audio_url,
-        cdn_url: reading.audio_url,
-      }
-    : undefined;
+  const audioAsset: AudioAsset | undefined = undefined;
 
   return (
     <div className="bg-white dark:bg-card rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] overflow-hidden grid gap-6 p-8">
@@ -101,9 +94,9 @@ interface LoadingStateProps {}
 
 /**
  * LoadingState Component
- * 
+ *
  * Loading skeleton for reading detail page.
- * 
+ *
  * @component
  */
 export function LoadingState({}: LoadingStateProps) {
@@ -128,9 +121,9 @@ interface NotFoundStateProps {
 
 /**
  * NotFoundState Component
- * 
+ *
  * Displays when reading article is not found.
- * 
+ *
  * @component
  */
 export function NotFoundState({ level }: NotFoundStateProps) {

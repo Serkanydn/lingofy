@@ -22,7 +22,6 @@ export interface ReadingText {
   title: string;
   content: string;
   level: Level;
-  audio_url: string;
   audio_asset_id?: string;
   audio_asset?: AudioAsset;
   is_premium: boolean;

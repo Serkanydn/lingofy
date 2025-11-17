@@ -9,7 +9,7 @@ export type GrammarTopic = {
   explanation: string
   examples: string[]
   mini_text: string
-  difficulty_level: Level
+  level: Level
   is_premium: boolean
   order_index: number
   created_at: string

@@ -27,7 +27,7 @@ export class GrammarService extends BaseService<GrammarRule> {
         *,
         category:grammar_categories(*)
       `)
-      .eq("difficulty_level", level)
+      .eq("level", level)
       .order("order_index", { ascending: true });
 
     if (error) throw error;

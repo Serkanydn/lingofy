@@ -165,4 +165,23 @@
   .dark .clay-shadow-inset {
     box-shadow: inset 4px 4px 8px #1c140d, inset -4px -4px 8px #281e13;
   }
+
+  .main-user-panel-layout {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+
+    grid-template-areas:
+      "header"
+      "main";
+
+    header {
+      grid-area: header;
+    }
+    
+    main {
+      grid-area: main;
+      height: 100%;
+    }
+  }
 }

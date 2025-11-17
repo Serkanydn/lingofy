@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { use, useState, useMemo } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -12,6 +12,7 @@ import { Breadcrumb } from "../components/Breadcrumb";
 import { useQuizLimit } from "@/features/statistics/hooks/useQuizLimit";
 import { QuizLimitWarning } from "@/features/statistics/components/QuizLimitWarning";
 import type { Level } from "@/shared/types/common.types";
+import { useReadingAttempts } from "@/features/reading/hooks";
 
 interface ListeningLevelPageClientProps {
   params: Promise<{ level: string }>;
@@ -19,23 +20,44 @@ interface ListeningLevelPageClientProps {
 
 /**
  * ListeningLevelPageClient Component
- * 
+ *
  * Main client component for displaying listening exercises by level.
  * Handles filtering, sorting, and premium access control.
- * 
+ *
  * @component
  */
-export function ListeningLevelPageClient({ params }: ListeningLevelPageClientProps) {
+export function ListeningLevelPageClient({
+  params,
+}: ListeningLevelPageClientProps) {
   const { level: paramLevel } = use(params);
   const level = paramLevel.toUpperCase() as Level;
   const { data: listeningContent, isLoading } = useListeningByLevel(level);
-  const { isPremium } = useAuth();
+  const { user, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
-  const { canTake, remaining, used, isPremium: isPremiumFromLimit, maxQuizzes } = useQuizLimit();
+
+  const {
+    canTake,
+    remaining,
+    used,
+    isPremium: isPremiumFromLimit,
+    maxQuizzes,
+  } = useQuizLimit();
 
   // Filter states
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
-  const [accessFilter, setAccessFilter] = useState<"all" | "free" | "premium">("all");
+  const [accessFilter, setAccessFilter] = useState<"all" | "free" | "premium">(
+    "all"
+  );
+
+  const { data: attempts } = useReadingAttempts(
+    listeningContent?.map((l) => l.id) || [],
+    user?.id
+  );
+
+  // Create a map of content_id to score for quick lookup
+  const scoreMap = new Map(
+    attempts?.map((attempt) => [attempt.content_id, attempt.percentage]) || []
+  );
 
   // Filter and sort content
   const filteredContent = useMemo(() => {
@@ -103,11 +125,15 @@ export function ListeningLevelPageClient({ params }: ListeningLevelPageClientPro
             {level} Listening Exercises
           </h1>
         </div>
-        
+
         {/* Quiz Limit Warning */}
         {!isPremiumFromLimit && (
           <div className="mb-6">
-            <QuizLimitWarning remaining={remaining} used={used} maxQuizzes={maxQuizzes} />
+            <QuizLimitWarning
+              remaining={remaining}
+              used={used}
+              maxQuizzes={maxQuizzes}
+            />
           </div>
         )}
 
@@ -127,6 +153,7 @@ export function ListeningLevelPageClient({ params }: ListeningLevelPageClientPro
                 level={level}
                 isPremium={isPremium}
                 onPremiumClick={() => setShowPaywall(true)}
+                score={scoreMap.get(listening.id)}
               />
             ))}
           </div>

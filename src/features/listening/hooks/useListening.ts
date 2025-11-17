@@ -8,7 +8,6 @@ export interface ListeningContent {
   title: string;
   level: Level;
   description: string;
-  audio_url: string; // Deprecated - keep for backward compatibility
   audio_asset_id?: string;
   audio_asset?: AudioAsset;
   duration_seconds: number;

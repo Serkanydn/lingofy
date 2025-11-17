@@ -66,7 +66,7 @@ export function GrammarPageClient() {
       await createTopic.mutateAsync({
         title: data.title,
         category_id: data.category_id,
-        difficulty_level: data.difficulty_level,
+        level: data.level,
         explanation: data.explanation,
         mini_text: data.mini_text,
         examples: data.examples,

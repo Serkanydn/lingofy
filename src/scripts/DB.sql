@@ -60,7 +60,7 @@ CREATE TABLE public.grammar_topics (
   updated_at timestamp with time zone DEFAULT now(),
   is_premium boolean DEFAULT false,
   category_id uuid,
-  difficulty_level text,
+  level text,
   CONSTRAINT grammar_topics_pkey PRIMARY KEY (id),
   CONSTRAINT grammar_topics_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.grammar_categories(id)
 );
@@ -118,7 +118,6 @@ CREATE TABLE public.reading_content (
   title text NOT NULL,
   level text NOT NULL CHECK (level = ANY (ARRAY['A1'::text, 'A2'::text, 'B1'::text, 'B2'::text, 'C1'::text])),
   content text NOT NULL,
-  audio_url text NOT NULL,
   is_premium boolean DEFAULT false,
   order_index integer,
   created_at timestamp with time zone DEFAULT now(),

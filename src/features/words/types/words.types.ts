@@ -3,7 +3,6 @@ export interface UserWord {
   word: string;
   description: string;
   example_sentences: string[];
-  audio_url?: string;
   source_type?: "reading" | "listening";
   source_id?: string;
   category_id?: string | null;

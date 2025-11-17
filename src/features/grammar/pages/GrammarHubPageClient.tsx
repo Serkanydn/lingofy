@@ -1,21 +1,20 @@
-'use client';
+"use client";
 
 import { useActiveGrammarCategories } from "@/features/admin/hooks/useGrammarCategories";
 import { CategoryCard } from "../components/CategoryCard";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { EmptyState } from "../components/EmptyState";
-import { FreeBanner } from "../components/FreeBanner";
 
 /**
  * GrammarHubPageClient Component
- * 
+ *
  * Main grammar hub page showing all categories.
  * Features:
  * - Category cards grid (3 columns)
  * - Free banner highlighting that grammar is free
  * - Loading skeleton
  * - Empty state when no categories
- * 
+ *
  * @component
  */
 export function GrammarHubPageClient() {
@@ -23,7 +22,7 @@ export function GrammarHubPageClient() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-background py-12">
+      <div className="  py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-8">
             Grammar Hub
@@ -35,7 +34,7 @@ export function GrammarHubPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background py-12">
+    <div className="  py-12">
       <div className="container mx-auto px-4">
         {/* Page Header */}
         <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
@@ -45,11 +44,6 @@ export function GrammarHubPageClient() {
           Master English grammar with comprehensive explanations and practice
           quizzes.
         </p>
-
-        {/* Free Banner */}
-        <div className="mb-10">
-          <FreeBanner />
-        </div>
 
         {/* Categories Grid */}
         {categories && categories.length > 0 ? (

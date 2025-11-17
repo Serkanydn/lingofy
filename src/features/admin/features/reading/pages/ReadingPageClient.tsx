@@ -77,7 +77,6 @@ export function ReadingPageClient() {
           id: editingReading.id,
           data: {
             ...readingData,
-            audio_url: readingData.audio_asset_id ? '' : '',
             updated_at: new Date().toISOString(),
           },
           questions,
@@ -93,7 +92,6 @@ export function ReadingPageClient() {
         console.log("[ReadingPageClient] Creating reading", { readingData, questions });
         await createReading.mutateAsync({
           ...readingData,
-          audio_url: readingData.audio_asset_id ? '' : '',
           updated_at: new Date().toISOString(),
           questions,
         });

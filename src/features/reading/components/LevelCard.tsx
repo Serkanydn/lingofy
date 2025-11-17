@@ -69,9 +69,8 @@ export function LevelCard({ level }: LevelCardProps) {
             <span className="text-gray-500 dark:text-gray-400">
               {isPremium
                 ? `${totalTexts} texts`
-                : `${freeTexts} free texts${
-                    totalTexts > freeTexts ? ` of ${totalTexts}` : ""
-                  }`}
+                : `${freeTexts} free texts${totalTexts > freeTexts ? ` of ${totalTexts}` : ""
+                }`}
             </span>
             {!isPremium && totalTexts > freeTexts && (
               <div className="flex items-center gap-1 text-orange-500">

@@ -7,7 +7,6 @@ interface UserWord {
   translation: string;
   description: string;
   example_sentences: string[];
-  audio_url?: string;
   source_type?: "reading" | "listening";
   source_id?: string;
   created_at: string;

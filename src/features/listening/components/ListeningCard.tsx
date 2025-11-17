@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -7,18 +7,33 @@ import { cn } from "@/shared/lib/utils";
 import type { Level } from "@/shared/types/common.types";
 import { ListeningExercise } from "../types/service.types";
 
+/**
+ * Category color mapping for reading cards
+ */
+const CATEGORY_COLORS: Record<string, string> = {
+  TRAVEL: "text-blue-600 dark:text-blue-400",
+  SCIENCE: "text-purple-600 dark:text-purple-400",
+  FOOD: "text-orange-600 dark:text-orange-400",
+  LIFE: "text-green-600 dark:text-green-400",
+  CULTURE: "text-amber-600 dark:text-amber-400",
+  NATURE: "text-emerald-600 dark:text-emerald-400",
+  EDUCATION: "text-indigo-600 dark:text-indigo-400",
+  TECHNOLOGY: "text-cyan-600 dark:text-cyan-400",
+};
+
 interface ListeningCardProps {
   listening: ListeningExercise;
   level: Level;
   isPremium: boolean;
   onPremiumClick: () => void;
+  score?: number;
 }
 
 /**
  * ListeningCard Component
- * 
+ *
  * Displays a listening exercise card with title, description, duration, and premium status.
- * 
+ *
  * @component
  */
 export function ListeningCard({
@@ -26,14 +41,20 @@ export function ListeningCard({
   level,
   isPremium,
   onPremiumClick,
+  score,
 }: ListeningCardProps) {
   const isLocked = listening.is_premium && !isPremium;
+  const category = listening.category || "ARTICLE";
+  const categoryColor =
+    CATEGORY_COLORS[category.toUpperCase()] || "text-gray-600";
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  console.log('score',score);
 
   const cardContent = (
     <div
@@ -46,12 +67,29 @@ export function ListeningCard({
     >
       {/* Content */}
       <div className="p-5 flex-1 flex flex-col relative">
-        {isLocked && (
-          <div className="absolute top-3 right-3 w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg z-10">
-            <Lock className="h-5 w-5 text-white" />
-          </div>
-        )}
-        
+        <div className="mb-2 flex items-center justify-between">
+          <span
+            className={cn(
+              "text-xs font-bold uppercase tracking-wide",
+              categoryColor
+            )}
+          >
+            {category}
+          </span>
+
+          {isLocked && (
+            <div className=" w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
+              <Lock className="h-5 w-5 text-white" />
+            </div>
+          )}
+          {score !== undefined && !isLocked && score > 0 && (
+            <div className=" px-3 py-1 rounded-full bg-orange-500 text-white text-sm font-semibold shadow-lg">
+              {Math.round(score)}%
+            </div>
+          )}
+        </div>
+
+
         {/* Title */}
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
           {listening.title}

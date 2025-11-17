@@ -42,7 +42,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
     defaultValues: {
       title: "",
       category_id: "",
-      difficulty_level: "B1",
+      level: "B1",
       explanation: "",
       mini_text: "",
       examples: [""],
@@ -125,7 +125,7 @@ export function AddGrammarDialog({ open, onClose }: AddGrammarDialogProps) {
 
             <div className="space-y-2">
               <FormLabel>Difficulty Level *</FormLabel>
-              <Select value={form.watch("difficulty_level") as string} onValueChange={(val) => form.setValue("difficulty_level", val as Level)}>
+              <Select value={form.watch("level") as string} onValueChange={(val) => form.setValue("level", val as Level)}>
                 <SelectTrigger className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>

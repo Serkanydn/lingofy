@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -31,10 +31,10 @@ interface ReadingCardProps {
 
 /**
  * ReadingCard Component
- * 
+ *
  * Displays a reading article card with image, title, category, and premium status.
  * Shows user's score if they've attempted the quiz.
- * 
+ *
  * @component
  */
 export function ReadingCard({
@@ -59,7 +59,7 @@ export function ReadingCard({
       )}
     >
       {/* Image */}
-      <div className="relative w-full h-48 bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900">
+      {/* <div className="relative w-full h-48 bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900">
         {reading.image_url ? (
           <img
             src={reading.image_url}
@@ -89,12 +89,12 @@ export function ReadingCard({
             {Math.round(score)}%
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Content */}
       <div className="p-5 flex-1 flex flex-col">
         {/* Category */}
-        <div className="mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <span
             className={cn(
               "text-xs font-bold uppercase tracking-wide",
@@ -103,6 +103,17 @@ export function ReadingCard({
           >
             {category}
           </span>
+
+          {isLocked && (
+            <div className=" w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
+              <Lock className="h-5 w-5 text-white" />
+            </div>
+          )}
+          {score !== undefined && !isLocked && score > 0 && (
+            <div className=" px-3 py-1 rounded-full bg-orange-500 text-white text-sm font-semibold shadow-lg">
+              {Math.round(score)}%
+            </div>
+          )}
         </div>
 
         {/* Title */}

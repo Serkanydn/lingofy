@@ -24,7 +24,6 @@ export interface ReadingContentWithAudio {
   title: string;
   level: string;
   content: string;
-  audio_url: string; // Deprecated - keep for backward compatibility
   audio_asset_id?: string;
   audio_asset?: AudioAsset;
   is_premium: boolean;
@@ -39,7 +38,6 @@ export interface ListeningContentWithAudio {
   title: string;
   level: string;
   description?: string;
-  audio_url: string; // Deprecated - keep for backward compatibility
   audio_asset_id?: string;
   audio_asset?: AudioAsset;
   duration_seconds?: number;
