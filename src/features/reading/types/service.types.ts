@@ -18,7 +18,6 @@ export interface ReadingQuestionInput {
 
 export interface ReadingText {
   id: string;
-  content_id?: string;
   title: string;
   content: string;
   level: Level;

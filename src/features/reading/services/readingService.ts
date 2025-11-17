@@ -1,5 +1,9 @@
 import { BaseService } from "@/shared/services/supabase/baseService";
-import { ReadingText, ReadingQuestion, ReadingQuestionInput } from "../types/service.types";
+import {
+  ReadingText,
+  ReadingQuestion,
+  ReadingQuestionInput,
+} from "../types/service.types";
 import type { Level } from "@/shared/types/common.types";
 
 export class ReadingService extends BaseService<ReadingText> {
@@ -12,9 +16,7 @@ export class ReadingService extends BaseService<ReadingText> {
 
   // Override getAll to include audio assets
   async getAll(): Promise<ReadingText[]> {
-    const { data, error } = await this.supabase
-      .from(this.tableName)
-      .select(`
+    const { data, error } = await this.supabase.from(this.tableName).select(`
         *,
         audio_asset:audio_assets(*)
       `);
@@ -27,10 +29,12 @@ export class ReadingService extends BaseService<ReadingText> {
   async getById(id: string | number): Promise<ReadingText | null> {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select(`
+      .select(
+        `
         *,
         audio_asset:audio_assets(*)
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 
@@ -41,7 +45,7 @@ export class ReadingService extends BaseService<ReadingText> {
   async createQuestions(readingId: string, questions: ReadingQuestionInput[]) {
     if (questions.length === 0) return [];
 
-    console.log('Creating questions:', questions);
+    console.log("Creating questions:", questions);
 
     // Create questions directly linked to reading_content id
     const questionsToInsert = questions.map((q) => ({
@@ -50,19 +54,17 @@ export class ReadingService extends BaseService<ReadingText> {
       type: q.type,
       points: q.points,
       order_index: q.order_index,
-      correct_answer: q.type === 'fill_blank' ? q.correct_answer : null, // Store correct answer for fill_blank
+      correct_answer: q.type === "fill_blank" ? q.correct_answer : null, // Store correct answer for fill_blank
     }));
 
-    console.log('Questions to insert:', questionsToInsert);
+    console.log("Questions to insert:", questionsToInsert);
 
-    const { data: insertedQuestions, error: questionsError } = await this.supabase
-      .from("questions")
-      .insert(questionsToInsert)
-      .select();
+    const { data: insertedQuestions, error: questionsError } =
+      await this.supabase.from("questions").insert(questionsToInsert).select();
 
     if (questionsError) throw questionsError;
 
-    console.log('Inserted questions:', insertedQuestions);
+    console.log("Inserted questions:", insertedQuestions);
 
     // Insert options for multiple_choice and true_false questions
     for (let i = 0; i < questions.length; i++) {
@@ -90,10 +92,12 @@ export class ReadingService extends BaseService<ReadingText> {
   async getQuestionsForContent(readingId: string): Promise<any[]> {
     const { data: questions, error } = await this.supabase
       .from("questions")
-      .select(`
+      .select(
+        `
         *,
         options:question_options(*)
-      `)
+      `
+      )
       .eq("content_id", readingId) // Use reading_content id directly
       .order("order_index", { ascending: true });
 
@@ -104,10 +108,11 @@ export class ReadingService extends BaseService<ReadingText> {
       id: q.id,
       text: q.text,
       type: q.type,
-      options: q.options?.map((opt: any) => ({
-        text: opt.text,
-        is_correct: opt.is_correct,
-      })) || [],
+      options:
+        q.options?.map((opt: any) => ({
+          text: opt.text,
+          is_correct: opt.is_correct,
+        })) || [],
       correct_answer: q.correct_answer,
       points: q.points || 10,
       order_index: q.order_index,
@@ -122,14 +127,14 @@ export class ReadingService extends BaseService<ReadingText> {
       .eq("content_id", readingId); // Use reading_content id directly
 
     if (existingQuestions && existingQuestions.length > 0) {
-      const questionIds = existingQuestions.map(q => q.id);
-      
+      const questionIds = existingQuestions.map((q) => q.id);
+
       // Delete options first (due to foreign key)
       await this.supabase
         .from("question_options")
         .delete()
         .in("question_id", questionIds);
-      
+
       // Delete questions
       await this.supabase
         .from("questions")
@@ -175,8 +180,7 @@ export class ReadingService extends BaseService<ReadingText> {
       .from(this.tableName)
       .select(
         `
-        *,
-        audio_asset:audio_assets(*)
+        *
       `
       )
       .eq("level", level);

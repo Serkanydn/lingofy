@@ -10,9 +10,7 @@ export class ListeningService extends BaseService<ListeningExercise> {
 
   // Override getAll to include audio assets
   async getAll(): Promise<ListeningExercise[]> {
-    const { data, error } = await this.supabase
-      .from(this.tableName)
-      .select(`
+    const { data, error } = await this.supabase.from(this.tableName).select(`
         *,
         audio_asset:audio_assets(*)
       `);
@@ -25,10 +23,12 @@ export class ListeningService extends BaseService<ListeningExercise> {
   async getById(id: string | number): Promise<ListeningExercise | null> {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select(`
+      .select(
+        `
         *,
         audio_asset:audio_assets(*)
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 
@@ -47,10 +47,13 @@ export class ListeningService extends BaseService<ListeningExercise> {
     return { ...exercise, questions };
   }
 
-  async createQuestions(listeningId: string, questions: ReadingQuestionInput[]) {
+  async createQuestions(
+    listeningId: string,
+    questions: ReadingQuestionInput[]
+  ) {
     if (questions.length === 0) return [];
 
-    console.log('Creating listening questions:', questions);
+    console.log("Creating listening questions:", questions);
 
     // Create questions directly linked to listening_content id
     const questionsToInsert = questions.map((q) => ({
@@ -59,19 +62,17 @@ export class ListeningService extends BaseService<ListeningExercise> {
       type: q.type,
       points: q.points,
       order_index: q.order_index,
-      correct_answer: q.type === 'fill_blank' ? q.correct_answer : null,
+      correct_answer: q.type === "fill_blank" ? q.correct_answer : null,
     }));
 
-    console.log('Listening questions to insert:', questionsToInsert);
+    console.log("Listening questions to insert:", questionsToInsert);
 
-    const { data: insertedQuestions, error: questionsError } = await this.supabase
-      .from("questions")
-      .insert(questionsToInsert)
-      .select();
+    const { data: insertedQuestions, error: questionsError } =
+      await this.supabase.from("questions").insert(questionsToInsert).select();
 
     if (questionsError) throw questionsError;
 
-    console.log('Inserted listening questions:', insertedQuestions);
+    console.log("Inserted listening questions:", insertedQuestions);
 
     // Insert options for multiple_choice and true_false questions
     for (let i = 0; i < questions.length; i++) {
@@ -99,10 +100,12 @@ export class ListeningService extends BaseService<ListeningExercise> {
   async getQuestionsForContent(listeningId: string): Promise<any[]> {
     const { data: questions, error } = await this.supabase
       .from("questions")
-      .select(`
+      .select(
+        `
         *,
         options:question_options(*)
-      `)
+      `
+      )
       .eq("content_id", listeningId) // Use listening_content id directly
       .order("order_index", { ascending: true });
 
@@ -113,17 +116,21 @@ export class ListeningService extends BaseService<ListeningExercise> {
       id: q.id,
       text: q.text,
       type: q.type,
-      options: q.options?.map((opt: any) => ({
-        text: opt.text,
-        is_correct: opt.is_correct,
-      })) || [],
+      options:
+        q.options?.map((opt: any) => ({
+          text: opt.text,
+          is_correct: opt.is_correct,
+        })) || [],
       correct_answer: q.correct_answer,
       points: q.points || 10,
       order_index: q.order_index,
     }));
   }
 
-  async updateQuestions(listeningId: string, questions: ReadingQuestionInput[]) {
+  async updateQuestions(
+    listeningId: string,
+    questions: ReadingQuestionInput[]
+  ) {
     // Delete existing questions for this listening content
     const { error: deleteError } = await this.supabase
       .from("questions")
@@ -140,26 +147,39 @@ export class ListeningService extends BaseService<ListeningExercise> {
     return [];
   }
 
-  async getExercisesByLevel(level: Level) {
+  async getListeningByLevel(level: Level) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select(`
-        *,
-        audio_asset:audio_assets(*)
-      `)
+      .select(
+        `
+        *
+      `
+      )
       .eq("level", level);
 
     if (error) throw error;
     return data as ListeningExercise[];
   }
 
+  async getCountByLevel(level: Level) {
+    const { count, error } = await this.supabase
+      .from(this.tableName)
+      .select("*", { count: "exact", head: true })
+      .eq("level", level);
+
+    if (error) throw error;
+    return count;
+  }
+
   async getExercisesByCategory(category: string) {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select(`
+      .select(
+        `
         *,
         audio_asset:audio_assets(*)
-      `)
+      `
+      )
       .eq("category", category);
 
     if (error) throw error;

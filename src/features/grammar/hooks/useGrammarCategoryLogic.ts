@@ -46,7 +46,6 @@ export function useGrammarCategoryLogic(categorySlug: string) {
   const contentIds = topics?.map((t) => t.id) || [];
   const { data: attempts } = useGrammarAttempts(contentIds, user?.id);
 
-  // Create a map of content_id to score for quick lookup
   const scoreMap = useMemo(
     () =>
       new Map(

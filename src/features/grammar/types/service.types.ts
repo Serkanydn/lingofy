@@ -1,5 +1,5 @@
 import { Level } from "@/shared/types/common.types";
-import { GrammarCategory } from './category.types';
+import { GrammarCategory } from "./category.types";
 
 export interface GrammarExercise {
   id: number;
@@ -24,5 +24,4 @@ export interface GrammarRule {
   order_index: number;
   created_at: string;
   updated_at: string;
-  content_id: string;
 }

@@ -42,7 +42,7 @@ export function ReadingContentCard({
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1 text-sm">
-          {reading.level} {level}
+          {reading.level} 
         </Badge>
       </div>
 

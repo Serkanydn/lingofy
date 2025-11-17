@@ -5,7 +5,7 @@ import { Level } from "@/shared/types/common.types";
 import { Lock } from "lucide-react";
 import Link from "next/link";
 import { LEVEL_INFO } from "../constants/levels";
-import { useListeningByLevelCount } from "../hooks/useListening";
+import { useListeningCountByLevel } from "../hooks/useListening";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface LevelCardProps {
@@ -15,7 +15,7 @@ interface LevelCardProps {
 export function LevelCard({ level }: LevelCardProps) {
   const { isPremium } = useAuth();
 
-  const { isLoading, data: totalContentCount } = useListeningByLevelCount(level);
+  const { isLoading, data: totalContentCount } = useListeningCountByLevel(level);
   const totalContent = totalContentCount ?? 0;
   const freeContent = Math.min(10, totalContent);
 
@@ -69,9 +69,8 @@ export function LevelCard({ level }: LevelCardProps) {
             <span className="text-gray-500 dark:text-gray-400">
               {isPremium
                 ? `${totalContent} exercises`
-                : `${freeContent} free exercises${
-                    totalContent > freeContent ? ` of ${totalContent}` : ""
-                  }`}
+                : `${freeContent} free exercises${totalContent > freeContent ? ` of ${totalContent}` : ""
+                }`}
             </span>
             {!isPremium && totalContent > freeContent && (
               <div className="flex items-center gap-1 text-orange-500">

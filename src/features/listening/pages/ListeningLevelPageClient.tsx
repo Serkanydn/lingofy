@@ -2,7 +2,7 @@
 
 import { use, useState, useMemo } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useListeningByLevel } from "../hooks/useListening";
+import { useListeningDetailByLevel } from "../hooks/useListening";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
 import { ListeningCard } from "../components/ListeningCard";
 import { FilterBar } from "../components/FilterBar";
@@ -31,7 +31,7 @@ export function ListeningLevelPageClient({
 }: ListeningLevelPageClientProps) {
   const { level: paramLevel } = use(params);
   const level = paramLevel.toUpperCase() as Level;
-  const { data: listeningContent, isLoading } = useListeningByLevel(level);
+  const { data: listeningContent, isLoading } = useListeningDetailByLevel(level);
   const { user, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
 

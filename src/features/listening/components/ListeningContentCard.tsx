@@ -133,28 +133,32 @@ export function ListeningContentCard({
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-4">
-        <Button
-          className="flex-1 rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
-          onClick={onQuizClick}
-          disabled={!hasQuiz}
-        >
-          <PlayCircleIcon className="mr-2 h-6 w-6" />
-          Take the Quiz
-        </Button>
-        <Button
-          variant="outline"
-          className="rounded-3xl px-6 py-6 border-2 border-gray-200 dark:border-gray-700 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-300"
-          onClick={onAddWordClick}
-        >
-          <Plus className="h-5 w-5" />
-        </Button>
-      </div>
+      {
+        hasQuiz && (
+          <div className="flex gap-4">
+            <Button
+              className="flex-1 rounded-3xl bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] transition-all duration-300 py-6 text-lg"
+              onClick={onQuizClick}
+            >
+              <PlayCircleIcon className="mr-2 h-6 w-6" />
+              Take the Quiz
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-3xl px-6 py-6 border-2 border-gray-200 dark:border-gray-700 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-300"
+              onClick={onAddWordClick}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
+        )
+      }
+
     </div>
   );
 }
 
-interface LoadingStateProps {}
+interface LoadingStateProps { }
 
 /**
  * LoadingState Component
@@ -163,7 +167,7 @@ interface LoadingStateProps {}
  * 
  * @component
  */
-export function LoadingState({}: LoadingStateProps) {
+export function LoadingState({ }: LoadingStateProps) {
   return (
     <div className="min-h-screen bg-white dark:bg-background py-8">
       <div className="container mx-auto px-4 max-w-4xl">

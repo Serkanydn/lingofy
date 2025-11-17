@@ -30,7 +30,6 @@ export interface ReadingContentWithAudio {
   order_index?: number;
   created_at: string;
   updated_at: string;
-  content_id?: string;
 }
 
 export interface ListeningContentWithAudio {
@@ -46,5 +45,4 @@ export interface ListeningContentWithAudio {
   order_index?: number;
   created_at: string;
   updated_at: string;
-  content_id?: string;
 }

@@ -25,7 +25,6 @@ export const readingTextSchema = z.object({
     .int("Order must be an integer")
     .positive("Order must be greater than 0"),
   audio_asset_id: z.string().uuid().optional(),
-  content_id: z.string().uuid().optional(),
   updated_at: z.string().datetime().optional(),
 });
 

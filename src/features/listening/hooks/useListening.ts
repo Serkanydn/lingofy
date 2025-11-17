@@ -20,11 +20,11 @@ export interface ListeningContent {
   updated_at?: string;
 }
 
-export function useListeningByLevel(level: Level) {
+export function useListeningDetailByLevel(level: Level) {
   return useQuery({
     queryKey: ["listening", level],
     queryFn: async () => {
-      return listeningService.getExercisesByLevel(level);
+      return listeningService.getListeningByLevel(level);
     },
   });
 }
@@ -50,17 +50,19 @@ export function useListeningQuiz(contentId: string) {
   });
 }
 
-export function useListeningByLevelCount(level: Level) {
+export function useListeningCountByLevel(level: Level) {
   return useQuery({
     queryKey: ["listening", "count", level],
     queryFn: async () => {
-      const exercises = await listeningService.getExercisesByLevel(level);
-      return exercises.length;
+      return listeningService.getCountByLevel(level);
     },
   });
 }
 
-export function useListeningQuestions(contentId: string, enabled: boolean = true) {
+export function useListeningQuestions(
+  contentId: string,
+  enabled: boolean = true
+) {
   return useQuery({
     queryKey: ["listening-questions", contentId],
     queryFn: async () => {

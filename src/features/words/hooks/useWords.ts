@@ -1,7 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authService } from "@/features/auth/services";
 import { wordsService } from "../services";
-import { statisticsService } from "@/features/statistics/services";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export interface UserWord {
@@ -100,11 +98,11 @@ export function useUpdateWord() {
 
 // Category hooks
 export function useWordCategories() {
+  const user = useAuth().user!;
+
   return useQuery({
     queryKey: ["word-categories"],
     queryFn: async () => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
       return categoryService.getCategories(user.id);
     },
@@ -113,6 +111,7 @@ export function useWordCategories() {
 
 export function useCreateCategory() {
   const queryClient = useQueryClient();
+  const user = useAuth().user!;
 
   return useMutation({
     mutationFn: async ({
@@ -124,8 +123,6 @@ export function useCreateCategory() {
       color: string;
       icon?: string;
     }) => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
       return categoryService.createCategory(user.id, name, color, icon);
     },
@@ -137,6 +134,7 @@ export function useCreateCategory() {
 
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
+  const user = useAuth().user!;
 
   return useMutation({
     mutationFn: async ({
@@ -146,8 +144,6 @@ export function useUpdateCategory() {
       id: string;
       updates: Partial<Pick<WordCategory, "name" | "color" | "icon">>;
     }) => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
       return categoryService.updateCategory(id, user.id, updates);
     },
@@ -159,11 +155,10 @@ export function useUpdateCategory() {
 
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
+  const user = useAuth().user!;
 
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
       return categoryService.deleteCategory(categoryId, user.id);
     },
@@ -176,11 +171,10 @@ export function useDeleteCategory() {
 
 export function useDeleteCategoryCascade() {
   const queryClient = useQueryClient();
+  const user = useAuth().user!;
 
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
       return categoryService.deleteCategoryCascade(categoryId, user.id);
     },
@@ -193,6 +187,7 @@ export function useDeleteCategoryCascade() {
 
 export function useAssignWordToCategory() {
   const queryClient = useQueryClient();
+  const user = useAuth().user!;
 
   return useMutation({
     mutationFn: async ({
@@ -202,8 +197,6 @@ export function useAssignWordToCategory() {
       wordId: string;
       categoryId: string | null;
     }) => {
-      const user = await authService.getCurrentUser();
-      if (!user) throw new Error("User not authenticated");
       const { categoryService } = await import("../services/categoryService");
       return categoryService.assignWordToCategory(user.id, wordId, categoryId);
     },

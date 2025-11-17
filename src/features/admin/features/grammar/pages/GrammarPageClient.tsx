@@ -73,7 +73,6 @@ export function GrammarPageClient() {
         updated_at: new Date().toISOString(),
         order_index: data.order_index,
         is_premium: data.is_premium,
-        content_id: data.content_id ?? '',
       });
     }
     setShowForm(false);

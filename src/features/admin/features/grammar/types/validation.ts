@@ -69,7 +69,6 @@ export const grammarTopicSchema = z.object({
     .int("Order must be an integer")
     .positive("Order must be greater than 0"),
   is_premium: z.boolean(),
-  content_id: z.string().uuid().optional(),
   updated_at: z.string().datetime().optional(),
 });
 

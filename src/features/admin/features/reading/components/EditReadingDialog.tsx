@@ -162,7 +162,6 @@ export function EditReadingDialog({
         audio_asset_id: audioAssetId,
         order_index: Number(data.order_index || 1),
         is_premium: !!data.is_premium,
-        content_id: reading.content_id,
         updated_at: new Date().toISOString(),
       },
       questions: mappedQuestions,
