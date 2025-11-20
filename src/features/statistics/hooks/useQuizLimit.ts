@@ -1,9 +1,9 @@
 'use client';
 
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useSettingsStore } from "@/features/admin/features/settings/store/settingsStore";
-import { QuizLimitService } from "../services/quizLimitService";
+import { quizLimitService } from "@/shared/services/supabase/quizLimitService";
 
 /**
  * useQuizLimit Hook
@@ -24,7 +24,7 @@ export function useQuizLimit() {
         return { canTake: false, remaining: 0, used: 0 };
       }
       
-      return QuizLimitService.canTakeQuiz(
+      return quizLimitService.canTakeQuiz(
         user.id,
         profile?.is_premium || false,
         maxFreeQuizzes

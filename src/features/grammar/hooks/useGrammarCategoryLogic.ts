@@ -1,28 +1,24 @@
-'use client';
+"use client";
 
 import { useState, useMemo } from "react";
-import { useGrammarCategoryBySlug } from "@/features/admin/hooks/useGrammarCategories";
-import { useGrammarByCategory, useGrammarAttempts } from "@/features/grammar/hooks/useGrammar";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import {
+  useGrammarByCategory,
+  useGrammarAttempts,
+} from "@/features/grammar/hooks/useGrammar";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { useGrammarCategoryBySlug } from "@/features/admin/features/grammar/hooks/useGrammarCategories";
 
 type SortOption = "newest" | "oldest";
 
-interface GrammarTopic {
-  id: string;
-  title: string;
-  explanation: string;
-  created_at?: string;
-}
-
 /**
  * useGrammarCategoryLogic Hook
- * 
+ *
  * Manages category page business logic:
  * - Fetches category info and topics
  * - Fetches user attempts and scores
  * - Handles sorting (newest/oldest)
  * - Creates score map for quick lookup
- * 
+ *
  * @param categorySlug - URL slug for the category
  * @returns Category data, topics, scores, loading states, and sort handlers
  */
@@ -31,16 +27,13 @@ export function useGrammarCategoryLogic(categorySlug: string) {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
 
   // Fetch category info
-  const {
-    data: categoryInfo,
-    isLoading: categoryLoading,
-  } = useGrammarCategoryBySlug(categorySlug);
+  const { data: categoryInfo, isLoading: categoryLoading } =
+    useGrammarCategoryBySlug(categorySlug);
 
   // Fetch topics for this category
-  const {
-    data: topics,
-    isLoading: topicsLoading,
-  } = useGrammarByCategory(categoryInfo?.id || "");
+  const { data: topics, isLoading: topicsLoading } = useGrammarByCategory(
+    categoryInfo?.id || ""
+  );
 
   // Fetch user attempts for all topics in this category
   const contentIds = topics?.map((t) => t.id) || [];
@@ -49,7 +42,8 @@ export function useGrammarCategoryLogic(categorySlug: string) {
   const scoreMap = useMemo(
     () =>
       new Map(
-        attempts?.map((attempt) => [attempt.content_id, attempt.percentage]) || []
+        attempts?.map((attempt) => [attempt.content_id, attempt.percentage]) ||
+          []
       ),
     [attempts]
   );

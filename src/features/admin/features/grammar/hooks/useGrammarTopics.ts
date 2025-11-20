@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { GrammarService } from "@/features/grammar/services/grammarService";
-import { GrammarRule } from "@/features/grammar/types/service.types";
+import { GrammarTopic } from "@/shared/types/model/grammarTopic.types";
+import { grammarService } from "@/shared/services/supabase/grammarService";
 
-type CreateGrammarTopicData = Omit<GrammarRule, "id" | "created_at">;
-
-const grammarService = new GrammarService();
+type CreateGrammarTopicData = Omit<
+  GrammarTopic,
+  "id" | "created_at" | "updated_at"
+>;
 
 export function useGrammarTopics() {
   return useQuery({
@@ -37,7 +38,13 @@ export function useUpdateGrammarTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateGrammarTopicData> }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateGrammarTopicData>;
+    }) => {
       return await grammarService.update(id, data);
     },
     onSuccess: () => {

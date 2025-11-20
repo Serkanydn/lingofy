@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { BookOpen, Headphones, BookText, BookMarked, Crown, BarChart3, Home } from 'lucide-react'
 import { useState } from 'react'
-import { useAuthStore } from '@/features/auth/store/useAuthStore'
+import { useAuthStore } from '@/shared/store/useAuthStore'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/shared/lib/utils'
 

@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Edit } from 'lucide-react';
 import { PageHeader, ContentCard, FilterBar, DataTable, type DataTableColumn } from '@/features/admin/shared/components';
 import { UserDetailsDialog, UserForm } from '../components';
-import { useUsers, useUpdateUser } from '../hooks';
 import type { User, UpdateUserFormData } from '../types';
+import { useUpdateUser, useUsers } from '../hooks';
 
 export function UsersPageClient() {
   const [searchQuery, setSearchQuery] = useState('');

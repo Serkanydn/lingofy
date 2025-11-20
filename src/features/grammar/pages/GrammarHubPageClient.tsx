@@ -1,9 +1,9 @@
 "use client";
 
-import { useActiveGrammarCategories } from "@/features/admin/hooks/useGrammarCategories";
 import { CategoryCard } from "../components/CategoryCard";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import { EmptyState } from "../components/EmptyState";
+import { useActiveGrammarCategories } from "@/features/admin/features/grammar/hooks/useGrammarCategories";
 
 /**
  * GrammarHubPageClient Component

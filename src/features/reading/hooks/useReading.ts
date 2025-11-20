@@ -1,19 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ReadingContent } from "../types/reading.types";
+import type { ReadingContent } from "../../../shared/types/model/reading.types";
 import type {
-  QuizQuestion,
+  Question,
   QuizResult,
   QuizSubmission,
-} from "@/features/quiz/types/quiz.types";
-import { readingService } from "../services";
-import { quizService } from "@/features/quiz/services";
-import { authService } from "@/features/auth/services";
-import { Level } from "@/shared/types/common.types";
+} from "@/shared/types/model/question.types";
+import { readingService } from "@/shared/services/supabase/readingService";
+import { CEFRLevel } from "@/shared/types/enums/cefrLevel.enum";
+import { quizService } from "@/shared/services/supabase/quizService";
+import { authService } from "@/shared/services/supabase/authService";
 
 /**
  * Hook to fetch reading content list by level
  */
-export function useReadingByLevel(level: Level) {
+export function useReadingByLevel(level: CEFRLevel) {
   return useQuery({
     queryKey: ["reading", level],
     queryFn: async () => {
@@ -36,7 +36,7 @@ export function useReadingAttempts(contentIds: string[], userId?: string) {
   });
 }
 
-export function useReadingByLevelCount(level: Level) {
+export function useReadingByLevelCount(level: CEFRLevel) {
   return useQuery({
     queryKey: ["reading_level_count", level],
     queryFn: async () => {
@@ -44,7 +44,6 @@ export function useReadingByLevelCount(level: Level) {
     },
   });
 }
-
 
 /**
  * Hook to fetch reading content details by id
@@ -76,7 +75,10 @@ export function useReadingQuiz(contentId: string) {
 /**
  * Hook to fetch questions for reading content (for admin/editing)
  */
-export function useReadingQuestions(contentId: string, enabled: boolean = true) {
+export function useReadingQuestions(
+  contentId: string,
+  enabled: boolean = true
+) {
   return useQuery({
     queryKey: ["reading-questions", contentId],
     queryFn: async () => {

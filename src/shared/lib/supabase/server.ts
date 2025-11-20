@@ -1,4 +1,4 @@
-import { Database } from "@/shared/types/database.types";
+import { Database } from "@/shared/types/model/database.types";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -9,9 +9,9 @@ export const createServerSupabaseClient = async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookieOptions: {
-        name: 'lingofy-auth-token',
-      },
+      // cookieOptions: {
+      //   name: 'lingofy-auth-token',
+      // },
       cookies: {
         getAll() {
           return cookieStore.getAll();

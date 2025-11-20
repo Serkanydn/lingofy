@@ -9,7 +9,7 @@ export interface GrammarCategory {
   description: string | null;
   icon: string;
   slug: string;
-  order_index: number;
+  order: number;
 }
 
 interface CategoryCardProps {

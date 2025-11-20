@@ -2,12 +2,12 @@
 
 import { CheckCircle2, XCircle } from "lucide-react";
 import { quizValidator } from "../utils/quizValidator";
-import { QuizQuestion, UserAnswer } from "../types/quiz.types";
+import { Question, UserAnswer } from "@/shared/types/model/question.types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 interface TrueFalseQuestionProps {
-  question: QuizQuestion;
+  question: Question;
   userAnswer?: UserAnswer;
   onAnswer: (answer: UserAnswer) => void;
   isSubmitted: boolean;
@@ -39,7 +39,7 @@ export function TrueFalseQuestion({
     <div className="space-y-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed">
-          Question {question.order_index || 1}: {question.text}
+          Question {question.order || 1}: {question.text}
         </h3>
       </div>
 
@@ -58,11 +58,11 @@ export function TrueFalseQuestion({
               className={cn(
                 "h-24 text-base font-medium transition-all rounded-2xl  flex items-center justify-center clay-shadow w-full",
                 isSelected &&
-                  !showFeedback &&
-                  " bg-orange-50 dark:bg-orange-950/20 ",
+                !showFeedback &&
+                " bg-orange-50 dark:bg-orange-950/20 ",
                 !isSelected &&
-                  !showFeedback &&
-                  " dark:border-gray-700 bg-white dark:bg-card ",
+                !showFeedback &&
+                " dark:border-gray-700 bg-white dark:bg-card ",
                 showAsCorrect && " bg-green-50 dark:bg-green-950/20 ",
                 showAsWrong && " bg-red-50 dark:bg-red-950/20 ",
                 showAsCorrectAnswer && " bg-green-50/50 dark:bg-green-950/10",

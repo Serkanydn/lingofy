@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { PlayCircleIcon, Plus, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AudioPlayer } from "@/features/reading/components/AudioPlayer";
-import type { ListeningExercise } from "../types/service.types";
-import type { AudioAsset } from "@/shared/types/audio.types";
+ import type { AudioAsset } from "@/shared/types/model/audio.types";
+import { ListeningContentWithAudio } from "@/shared/types/model/listening.types";
 
 interface ListeningContentCardProps {
-  listening: ListeningExercise;
+  listening: ListeningContentWithAudio;
   level: string;
   showTranscript: boolean;
   onToggleTranscript: () => void;
@@ -58,12 +58,6 @@ export function ListeningContentCard({
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
         {listening.title}
       </h1>
-
-      {listening.description && (
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-          {listening.description}
-        </p>
-      )}
 
       {/* Audio Player Section */}
       <div className="mb-8">

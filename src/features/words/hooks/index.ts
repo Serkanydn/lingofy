@@ -7,7 +7,5 @@ export {
   useCreateCategory,
   useDeleteCategory,
   useAssignWordToCategory,
-  type UserWord,
-  type WordCategory,
 } from './useWords';
 export { useMyWordsLogic } from './useMyWordsLogic';

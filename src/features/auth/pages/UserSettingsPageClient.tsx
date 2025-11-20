@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../hooks/useAuth'
-import { supabase } from '@/shared/lib/supabase/client'
+import { useAuth } from '../../../shared/hooks/useAuth'
+import { authService } from '@/shared/services/supabase/authService'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { toast } from 'sonner'
+import { userService } from '@/features/admin/features/users/services'
 
 const profileSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters').max(80).optional().or(z.literal('')),
@@ -46,16 +47,14 @@ export default function UserSettingsPageClient() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       full_name: profile?.full_name || '',
-      avatar_url: profile?.avatar_url || '',
     },
   })
 
   useEffect(() => {
     profileForm.reset({
       full_name: profile?.full_name || '',
-      avatar_url: profile?.avatar_url || '',
     })
-  }, [profileForm, profile?.full_name, profile?.avatar_url])
+  }, [profileForm, profile?.full_name])
 
   const passwordForm = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
@@ -70,12 +69,8 @@ export default function UserSettingsPageClient() {
       if (data.full_name !== undefined) updates.full_name = data.full_name || null
       if (data.avatar_url !== undefined) updates.avatar_url = data.avatar_url || null
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
+      const _data = await userService.getById(user.id)
 
-      if (error) throw error
       toast.success('Profile updated')
     } catch (err: any) {
       toast.error('Failed to update profile', { description: err.message })
@@ -119,7 +114,7 @@ export default function UserSettingsPageClient() {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 ring-2 ring-orange-100 dark:ring-orange-900/30 shadow-md">
-                  <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} />
+                  {/* <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} /> */}
                   <AvatarFallback className="bg-linear-to-br from-orange-400 to-orange-500 text-white">
                     {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>

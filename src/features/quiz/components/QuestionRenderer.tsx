@@ -3,10 +3,10 @@
 import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
 import { FillBlankQuestion } from "./FillBlankQuestion";
 import { TrueFalseQuestion } from "./TrueFalseQuestion";
-import { QuizQuestion, UserAnswer } from '../types/quiz.types';
+import { Question, UserAnswer } from "@/shared/types/model/question.types";
 
 interface QuestionRendererProps {
-  question: QuizQuestion;
+  question: Question;
   userAnswer?: UserAnswer;
   onAnswer: (answer: UserAnswer) => void;
   isSubmitted: boolean;

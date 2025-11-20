@@ -7,8 +7,8 @@ import { PlayCircleIcon, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AudioPlayer } from "../components/AudioPlayer";
 import { Breadcrumb } from "../components/Breadcrumb";
-import type { ReadingContent } from "../types/reading.types";
-import type { AudioAsset } from "@/shared/types/audio.types";
+import type { ReadingContent } from "../../../shared/types/model/reading.types";
+import type { AudioAsset } from "@/shared/types/model/audio.types";
 
 interface ReadingContentCardProps {
   reading: ReadingContent;

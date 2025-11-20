@@ -1,11 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ReadingText, ReadingQuestionInput } from "@/features/reading/types/service.types";
-import { readingService } from "@/features/reading/services";
-
-type CreateReadingData = Omit<ReadingText, "id" | "created_at"> & {
-  questions?: ReadingQuestionInput[];
-};
+import { readingService } from "@/shared/services/supabase/readingService";
+import { ReadingFormData } from "../types/validation";
 
 export function useReadingContent() {
   return useQuery({
@@ -20,15 +16,16 @@ export function useCreateReading() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (insertData: CreateReadingData) => {
+    mutationFn: async (insertData: ReadingFormData) => {
       const { questions, ...readingData } = insertData;
       const reading = await readingService.create(readingData);
-      
-      // If questions are provided, create them
+
+      console.log("questions :>> ", questions);
+
       if (questions && questions.length > 0 && reading?.id) {
         await readingService.createQuestions(reading.id, questions);
       }
-      
+
       return reading;
     },
     onSuccess: () => {
@@ -47,20 +44,19 @@ export function useUpdateReading() {
   return useMutation({
     mutationFn: async ({
       id,
-      data,
-      questions,
+      updateData,
     }: {
       id: string;
-      data: Partial<CreateReadingData>;
-      questions?: ReadingQuestionInput[];
+      updateData: Partial<ReadingFormData>;
     }) => {
-      const result = await readingService.update(id, data);
-      
-      // Update or create questions using reading_content id directly
+      const { questions, ...readingData } = updateData;
+
+      const result = await readingService.update(id, readingData);
+
       if (questions !== undefined) {
         await readingService.updateQuestions(id, questions);
       }
-      
+
       return result;
     },
     onSuccess: () => {

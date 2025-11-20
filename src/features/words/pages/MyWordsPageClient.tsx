@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { FlashcardPractice } from "../components/FlashcardPractice";
 import { UpdateWordDialog } from "../components/UpdateWordDialog";
 import { AddWordDialog } from "../components/addWordDialog";

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { PlanType } from '../types/premium.types';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { PlanType } from '../../../shared/types/model/premium.types';
 
 /**
  * usePremiumSubscription Hook

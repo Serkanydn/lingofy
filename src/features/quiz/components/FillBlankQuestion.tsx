@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 
 import { CheckCircle2, XCircle } from "lucide-react";
 import { quizValidator } from "../utils/quizValidator";
-import { QuizQuestion, UserAnswer } from "../types/quiz.types";
+import {  Question, UserAnswer } from "@/shared/types/model/question.types";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/shared/lib/utils";
 
 interface FillBlankQuestionProps {
-  question: QuizQuestion;
+  question: Question;
   userAnswer?: UserAnswer;
   onAnswer: (answer: UserAnswer) => void;
   isSubmitted: boolean;
@@ -78,7 +78,7 @@ export function FillBlankQuestion({
     <div className="space-y-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-relaxed mb-4">
-          Question {question.order_index || 1}: Fill in the blank
+          Question {question.order || 1}: Fill in the blank
         </h3>
         
         {hasBlankMarker ? (

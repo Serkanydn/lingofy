@@ -1,9 +1,9 @@
-import { supabase } from '@/shared/lib/supabase/client';
-import type { AudioAsset } from '@/shared/types/audio.types';
+import type { AudioAsset } from "@/shared/types/model/audio.types";
+import { getSupabaseClient } from "../lib/supabase/client";
 
 export interface AudioUploadOptions {
   file: File;
-  contentType: 'reading' | 'listening' | 'pronunciation' | 'general';
+  contentType: "reading" | "listening" | "pronunciation" | "general";
 }
 
 export interface AudioUploadResult {
@@ -20,45 +20,48 @@ export async function uploadAudioAsset(
 ): Promise<AudioUploadResult> {
   try {
     const { file, contentType } = options;
-    
+
     // Validate file
     if (!file || file.size === 0) {
-      return { success: false, error: 'Invalid or empty file' };
+      return { success: false, error: "Invalid or empty file" };
     }
-    
-    console.log('Uploading audio file via API:', {
+
+    console.log("Uploading audio file via API:", {
       name: file.name,
       size: file.size,
       type: file.type,
       contentType,
     });
-    
+
     // Create form data
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('contentType', contentType);
-    
+    formData.append("file", file);
+    formData.append("contentType", contentType);
+
     // Upload via API route
-    const response = await fetch('/api/audio/upload', {
-      method: 'POST',
+    const response = await fetch("/api/audio/upload", {
+      method: "POST",
       body: formData,
     });
-    
+
     const result = await response.json();
-    
+
     if (!response.ok || !result.success) {
-      console.error('Upload failed:', result.error);
-      return { success: false, error: result.error || 'Failed to upload audio' };
+      console.error("Upload failed:", result.error);
+      return {
+        success: false,
+        error: result.error || "Failed to upload audio",
+      };
     }
-    
-    console.log('Upload successful:', result.audioAsset);
-    
+
+    console.log("Upload successful:", result.audioAsset);
+
     return { success: true, audioAsset: result.audioAsset as AudioAsset };
   } catch (error) {
-    console.error('Upload exception:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    console.error("Upload exception:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -69,34 +72,33 @@ export async function uploadAudioAsset(
 export async function deleteAudioAsset(assetId: string): Promise<boolean> {
   try {
     // Get asset details
-    const { data: asset } = await supabase
-      .from('audio_assets')
-      .select('*')
-      .eq('id', assetId)
+    const { data: asset } = await getSupabaseClient()
+      .from("audio_assets")
+      .select("*")
+      .eq("id", assetId)
       .single();
-    
+
     if (!asset) return false;
-    
+
     // Delete from Cloudflare R2 if storage path exists
     if ((asset as any).storage_path) {
       try {
-        const { deleteAudioFromR2 } = await import('./cloudflareService');
+        const { deleteAudioFromR2 } = await import("./cloudflareService");
         await deleteAudioFromR2((asset as any).storage_path);
       } catch (error) {
-        console.error('Error deleting from R2:', error);
+        console.error("Error deleting from R2:", error);
         // Continue with soft delete even if R2 deletion fails
       }
     }
-    
+
     // Soft delete from database
-    await (supabase
-      .from('audio_assets') as any)
+    await (getSupabaseClient().from("audio_assets") as any)
       .update({ is_active: false })
-      .eq('id', assetId);
-    
+      .eq("id", assetId);
+
     return true;
   } catch (error) {
-    console.error('Error deleting audio asset:', error);
+    console.error("Error deleting audio asset:", error);
     return false;
   }
 }
@@ -104,19 +106,21 @@ export async function deleteAudioAsset(assetId: string): Promise<boolean> {
 /**
  * Get audio asset by ID
  */
-export async function getAudioAsset(assetId: string): Promise<AudioAsset | null> {
+export async function getAudioAsset(
+  assetId: string
+): Promise<AudioAsset | null> {
   try {
-    const { data, error } = await supabase
-      .from('audio_assets')
-      .select('*')
-      .eq('id', assetId)
-      .eq('is_active', true)
+    const { data, error } = await getSupabaseClient()
+      .from("audio_assets")
+      .select("*")
+      .eq("id", assetId)
+      .eq("is_active", true)
       .single();
-    
+
     if (error) throw error;
     return data as AudioAsset;
   } catch (error) {
-    console.error('Error fetching audio asset:', error);
+    console.error("Error fetching audio asset:", error);
     return null;
   }
 }
@@ -129,15 +133,14 @@ export async function updateAudioAsset(
   updates: Partial<AudioAsset>
 ): Promise<boolean> {
   try {
-    const { error } = await (supabase
-      .from('audio_assets') as any)
+    const { error } = await (getSupabaseClient().from("audio_assets") as any)
       .update(updates)
-      .eq('id', assetId);
-    
+      .eq("id", assetId);
+
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error updating audio asset:', error);
+    console.error("Error updating audio asset:", error);
     return false;
   }
 }
@@ -146,25 +149,25 @@ export async function updateAudioAsset(
  * List audio assets by content type
  */
 export async function listAudioAssets(
-  contentType?: 'reading' | 'listening' | 'pronunciation' | 'general'
+  contentType?: "reading" | "listening" | "pronunciation" | "general"
 ): Promise<AudioAsset[]> {
   try {
-    let query = supabase
-      .from('audio_assets')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-    
+    let query = getSupabaseClient()
+      .from("audio_assets")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
     if (contentType) {
-      query = query.eq('content_type', contentType);
+      query = query.eq("content_type", contentType);
     }
-    
+
     const { data, error } = await query;
-    
+
     if (error) throw error;
     return data as AudioAsset[];
   } catch (error) {
-    console.error('Error listing audio assets:', error);
+    console.error("Error listing audio assets:", error);
     return [];
   }
 }

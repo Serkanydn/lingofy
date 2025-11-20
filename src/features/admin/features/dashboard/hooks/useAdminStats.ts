@@ -1,5 +1,5 @@
+import { getSupabaseClient } from "@/shared/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/shared/lib/supabase/client";
 
 interface AdminStats {
   totalUsers: number;
@@ -15,33 +15,33 @@ export function useAdminStats() {
     queryKey: ["admin-stats"],
     queryFn: async (): Promise<AdminStats> => {
       // Get total users
-      const { count: totalUsers } = await supabase
+      const { count: totalUsers } = await getSupabaseClient()
         .from("profiles")
         .select("*", { count: "exact", head: true });
 
       // Get premium users
-      const { count: premiumUsers } = await supabase
+      const { count: premiumUsers } = await getSupabaseClient()
         .from("profiles")
         .select("*", { count: "exact", head: true })
         .eq("is_premium", true);
 
       // Get reading content count
-      const { count: readingContent } = await supabase
+      const { count: readingContent } = await getSupabaseClient()
         .from("reading_content")
         .select("*", { count: "exact", head: true });
 
       // Get listening content count
-      const { count: listeningContent } = await supabase
+      const { count: listeningContent } = await getSupabaseClient()
         .from("listening_content")
         .select("*", { count: "exact", head: true });
 
       // Get grammar topics count
-      const { count: grammarTopics } = await supabase
+      const { count: grammarTopics } = await getSupabaseClient()
         .from("grammar_topics")
         .select("*", { count: "exact", head: true });
 
       // Get total quizzes taken
-      const { count: totalQuizzes } = await supabase
+      const { count: totalQuizzes } = await getSupabaseClient()
         .from("user_question_attempts")
         .select("*", { count: "exact", head: true });
 

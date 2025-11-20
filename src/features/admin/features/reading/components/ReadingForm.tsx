@@ -17,12 +17,12 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, Upload, X, AlertCircle } from "lucide-react";
-import { Level } from "@/shared/types/common.types";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
-import { QuestionManager, Question } from "./QuestionManager";
 import { readingFormSchema, type ReadingFormData } from "../types/validation";
+import { CEFRLevel } from "@/shared/types/enums/cefrLevel.enum";
+import { LEVELS } from "@/shared/types/model/level";
+import { QuestionManager } from "@/features/admin/shared/components/questionManager";
 
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 interface ReadingFormProps {
   isOpen: boolean;
@@ -49,10 +49,10 @@ export function ReadingForm({
     reValidateMode: "onChange",
     defaultValues: {
       title: initialData?.title ?? "",
-      level: initialData?.level ?? "A1",
+      level: initialData?.level ?? CEFRLevel.A1,
       content: initialData?.content ?? "",
       is_premium: initialData?.is_premium ?? false,
-      order_index: initialData?.order_index ?? 1,
+      order: initialData?.order ?? 1,
       audio_asset_id: initialData?.audio_asset_id,
       questions: initialData?.questions ?? [],
     },
@@ -66,10 +66,10 @@ export function ReadingForm({
       console.log("[ReadingForm] Received initialData", initialData);
       reset({
         title: initialData.title ?? "",
-        level: initialData.level ?? "A1",
+        level: initialData.level ?? CEFRLevel.A1,
         content: initialData.content ?? "",
         is_premium: initialData.is_premium ?? false,
-        order_index: initialData.order_index ?? 1,
+        order: initialData.order ?? 1,
         audio_asset_id: initialData.audio_asset_id,
         questions: initialData.questions ?? [],
         audio_asset: initialData?.audio_asset,
@@ -129,19 +129,12 @@ export function ReadingForm({
       }
     }
     try {
-      console.log("[ReadingForm] Calling parent onSubmit with payload", { ...data, audio_asset_id: audioAssetId });
-      await onSubmit({ ...data, audio_asset_id: audioAssetId });
+      const questionsPayload = watch("questions") || [];
+      console.log("[ReadingForm] Calling parent onSubmit with payload", { ...data, audio_asset_id: audioAssetId, questions: questionsPayload });
+      await onSubmit({ ...data, audio_asset_id: audioAssetId, questions: questionsPayload });
       if (mode === "create") {
         console.log("[ReadingForm] Create mode: resetting form while keeping it open");
-        reset({
-          title: "",
-          level: "A1",
-          content: "",
-          is_premium: false,
-          order_index: 1,
-          audio_asset_id: undefined,
-          questions: [],
-        });
+        reset();
         setAudioFile(null);
       }
     } catch (e) {
@@ -151,15 +144,7 @@ export function ReadingForm({
   };
 
   const handleReset = () => {
-    reset({
-      title: "",
-      level: "A1",
-      content: "",
-      is_premium: false,
-      order_index: 1,
-      audio_asset_id: undefined,
-      questions: [],
-    });
+    reset();
     setAudioFile(null);
   };
 
@@ -234,7 +219,7 @@ export function ReadingForm({
                     <Label htmlFor="level" className="text-sm font-semibold">
                       Level *
                     </Label>
-                    <Select value={watch("level")} onValueChange={(value) => setValue("level", value as Level, { shouldValidate: true })}>
+                    <Select value={watch("level")} onValueChange={(value) => setValue("level", value as CEFRLevel, { shouldValidate: true })}>
                       <SelectTrigger className={`rounded-2xl border-2 h-12 ${errors.level ? "border-red-500" : ""}`} onBlur={() => trigger("level")}>
                         <SelectValue placeholder="Select level" />
                       </SelectTrigger>
@@ -339,15 +324,15 @@ export function ReadingForm({
                     <Input
                       id="orderIndex"
                       type="number"
-                      {...register("order_index", { valueAsNumber: true })}
-                      className={`rounded-2xl border-2 h-12 ${errors.order_index ? "border-red-500" : ""}`}
-                      onBlur={() => trigger("order_index")}
+                      {...register("order", { valueAsNumber: true })}
+                      className={`rounded-2xl border-2 h-12 ${errors.order ? "border-red-500" : ""}`}
+                      onBlur={() => trigger("order")}
                       min="1"
                     />
-                    {errors.order_index && (
+                    {errors.order && (
                       <span role="alert" className="text-xs text-red-600 flex items-center gap-1">
                         <AlertCircle className="h-4 w-4" />
-                        {errors.order_index.message as string}
+                        {errors.order.message as string}
                       </span>
                     )}
                   </div>

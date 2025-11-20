@@ -1,7 +1,7 @@
 'use client';
 
 import { StatsCard } from '@/features/admin/shared/components';
-import { useAdminStats } from '../hooks';
+import { useAdminStats } from '../hooks/useAdminStats';
 
 export function AdminDashboardPageClient() {
   const { data: stats, isLoading } = useAdminStats();

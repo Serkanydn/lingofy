@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { QuizAnswer } from "../types/quiz.types";
-import { quizService } from "../services";
-import { toast } from "sonner";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { QuizAnswer } from "../../../shared/types/model/question.types";
+ import { toast } from "sonner";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { quizService } from "@/shared/services/supabase/quizService";
 
 interface QuizSubmitParams {
   content_id: string;

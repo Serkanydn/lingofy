@@ -26,7 +26,7 @@ import {
   Pagination,
   DeleteConfirmDialog,
 } from "@/features/admin/shared/components";
-import { GrammarCategoryForm, type CategoryFormData } from "../components/GrammarCategoryForm";
+import { GrammarCategoryForm } from "../components/GrammarCategoryForm";
 import {
   useGrammarCategories,
   useDeleteGrammarCategory,
@@ -34,6 +34,7 @@ import {
   useCreateGrammarCategory,
   useUpdateGrammarCategory,
 } from "../hooks/useGrammarCategories";
+import { CreateGrammarCategoryFormData } from "../types/validation";
 
 export function GrammarCategoriesPageClient() {
   const [showForm, setShowForm] = useState(false);
@@ -76,7 +77,7 @@ export function GrammarCategoriesPageClient() {
     });
   };
 
-  const handleFormSubmit = async (data: CategoryFormData) => {
+  const handleFormSubmit = async (data: CreateGrammarCategoryFormData) => {
     if (editingCategory) {
       await updateCategory.mutateAsync({
         id: editingCategory.id,
@@ -213,7 +214,7 @@ export function GrammarCategoriesPageClient() {
                     </code>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{category.order_index}</Badge>
+                    <Badge variant="outline">{category.order}</Badge>
                   </TableCell>
                   <TableCell>
                     <Button

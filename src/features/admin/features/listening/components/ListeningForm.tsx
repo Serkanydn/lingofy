@@ -17,39 +17,22 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, Upload, X } from "lucide-react";
-import { Level } from "@/shared/types/common.types";
 import { uploadAudioAsset } from "@/shared/services/audioUploadService";
-import { QuestionManager, type Question } from "./QuestionManager";
+import { QuestionManager, type Question } from "../../../shared/components/questionManager";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { z } from "zod";
-import { levelSchema, questionSchema } from "../types/validation";
+import { ListeningFormData, listeningSchema } from "../types/validation";
 import { toast } from "sonner";
-
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
-
-type ListeningFormValues = z.infer<typeof listeningFormUiSchema>;
+import { LEVELS } from "@/shared/types/model/level";
+import { CEFRLevel } from "@/shared/types/enums/cefrLevel.enum";
 
 interface ListeningFormProps {
   isOpen: boolean;
   onToggle: () => void;
-  onSubmit: (data: ListeningFormValues & { audio_asset_id: string }) => Promise<void>;
-  initialData?: Partial<ListeningFormValues>;
+  onSubmit: (data: ListeningFormData) => Promise<void>;
+  initialData?: Partial<ListeningFormData>;
   isLoading?: boolean;
   mode?: "create" | "edit";
 }
-
-const listeningFormUiSchema = z.object({
-  title: z.string().min(3).max(200).trim(),
-  level: levelSchema,
-  transcript: z.string().min(20).trim(),
-  duration: z
-    .union([z.coerce.number().int().positive().max(3600), z.literal(0)])
-    .optional(),
-  is_premium: z.boolean(),
-  order_index: z.coerce.number().int().positive(),
-  audio_asset_id: z.string().uuid().optional(),
-  questions: z.array(questionSchema).default([]),
-});
 
 export function ListeningForm({
   isOpen,
@@ -62,22 +45,22 @@ export function ListeningForm({
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const defaultValues = useMemo<Partial<ListeningFormValues>>(
+  const defaultValues = useMemo<Partial<ListeningFormData>>(
     () => ({
       title: "",
-      level: "A1",
+      level: CEFRLevel.A1,
       transcript: "",
       duration: undefined,
       is_premium: false,
-      order_index: 1,
+      order: 1,
       questions: [],
       ...initialData,
     }),
     [initialData]
   );
 
-  const form = useForm<ListeningFormValues>({
-    resolver: zodResolver(listeningFormUiSchema) as any,
+  const form = useForm<ListeningFormData>({
+    resolver: zodResolver(listeningSchema) as any,
     defaultValues,
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -100,7 +83,7 @@ export function ListeningForm({
     form.setValue("audio_asset_id", undefined);
   };
 
-  const onSubmitForm = async (values: ListeningFormValues) => {
+  const onSubmitForm = async (values: ListeningFormData) => {
     let audioAssetId = values.audio_asset_id;
     if (!audioAssetId && !audioFile) {
       toast.error("Audio file is required for listening content");
@@ -129,7 +112,7 @@ export function ListeningForm({
       toast.error("Audio file is required");
       return;
     }
-    const payload: ListeningFormValues & { audio_asset_id: string } = {
+    const payload: ListeningFormData & { audio_asset_id: string } = {
       ...values,
       audio_asset_id: audioAssetId,
     };
@@ -194,7 +177,7 @@ export function ListeningForm({
                         <FormItem>
                           <FormLabel className="text-sm font-semibold">Level</FormLabel>
                           <FormControl>
-                            <Select value={field.value} onValueChange={(v) => field.onChange(v as Level)}>
+                            <Select value={field.value} onValueChange={(v) => field.onChange(v as CEFRLevel)}>
                               <SelectTrigger className="rounded-2xl border-2 h-12">
                                 <SelectValue placeholder="Select level" />
                               </SelectTrigger>
@@ -250,7 +233,7 @@ export function ListeningForm({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name="duration"
+                      name="duration_seconds"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-semibold">Duration (seconds)</FormLabel>
@@ -270,7 +253,7 @@ export function ListeningForm({
                     />
                     <FormField
                       control={form.control}
-                      name="order_index"
+                      name="order"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-semibold">Display Order</FormLabel>

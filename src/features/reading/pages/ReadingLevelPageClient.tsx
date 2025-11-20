@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useMemo } from "react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useReadingByLevel, useReadingAttempts } from "../hooks/useReading";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
 import { ReadingCard } from "../components/ReadingCard";
@@ -11,7 +11,7 @@ import { EmptyState } from "../components/EmptyState";
 import { Breadcrumb } from "../components/Breadcrumb";
 import { useQuizLimit } from "@/features/statistics/hooks/useQuizLimit";
 import { QuizLimitWarning } from "@/features/statistics/components/QuizLimitWarning";
-import type { Level } from "@/shared/types/common.types";
+import type { Level } from "@/shared/types/model/common.types";
 
 interface ReadingLevelPageClientProps {
   params: Promise<{ level: string }>;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Play, Pause, Headphones, SkipBack, SkipForward } from "lucide-react";
 import { Howl } from "howler";
-import type { AudioAsset } from "@/shared/types/audio.types";
+import type { AudioAsset } from "@/shared/types/model/audio.types";
 
 interface AudioPlayerProps {
   audioAsset: AudioAsset; // New preferred method

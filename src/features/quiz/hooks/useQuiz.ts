@@ -1,4 +1,4 @@
-import { quizService } from "../services";
+import { quizService } from "@/shared/services/supabase/quizService";
 import { useQuery } from "@tanstack/react-query";
 
 export function useQuiz(contentId: string) {
@@ -26,7 +26,7 @@ export function useHasAttempted(userId: string, quizContentId: string) {
 }
 
 export function useQuizFromId(contentId: string) {
-  console.log('contentId',contentId);
+  console.log("contentId", contentId);
   return useQuery({
     queryKey: ["quiz", contentId],
     queryFn: () => quizService.getQuizByContentId(contentId),

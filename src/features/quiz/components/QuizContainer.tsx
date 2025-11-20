@@ -1,6 +1,6 @@
 "use client";
 
-import { QuizContent, QuizState, UserAnswer } from "../types/quiz.types";
+import { Quiz, QuizState, UserAnswer } from "../../../shared/types/model/question.types";
 import { useState, useEffect, useRef } from "react";
 import { QuizResult } from "./QuizResult";
 import { ArrowLeft } from "lucide-react";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { quizValidator } from "../utils/quizValidator";
 
 interface QuizContainerProps {
-  quiz: QuizContent;
+  quiz: Quiz;
   onExit: () => void;
   onComplete: (
     score: number,

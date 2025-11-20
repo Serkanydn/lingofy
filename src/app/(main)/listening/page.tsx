@@ -1,4 +1,4 @@
-import { Level } from "@/shared/types/common.types";
+import { Level } from "@/shared/types/model/common.types";
 import { LevelCard } from "@/features/listening/components/LevelCard";
 import { LEVEL_INFO } from "@/features/listening/constants/levels";
 

@@ -1,26 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { Level } from "@/shared/types/common.types";
-import { AudioAsset } from "@/shared/types/audio.types";
-import { listeningService } from "../services";
+import { AudioAsset } from "@/shared/types/model/audio.types";
+import { listeningService } from "@/shared/services/supabase/listeningService";
+import { CEFRLevel } from "@/shared/types/enums/cefrLevel.enum";
 
 export interface ListeningContent {
   id: string;
   title: string;
-  level: Level;
+  level: CEFRLevel;
   description: string;
   audio_asset_id?: string;
   audio_asset?: AudioAsset;
   duration_seconds: number;
   transcript: string;
   is_premium: boolean;
-  order_index: number;
+  order: number;
   category?: string;
   thumbnail?: string;
   created_at?: string;
   updated_at?: string;
 }
 
-export function useListeningDetailByLevel(level: Level) {
+export function useListeningDetailByLevel(level: CEFRLevel) {
   return useQuery({
     queryKey: ["listening", level],
     queryFn: async () => {
@@ -50,7 +50,7 @@ export function useListeningQuiz(contentId: string) {
   });
 }
 
-export function useListeningCountByLevel(level: Level) {
+export function useListeningCountByLevel(level: CEFRLevel) {
   return useQuery({
     queryKey: ["listening", "count", level],
     queryFn: async () => {

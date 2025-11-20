@@ -2,7 +2,7 @@
 
 import { Header } from "@/components/ui/header";
 import { Sidebar } from "./Sidebar";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { usePathname, useRouter } from "next/navigation";
 import { useSettingsStore } from "@/features/admin/features/settings";
 import { MaintenancePage } from "@/shared/components/MaintenancePage";

@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
-import { supabase } from "@/shared/lib/supabase/client";
 import {
   Crown,
   LogOut,
@@ -30,19 +29,20 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "./sheet";
 import { Badge } from "./badge";
 import { cn } from "@/shared/lib/utils";
-import { useAuth } from "@/features/auth/hooks/useAuth";
- 
+import { useAuth } from "@/shared/hooks/useAuth";
+
 import { useSettingsStore } from "@/features/admin/features/settings";
+import { authService } from "@/shared/services/supabase/authService";
 
 export function Header() {
   const router = useRouter();
   const { user, profile, isPremium, isAdmin } = useAuth();
   const pathname = usePathname();
-  
+
   const siteName = useSettingsStore((state) => state.getSiteName());
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await authService.signOut();
     router.push("/login");
     router.refresh();
   };
@@ -228,7 +228,7 @@ export function Header() {
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
                   </DropdownMenuItem>
-                  
+
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

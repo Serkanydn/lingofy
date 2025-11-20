@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuizFromId } from "@/features/quiz/hooks/useQuiz";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
 import { useReadingDetail } from "./useReading";
-import type { QuizContent } from "@/features/quiz/types/quiz.types";
+import type { Quiz } from "@/shared/types/model/question.types";
 
 /**
  * useReadingDetailLogic Hook
@@ -28,7 +28,7 @@ export function useReadingDetailLogic(contentId: string, userId?: string) {
   const [selectedText, setSelectedText] = useState("");
 
   // Transform quiz questions array to QuizContent object
-  const quiz: QuizContent | null =
+  const quiz: Quiz | null =
     quizQuestions && quizQuestions.length > 0
       ? {
           id: contentId,

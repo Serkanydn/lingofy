@@ -3,15 +3,18 @@
  * Following: docs/03-code-standards/01-design-patterns.md (Service Layer Pattern)
  */
 
-import { supabase } from "@/shared/lib/supabase/client";
-import type { User, UpdateUserInput } from "../types/user.types";
+import { BaseService } from "@/shared/services/supabase/baseService";
+import { UpdateUserInput, UserProfile } from "@/shared/types/model/user.types";
 
-class UserService {
+class UserService extends BaseService {
+  constructor() {
+    super("profiles");
+  }
   /**
    * Get all users
    */
-  async getAll(): Promise<User[]> {
-    const { data, error } = await supabase
+  async getAll(): Promise<UserProfile[]> {
+    const { data, error } = await this.supabase
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false });
@@ -23,22 +26,22 @@ class UserService {
   /**
    * Get user by ID
    */
-  async getById(id: string): Promise<User> {
-    const { data, error } = await supabase
+  async getById(id: string): Promise<UserProfile> {
+    const { data, error } = await this.supabase
       .from("profiles")
       .select("*")
       .eq("id", id)
       .single();
 
     if (error) throw error;
-    return data as User;
+    return data as UserProfile;
   }
 
   /**
    * Update user
    */
-  async update(id: string, input: UpdateUserInput): Promise<User> {
-    const { data, error } = await supabase
+  async update(id: string, input: UpdateUserInput): Promise<UserProfile> {
+    const { data, error } = await this.supabase
       .from("profiles")
       .update(input)
       .eq("id", id)
@@ -46,7 +49,7 @@ class UserService {
       .single();
 
     if (error) throw error;
-    return data as User;
+    return data as UserProfile;
   }
 }
 

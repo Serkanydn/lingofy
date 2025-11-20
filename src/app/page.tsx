@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PlayCircle, Trophy, Crown, Sparkles, Target, Zap } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useSettingsStore } from "@/features/admin/features/settings";
 import { MaintenancePage } from "@/shared/components/MaintenancePage";
 

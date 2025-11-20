@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/shared/lib/supabase/client";
-import { quizService } from "@/features/quiz/services";
+import { quizService } from "@/shared/services/supabase/quizService";
+import { getSupabaseClient } from "@/shared/lib/supabase/client";
 
 export function useGrammarQuestions(topicId: string) {
   return useQuery({
     queryKey: ["admin-grammar-questions", topicId],
     queryFn: async () => {
       // Get topic details
-      const { data: topic, error: topicError } = await supabase
+      const { data: topic, error: topicError } = await getSupabaseClient()
         .from("grammar_topics")
         .select("id, title")
         .eq("id", topicId)

@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddWord, useWordCategories, useAssignWordToCategory } from "../hooks/useWords";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useForm, useFieldArray } from "react-hook-form";
 import type { FieldArrayPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

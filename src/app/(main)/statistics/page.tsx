@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
  import { StatsCard } from '@/features/statistics/components/StatsCard'
 import { SkeletonStats } from '@/features/statistics/components/SkeletonStats'
-import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuth } from '@/shared/hooks/useAuth'
 import { useQuizHistory } from '@/features/quiz/hooks/useQuiz'
 import { useStatistics } from '@/features/statistics/hooks/useStatistics'
 

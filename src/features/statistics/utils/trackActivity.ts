@@ -6,7 +6,7 @@
  * provide manual tracking for flashcard practice and most studied level updates.
  */
 
-import { supabase } from "@/shared/lib/supabase/client";
+import { getSupabaseClient } from "@/shared/lib/supabase/client";
 
 interface ActivityTrackingResult {
   success: boolean;
@@ -34,7 +34,9 @@ interface UserStatistics {
  */
 export async function trackFlashcardPractice(): Promise<ActivityTrackingResult> {
   try {
-    const { error } = await supabase.rpc("increment_flashcard_practice");
+    const { error } = await getSupabaseClient().rpc(
+      "increment_flashcard_practice"
+    );
 
     if (error) {
       console.error("Error tracking flashcard practice:", error);
@@ -54,7 +56,9 @@ export async function trackFlashcardPractice(): Promise<ActivityTrackingResult> 
  */
 export async function updateMostStudiedLevel(): Promise<ActivityTrackingResult> {
   try {
-    const { error } = await supabase.rpc("update_most_studied_level");
+    const { error } = await getSupabaseClient().rpc(
+      "update_most_studied_level"
+    );
 
     if (error) {
       console.error("Error updating most studied level:", error);
@@ -98,7 +102,7 @@ export async function manualTrackActivity({
 }: ManualTrackingParams): Promise<ActivityTrackingResult> {
   try {
     // Get current statistics
-    const { data: currentStats, error: fetchError } = await supabase
+    const { data: currentStats, error: fetchError } = await getSupabaseClient()
       .from("user_statistics")
       .select(incrementField)
       .eq("user_id", userId)
@@ -122,7 +126,7 @@ export async function manualTrackActivity({
 
     // Add quiz score if provided
     if (additionalData?.quiz_score !== undefined) {
-      const { data: scoreData } = await supabase
+      const { data: scoreData } = await getSupabaseClient()
         .from("user_statistics")
         .select("total_quiz_score")
         .eq("user_id", userId)
@@ -133,7 +137,7 @@ export async function manualTrackActivity({
     }
 
     // Update statistics
-    const { error: updateError } = await supabase
+    const { error: updateError } = await getSupabaseClient()
       .from("user_statistics")
       .upsert(
         {
@@ -163,7 +167,7 @@ export async function manualTrackActivity({
  */
 export async function getStatisticsSummary(userId: string) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from("user_statistics")
       .select("*")
       .eq("user_id", userId)

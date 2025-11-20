@@ -3,20 +3,21 @@
  * Following: docs/02-architecture/01-feature-based-structure.md
  */
 
-import { supabase } from '@/shared/lib/supabase/client';
-import type { PremiumSubscription, UpdatePremiumInput } from '../types';
+import { BaseService } from "@/shared/services/supabase/baseService";
+import type { PremiumSubscription, UpdatePremiumInput } from "../types";
 
-class PremiumAdminService {
-  private supabase = supabase;
-
+class PremiumAdminService extends BaseService {
+  constructor() {
+    super("profiles");
+  }
   /**
    * Get all premium subscriptions
    */
   async getAllSubscriptions(): Promise<PremiumSubscription[]> {
     const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
@@ -42,9 +43,9 @@ class PremiumAdminService {
    */
   async getSubscriptionById(userId: string): Promise<PremiumSubscription> {
     const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
       .single();
 
     if (error) throw error;
@@ -75,14 +76,14 @@ class PremiumAdminService {
     input: UpdatePremiumInput
   ): Promise<PremiumSubscription> {
     const { data, error } = await this.supabase
-      .from('profiles')
+      .from("profiles")
       // @ts-ignore - Supabase types issue with update
       .update({
         is_premium: input.is_premium,
         premium_expires_at: input.premium_expires_at,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('id', userId)
+      .eq("id", userId)
       .select()
       .single();
 
@@ -134,8 +135,8 @@ class PremiumAdminService {
    */
   async getStats() {
     const { data, error } = await this.supabase
-      .from('profiles')
-      .select('is_premium, premium_expires_at');
+      .from("profiles")
+      .select("is_premium, premium_expires_at");
 
     if (error) throw error;
 
@@ -169,18 +170,18 @@ class PremiumAdminService {
   private getSubscriptionStatus(
     isPremium: boolean,
     expiresAt: string | null
-  ): 'active' | 'expired' | 'cancelled' | 'none' {
-    if (!isPremium) return 'none';
+  ): "active" | "expired" | "cancelled" | "none" {
+    if (!isPremium) return "none";
 
-    if (!expiresAt) return 'active';
+    if (!expiresAt) return "active";
 
     const now = new Date();
     const expirationDate = new Date(expiresAt);
 
-    if (expirationDate > now) return 'active';
-    if (expirationDate <= now) return 'expired';
+    if (expirationDate > now) return "active";
+    if (expirationDate <= now) return "expired";
 
-    return 'cancelled';
+    return "cancelled";
   }
 }
 

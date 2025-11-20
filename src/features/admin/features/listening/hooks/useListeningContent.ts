@@ -1,14 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ListeningService } from "@/features/listening/services/listeningService";
-import { ListeningExercise } from "@/features/listening/types/service.types";
-import { ReadingQuestionInput } from "@/features/reading/types/service.types";
-
-type CreateListeningData = Omit<ListeningExercise, "id" | "created_at"> & {
-  questions?: ReadingQuestionInput[];
-};
-
-const listeningService = new ListeningService();
+import { listeningService } from "@/shared/services/supabase/listeningService";
+import { ListeningFormData } from "../types/validation";
 
 export function useListeningContent() {
   return useQuery({
@@ -23,15 +16,15 @@ export function useCreateListening() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (insertData: CreateListeningData) => {
+    mutationFn: async (insertData: ListeningFormData) => {
       const { questions, ...listeningData } = insertData;
       const listening = await listeningService.create(listeningData);
-      
+
       // If questions are provided, create them
       if (questions && questions.length > 0 && listening?.id) {
         await listeningService.createQuestions(listening.id, questions);
       }
-      
+
       return listening;
     },
     onSuccess: () => {
@@ -50,20 +43,19 @@ export function useUpdateListening() {
   return useMutation({
     mutationFn: async ({
       id,
-      data,
-      questions,
+      updateData,
     }: {
       id: string;
-      data: Partial<CreateListeningData>;
-      questions?: ReadingQuestionInput[];
+      updateData: Partial<ListeningFormData>;
     }) => {
-      const result = await listeningService.update(id, data);
-      
-      // Update or create questions using listening_content id directly
-      if (questions !== undefined) {
+      const { questions, ...listeningData } = updateData;
+
+      const result = await listeningService.update(id, listeningData);
+
+      if (questions !== undefined && questions.length > 0) {
         await listeningService.updateQuestions(id, questions);
       }
-      
+
       return result;
     },
     onSuccess: () => {

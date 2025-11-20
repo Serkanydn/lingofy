@@ -1,43 +1,25 @@
-import { Database } from "@/shared/types/database.types";
+import { Database } from "@/shared/types/model/database.types";
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
-// Create a singleton instance for browser client
-let browserClient: ReturnType<typeof createBrowserClient<Database>> | null =
-  null;
-
-export const supabase = createBrowserClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    cookieOptions: {
-      name: "lingofy-auth-token",
-    },
-  }
-);
-
-export const getSupabaseClient2 = () => {
+// CLIENT-SIDE CRUD için
+export const getSupabaseClient = () => {
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 };
 
-export const getSupabaseClient = () => {
-  if (!browserClient) {
-    browserClient = createBrowserClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookieOptions: {
-          name: "lingofy-auth-token",
-        },
-      }
-    );
-  }
-  return browserClient;
-};
+// AUTH için (cookies + redirect + session)
 
-export const getSupabaseServerClient = () => {
-  return getSupabaseClient();
+export const getSupabaseBrowserClient = () => {
+  return createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      // cookieOptions: {
+      //   name: "lingofy-auth-token",
+      // },
+    }
+  );
 };

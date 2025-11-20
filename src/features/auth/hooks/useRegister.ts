@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { AuthService } from '../services/authService'
+import { AuthService } from '../../../shared/services/supabase/authService'
 import type { RegisterInput } from '../types/validation'
 
 /**

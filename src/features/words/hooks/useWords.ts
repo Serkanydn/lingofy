@@ -1,28 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { wordsService } from "../services";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-
-export interface UserWord {
-  id: string;
-  word: string;
-  description: string;
-  example_sentences: string[];
-  source_type?: "reading" | "listening";
-  source_id?: string;
-  category_id?: string | null;
-  created_at: string;
-}
-
-export interface WordCategory {
-  id: string;
-  user_id: string;
-  name: string;
-  color: string;
-  icon?: string | null;
-  order_index: number;
-  created_at: string;
-  updated_at: string;
-}
+import { useAuth } from "@/shared/hooks/useAuth";
+import { wordsService } from "@/shared/services/supabase/wordsService";
 
 export function useUserWords(categoryId?: string | null) {
   return useQuery({
@@ -103,7 +81,9 @@ export function useWordCategories() {
   return useQuery({
     queryKey: ["word-categories"],
     queryFn: async () => {
-      const { categoryService } = await import("../services/categoryService");
+      const { categoryService } = await import(
+        "../../../shared/services/supabase/categoryService"
+      );
       return categoryService.getCategories(user.id);
     },
   });
@@ -123,7 +103,9 @@ export function useCreateCategory() {
       color: string;
       icon?: string;
     }) => {
-      const { categoryService } = await import("../services/categoryService");
+      const { categoryService } = await import(
+        "../../../shared/services/supabase/categoryService"
+      );
       return categoryService.createCategory(user.id, name, color, icon);
     },
     onSuccess: () => {
@@ -144,7 +126,9 @@ export function useUpdateCategory() {
       id: string;
       updates: Partial<Pick<WordCategory, "name" | "color" | "icon">>;
     }) => {
-      const { categoryService } = await import("../services/categoryService");
+      const { categoryService } = await import(
+        "../../../shared/services/supabase/categoryService"
+      );
       return categoryService.updateCategory(id, user.id, updates);
     },
     onSuccess: () => {
@@ -159,7 +143,9 @@ export function useDeleteCategory() {
 
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      const { categoryService } = await import("../services/categoryService");
+      const { categoryService } = await import(
+        "../../../shared/services/supabase/categoryService"
+      );
       return categoryService.deleteCategory(categoryId, user.id);
     },
     onSuccess: () => {
@@ -175,7 +161,9 @@ export function useDeleteCategoryCascade() {
 
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      const { categoryService } = await import("../services/categoryService");
+      const { categoryService } = await import(
+        "../../../shared/services/supabase/categoryService"
+      );
       return categoryService.deleteCategoryCascade(categoryId, user.id);
     },
     onSuccess: () => {
@@ -197,7 +185,9 @@ export function useAssignWordToCategory() {
       wordId: string;
       categoryId: string | null;
     }) => {
-      const { categoryService } = await import("../services/categoryService");
+      const { categoryService } = await import(
+        "../../../shared/services/supabase/categoryService"
+      );
       return categoryService.assignWordToCategory(user.id, wordId, categoryId);
     },
     onSuccess: () => {

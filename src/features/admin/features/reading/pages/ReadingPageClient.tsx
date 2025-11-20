@@ -12,8 +12,10 @@ import {
   DeleteConfirmDialog,
   type DataTableColumn,
 } from "@/features/admin/shared/components";
-import { ReadingForm, type ReadingFormData } from "../components";
 import { useReadingContent, useDeleteReading, useCreateReading, useUpdateReading } from "../hooks";
+import { readingService } from "@/shared/services/supabase/readingService";
+import { ReadingFormData } from "../types/validation";
+import { ReadingForm } from "../components/ReadingForm";
 
 export function ReadingPageClient() {
   const [showForm, setShowForm] = useState(false);
@@ -30,7 +32,7 @@ export function ReadingPageClient() {
 
   const filteredReadings =
     readings?.filter(
-      (reading) =>
+      (reading: any) =>
         reading.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
         (levelFilter === "all" || reading.level === levelFilter) &&
         (premiumFilter === "all" ||
@@ -38,10 +40,11 @@ export function ReadingPageClient() {
           (premiumFilter === "free" && !reading.is_premium))
     ) || [];
 
-  const handleEdit = (reading: any) => {
+  const handleEdit = async (reading: any) => {
     console.log("[ReadingPageClient] Edit clicked", reading);
     const assetId = reading.audio_asset_id || reading.audio_asset?.id;
-    const enriched = assetId ? { ...reading, audio_asset_id: assetId } : reading;
+    const questions = await readingService.getQuestionsForContent(reading.id);
+    const enriched = assetId ? { ...reading, audio_asset_id: assetId, questions } : { ...reading, questions };
     setEditingReading(enriched);
     setShowForm(true);
     window.scrollTo({ top: 200, behavior: "smooth" });
@@ -62,7 +65,6 @@ export function ReadingPageClient() {
 
   const handleFormSubmit = async (data: ReadingFormData) => {
     console.log("[ReadingPageClient] Form submit received", data);
-    const { questions, audio_asset, ...readingData } = data;
 
     if (!navigator.onLine) {
       console.error("[ReadingPageClient] Offline - cannot submit");
@@ -72,14 +74,10 @@ export function ReadingPageClient() {
 
     if (editingReading) {
       try {
-        console.log("[ReadingPageClient] Updating reading", { id: editingReading.id, readingData, questions });
         await updateReading.mutateAsync({
           id: editingReading.id,
-          data: {
-            ...readingData,
-            updated_at: new Date().toISOString(),
-          },
-          questions,
+          updateData: data,
+
         });
         console.log("[ReadingPageClient] Update success");
       } catch (error) {
@@ -89,12 +87,7 @@ export function ReadingPageClient() {
       // setShowForm(false);
     } else {
       try {
-        console.log("[ReadingPageClient] Creating reading", { readingData, questions });
-        await createReading.mutateAsync({
-          ...readingData,
-          updated_at: new Date().toISOString(),
-          questions,
-        });
+        await createReading.mutateAsync(data);
         console.log("[ReadingPageClient] Create success");
       } catch (error) {
         console.error("[ReadingPageClient] Create error", error);

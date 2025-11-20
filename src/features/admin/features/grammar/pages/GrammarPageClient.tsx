@@ -6,17 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, List } from 'lucide-react';
 import { PageHeader, ContentCard, FilterBar, DataTable, DeleteConfirmDialog, type DataTableColumn } from '@/features/admin/shared/components';
-import { GrammarForm, type GrammarFormData } from '../components/GrammarForm';
-import { useGrammarTopics, useDeleteGrammarTopic, useCreateGrammarTopic, useUpdateGrammarTopic } from '../hooks';
+import { GrammarForm } from '../components/GrammarForm';
 import { useActiveGrammarCategories } from '../hooks/useGrammarCategories';
-import type { GrammarRule } from '@/features/grammar/types/service.types';
+import { GrammarTopic } from '@/shared/types/model/grammarTopic.types';
+import { useCreateGrammarTopic, useDeleteGrammarTopic, useGrammarTopics, useUpdateGrammarTopic } from '../hooks/useGrammarTopics';
+import { GrammarTopicFormData } from '../types/validation';
 
 
 export function GrammarPageClient() {
   const [showForm, setShowForm] = useState(false);
-  const [editingTopic, setEditingTopic] = useState<GrammarRule | null>(null);
+  const [editingTopic, setEditingTopic] = useState<GrammarTopic | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState<GrammarRule | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<GrammarTopic | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [premiumFilter, setPremiumFilter] = useState<string>('all');
@@ -48,18 +49,18 @@ export function GrammarPageClient() {
     categoriesLoading ? 'Loading categories...' : (categoriesError ? 'Failed to load categories' : 'Select Category')
   ), [categoriesLoading, categoriesError]);
 
-  const handleEdit = useCallback((topic: GrammarRule) => {
+  const handleEdit = useCallback((topic: GrammarTopic) => {
     setEditingTopic(topic);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleDelete = useCallback((topic: GrammarRule) => {
+  const handleDelete = useCallback((topic: GrammarTopic) => {
     setSelectedTopic(topic);
     setShowDeleteDialog(true);
   }, []);
 
-  const handleFormSubmit = useCallback(async (data: GrammarFormData) => {
+  const handleFormSubmit = useCallback(async (data: GrammarTopicFormData) => {
     if (editingTopic) {
       await updateTopic.mutateAsync({ id: editingTopic.id, data });
     } else {
@@ -70,8 +71,7 @@ export function GrammarPageClient() {
         explanation: data.explanation,
         mini_text: data.mini_text,
         examples: data.examples,
-        updated_at: new Date().toISOString(),
-        order_index: data.order_index,
+        order: data.order,
         is_premium: data.is_premium,
       });
     }
@@ -94,7 +94,7 @@ export function GrammarPageClient() {
     }
   }, [selectedTopic, deleteTopic]);
 
-  const columns: DataTableColumn<GrammarRule>[] = useMemo(() => [
+  const columns: DataTableColumn<GrammarTopic>[] = useMemo(() => [
     {
       header: 'Title',
       accessor: 'title',
@@ -111,7 +111,7 @@ export function GrammarPageClient() {
       header: 'Category',
       accessor: 'category_id',
       render: (topic) => (
-        <Badge variant="outline">{(typeof topic.category?.name === 'string' && topic.category?.name) || topic.category_id || 'Uncategorized'}</Badge>
+        <Badge variant="outline">{(typeof topic?.category?.name === 'string' && topic.category?.name) || topic.category_id || 'Uncategorized'}</Badge>
       ),
     },
     {
@@ -190,7 +190,7 @@ export function GrammarPageClient() {
             ...editingTopic,
             category_id: (editingTopic.category?.id ?? editingTopic.category_id) || "",
             mini_text: editingTopic.mini_text || "",
-          } as Partial<GrammarFormData> : undefined}
+          } as any : undefined}
           categories={categories}
           isLoading={createTopic.isPending || updateTopic.isPending}
           mode={editingTopic ? "edit" : "create"}

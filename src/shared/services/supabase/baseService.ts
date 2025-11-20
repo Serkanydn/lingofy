@@ -1,17 +1,19 @@
-import { getSupabaseClient2, getSupabaseServerClient } from "@/shared/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/shared/lib/supabase/client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export class BaseService<T = any> {
-  // protected supabase: SupabaseClient;
   protected tableName: string;
 
   constructor(tableName: string) {
-    // this.supabase = getSupabaseServerClient();
     this.tableName = tableName;
   }
 
   get supabase(): SupabaseClient {
-    return getSupabaseClient2();
+    return getSupabaseBrowserClient();
+  }
+
+  get supabaseBrowserClient(): SupabaseClient {
+    return getSupabaseBrowserClient();
   }
 
   async getAll(): Promise<T[]> {

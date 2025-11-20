@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { PremiumBadge } from "@/features/premium/components/PremiumBadge";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useSettingsStore } from "@/features/admin/features/settings";
 
 const navigation = [

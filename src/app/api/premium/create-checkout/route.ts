@@ -1,7 +1,7 @@
 import { createCheckout } from "@/shared/lib/lemonsqueezy/client";
 import { LEMON_SQUEEZY_CONFIG } from "@/shared/lib/lemonsqueezy/config";
 import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
-import { PlanType } from "@/features/premium/types/premium.types";
+import { PlanType } from "@/shared/types/model/premium.types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {

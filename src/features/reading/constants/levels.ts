@@ -1,4 +1,4 @@
-import { Level } from "@/shared/types/common.types";
+import { Level } from "@/shared/types/model/common.types";
 
 export const LEVEL_INFO: Record<
   Level,

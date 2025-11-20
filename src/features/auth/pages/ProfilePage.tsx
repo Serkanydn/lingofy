@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/shared/lib/supabase/client'
+import { authService } from '@/shared/services/supabase/authService'  
 import { Crown, LogOut, Settings, BookOpen, Headphones, GraduationCap, Book, Calendar, Activity, BarChart3 } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../../../shared/hooks/useAuth'
 import { useStatistics } from '@/features/statistics/hooks/useStatistics'
 import { useUserWords } from '@/features/words/hooks/useWords'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     setIsLoading(true)
     try {
-      await supabase.auth.signOut()
+      await authService.signOut()
       router.push('/login')
       router.refresh()
     } catch (error) {

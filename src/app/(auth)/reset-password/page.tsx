@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { resetPasswordSchema, type ResetPasswordInput } from '@/features/auth/types/validation'
 import { toast } from 'sonner'
-import { authService } from '@/features/auth/services/authService'
+import { authService } from '@/shared/services/supabase/authService'
 import { useRouter } from 'next/navigation'
 import { AuthBrandingPanel, AuthMobileLogo, AuthFooter } from '@/features/auth/components'
 

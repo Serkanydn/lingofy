@@ -1,10 +1,13 @@
-import { QuizQuestion, UserAnswer } from "../types/quiz.types";
+import {
+  Question,
+  UserAnswer,
+} from "../../../shared/types/model/question.types";
 import { quizValidator } from "./quizValidator";
 
 export const scoreCalculator = {
   // Calculate total score
   calculateScore(
-    questions: QuizQuestion[],
+    questions: Question[],
     userAnswers: Record<string, UserAnswer>
   ): { totalScore: number; maxScore: number; percentage: number } {
     let totalScore = 0;

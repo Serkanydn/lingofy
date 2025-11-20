@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from "react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
 import { useGrammarDetail } from "@/features/grammar/hooks/useGrammar";
 import { useQuizFromId } from "@/features/quiz/hooks/useQuiz";
+import { Question } from "@/shared/types/model/question.types";
 
 /**
  * useGrammarTopicLogic Hook
@@ -59,7 +60,7 @@ export function useGrammarTopicLogic(topicId: string) {
 
     // Transform userAnswers to QuizAnswer format
     const answers = Object.values(userAnswers).map((answer) => {
-      const question = quizQuestions.find((q) => q.id === answer.question_id);
+      const question = quizQuestions.find((q: Question) => q.id === answer.question_id);
       const selectedOption = question?.options.find(
         (opt: { id: string; is_correct: boolean }) =>
           opt.id === answer.selectedOptionId

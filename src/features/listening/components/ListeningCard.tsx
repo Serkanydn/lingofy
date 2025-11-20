@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Clock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { Level } from "@/shared/types/common.types";
-import { ListeningExercise } from "../types/service.types";
+import { ListeningContentWithAudio } from "@/shared/types/model/listening.types";
+import { CEFRLevel } from "@/shared/types/enums/cefrLevel.enum";
 
 /**
  * Category color mapping for reading cards
@@ -22,8 +22,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 interface ListeningCardProps {
-  listening: ListeningExercise;
-  level: Level;
+  listening: ListeningContentWithAudio;
+  level: CEFRLevel;
   isPremium: boolean;
   onPremiumClick: () => void;
   score?: number;
@@ -44,7 +44,7 @@ export function ListeningCard({
   score,
 }: ListeningCardProps) {
   const isLocked = listening.is_premium && !isPremium;
-  const category = listening.category || "ARTICLE";
+  const category = listening?.category || "ARTICLE";
   const categoryColor =
     CATEGORY_COLORS[category.toUpperCase()] || "text-gray-600";
 
@@ -54,7 +54,7 @@ export function ListeningCard({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  console.log('score',score);
+  console.log('score', score);
 
   const cardContent = (
     <div
@@ -95,16 +95,12 @@ export function ListeningCard({
           {listening.title}
         </h3>
 
-        {/* Description */}
-        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 line-clamp-2 flex-1">
-          {listening.description}
-        </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <Clock className="h-4 w-4" />
-            <span>{formatDuration(listening.duration_seconds)}</span>
+            <span>{formatDuration(listening?.duration_seconds || 0)}</span>
           </div>
           <Badge
             className={cn(

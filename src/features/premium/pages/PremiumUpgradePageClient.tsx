@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { addPremiumToUser } from "../services/addPremiumService";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { addPremiumToUser } from "../../../shared/services/supabase/addPremiumService";
 import { UpgradePlanCard } from "../components/UpgradePlanCard";
 import { useSettingsStore } from "@/features/admin/features/settings/store/settingsStore";
-import { PlanType } from "../types/premium.types";
+import { PlanType } from "../../../shared/types/model/premium.types";
 
 const MONTHLY_PRICE = 9.99;
 const ANNUAL_PRICE = 99.99;

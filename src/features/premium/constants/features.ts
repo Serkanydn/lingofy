@@ -1,4 +1,4 @@
-import type { PremiumFeature } from '../types/premium.types';
+import type { PremiumFeature } from '../../../shared/types/model/premium.types';
 
 /**
  * Premium Features List

@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { grammarCategoryService } from "@/features/grammar/services/grammarCategoryService";
-import { CreateGrammarCategoryData, UpdateGrammarCategoryData } from "@/features/grammar/types/category.types";
+import { grammarCategoryService } from "@/shared/services/supabase/grammarCategoryService";
+import { GrammarCategory } from "@/shared/types/model/grammarCategory.types";
+import { CreateGrammarCategoryFormData } from "../types/validation";
 
 export function useGrammarCategories() {
   return useQuery({
@@ -35,12 +36,24 @@ export function useCreateGrammarCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateGrammarCategoryData) => {
-      return await grammarCategoryService.createCategory(data);
+    mutationFn: async (data: CreateGrammarCategoryFormData) => {
+      const payload: Omit<GrammarCategory, "id" | "created_at" | "updated_at"> =
+        {
+          name: data.name,
+          slug: data.slug,
+          icon: data.icon,
+          color: data.color,
+          order: data.order,
+          is_active: data.is_active,
+          description: data.description ?? "",
+        };
+      return await grammarCategoryService.createCategory(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
-      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
+      queryClient.invalidateQueries({
+        queryKey: ["grammar-categories", "active"],
+      });
       toast.success("Category created successfully");
     },
     onError: (error: any) => {
@@ -53,12 +66,20 @@ export function useUpdateGrammarCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateGrammarCategoryData }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateGrammarCategoryFormData>;
+    }) => {
       return await grammarCategoryService.updateCategory(id, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
-      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
+      queryClient.invalidateQueries({
+        queryKey: ["grammar-categories", "active"],
+      });
       toast.success("Category updated successfully");
     },
     onError: (error: any) => {
@@ -76,7 +97,9 @@ export function useDeleteGrammarCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
-      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
+      queryClient.invalidateQueries({
+        queryKey: ["grammar-categories", "active"],
+      });
       toast.success("Category deleted successfully");
     },
     onError: (error: any) => {
@@ -94,7 +117,9 @@ export function useToggleGrammarCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
-      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
+      queryClient.invalidateQueries({
+        queryKey: ["grammar-categories", "active"],
+      });
       toast.success("Category status updated");
     },
     onError: (error: any) => {
@@ -107,12 +132,16 @@ export function useReorderGrammarCategories() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (categories: Array<{ id: string; order_index: number }>) => {
+    mutationFn: async (
+      categories: Array<{ id: string; order: number }>
+    ) => {
       return await grammarCategoryService.reorder(categories);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grammar-categories"] });
-      queryClient.invalidateQueries({ queryKey: ["grammar-categories", "active"] });
+      queryClient.invalidateQueries({
+        queryKey: ["grammar-categories", "active"],
+      });
       toast.success("Categories reordered successfully");
     },
     onError: (error: any) => {

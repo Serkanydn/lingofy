@@ -9,11 +9,11 @@ import {
   HelpCircle,
   GraduationCap,
 } from "lucide-react";
-import { QuizContent, UserAnswer } from "../types/quiz.types";
+import { Quiz, UserAnswer } from "../../../shared/types/model/question.types";
 import { Button } from "@/components/ui/button";
 
 interface QuizResultProps {
-  quiz: QuizContent;
+  quiz: Quiz;
   userAnswers: Record<string, UserAnswer> & { _totalTime?: number };
   onRetry: () => void;
   onExit: () => void;

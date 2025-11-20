@@ -3,57 +3,62 @@
  * Following: docs/03-code-standards/01-design-patterns.md (Service Layer Pattern)
  */
 
-import { supabase } from '@/shared/lib/supabase/client';
-import type { Database } from '@/shared/types/database.types';
-import type { AppSettings, UpdateSettingsInput } from '../types/settings.types';
+import type { Database } from "@/shared/types/model/database.types";
+import type { AppSettings, UpdateSettingsInput } from "../types/settings.types";
+import { BaseService } from "@/shared/services/supabase/baseService";
 
-type AppSettingsInsert = Database['public']['Tables']['app_settings']['Insert'];
-type AppSettingsUpdate = Database['public']['Tables']['app_settings']['Update'];
+type AppSettingsInsert = Database["public"]["Tables"]["app_settings"]["Insert"];
+type AppSettingsUpdate = Database["public"]["Tables"]["app_settings"]["Update"];
 
-class SettingsService {
+class SettingsService extends BaseService {
+  constructor() {
+    super("app_settings");
+  }
   /**
    * Get application settings
    * Returns the first (and should be only) settings record
    */
   async get(): Promise<AppSettings | null> {
-    const { data, error } = await supabase
-      .from('app_settings')
-      .select('*')
+    const { data, error } = await this.supabase
+      .from("app_settings")
+      .select("*")
       .single();
 
     if (error) {
       // If no settings exist, return null
-      if (error.code === 'PGRST116') {
+      if (error.code === "PGRST116") {
         return null;
       }
       throw error;
     }
-    
+
     return data;
   }
 
   /**
    * Update application settings
    */
-  async update(input: UpdateSettingsInput): Promise<AppSettings> {
+  async update(_id: string | number, input: Partial<UpdateSettingsInput>): Promise<AppSettings> {
     // First, check if settings exist
     const existing = await this.get();
 
     if (!existing) {
       // Create initial settings if they don't exist
       const insertData: AppSettingsInsert = {
-        site_name: input.site_name || 'Learn Quiz English',
-        site_description: input.site_description || 'Master English through interactive quizzes',
-        contact_email: input.contact_email || 'contact@learnquiz.com',
-        support_email: input.support_email || 'support@learnquiz.com',
+        site_name: input.site_name || "Learn Quiz English",
+        site_description:
+          input.site_description ||
+          "Master English through interactive quizzes",
+        contact_email: input.contact_email || "contact@learnquiz.com",
+        support_email: input.support_email || "support@learnquiz.com",
         max_free_quizzes_per_day: input.max_free_quizzes_per_day ?? 5,
         enable_new_registrations: input.enable_new_registrations ?? true,
         maintenance_mode: input.maintenance_mode ?? false,
         maintenance_message: input.maintenance_message || null,
       };
 
-      const { data, error } = await supabase
-        .from('app_settings')
+      const { data, error } = await this.supabase
+        .from("app_settings")
         .insert(insertData)
         .select()
         .single();
@@ -68,10 +73,10 @@ class SettingsService {
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabase
-      .from('app_settings')
+    const { data, error } = await this.supabase
+      .from("app_settings")
       .update(updateData)
-      .eq('id', existing.id)
+      .eq("id", existing.id)
       .select()
       .single();
 

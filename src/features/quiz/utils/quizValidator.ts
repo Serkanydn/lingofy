@@ -1,8 +1,8 @@
-import { QuizQuestion, UserAnswer } from "../types/quiz.types";
+import { Question, UserAnswer } from "@/shared/types/model/question.types";
 
 export const quizValidator = {
   // Check if answer is correct
-  isAnswerCorrect(question: QuizQuestion, userAnswer: UserAnswer): boolean {
+  isAnswerCorrect(question: Question, userAnswer: UserAnswer): boolean {
     if (!userAnswer) return false;
 
     switch (question.type) {
@@ -18,7 +18,7 @@ export const quizValidator = {
       case "fill_blank":
         // Check if text answer matches correct_answer (case-insensitive)
         if (!userAnswer.textAnswer) return false;
-        
+
         // Parse user answer - could be JSON array or single string
         let userAnswerText = userAnswer.textAnswer.trim();
         try {
@@ -30,15 +30,17 @@ export const quizValidator = {
         } catch {
           // Not JSON, use as is
         }
-        
+
         const normalizedAnswer = userAnswerText.toLowerCase();
-        
+
         // Check against correct_answer field if it exists
         if (question.correct_answer) {
-          const correctAnswerStr = String(question.correct_answer).toLowerCase();
+          const correctAnswerStr = String(
+            question.correct_answer
+          ).toLowerCase();
           return correctAnswerStr === normalizedAnswer;
         }
-        
+
         // Fallback: check against options if correct_answer is not set
         return question.options.some(
           (opt) => opt.is_correct && opt.text.toLowerCase() === normalizedAnswer
@@ -50,12 +52,12 @@ export const quizValidator = {
   },
 
   // Get correct answer text
-  getCorrectAnswerText(question: QuizQuestion): string {
+  getCorrectAnswerText(question: Question): string {
     // For fill_blank, return correct_answer field if it exists
-    if (question.type === 'fill_blank' && question.correct_answer) {
+    if (question.type === "fill_blank" && question.correct_answer) {
       return String(question.correct_answer);
     }
-    
+
     // Otherwise, get from options
     const correctOption = question.options.find((opt) => opt.is_correct);
     return correctOption?.text || "";
@@ -63,7 +65,7 @@ export const quizValidator = {
 
   // Validate all answers
   validateAnswers(
-    questions: QuizQuestion[],
+    questions: Question[],
     userAnswers: Record<string, UserAnswer>
   ): Record<string, boolean> {
     const results: Record<string, boolean> = {};

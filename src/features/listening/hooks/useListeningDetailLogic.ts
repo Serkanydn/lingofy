@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useListeningDetail, useListeningQuestions } from "./useListening";
 import { useQuizSubmit } from "@/features/quiz/hooks/useQuizSubmit";
-import type { QuizContent, QuizQuestion } from "@/features/quiz/types/quiz.types";
+import type { Question, Quiz } from "@/shared/types/model/question.types";
 
 /**
  * useListeningDetailLogic Hook
@@ -26,7 +26,7 @@ export function useListeningDetailLogic(contentId: string, userId?: string) {
   const isLoading = isLoadingListening || isLoadingQuestions;
 
   // Transform questions to QuizQuestion format
-  const quizQuestions: QuizQuestion[] | undefined = questions?.map((q: any) => ({
+  const quizQuestions: Question[] | undefined = questions?.map((q: any) => ({
     id: q.id,
     content_id: contentId,
     content_type: "listening" as const,
@@ -39,11 +39,11 @@ export function useListeningDetailLogic(contentId: string, userId?: string) {
     })) || [],
     correct_answer: q.type === 'fill_blank' ? undefined : q.options?.findIndex((opt: any) => opt.is_correct),
     explanation: q.explanation,
-    order_index: q.order_index,
+    order: q.order,
     points: q.points || 1,
   }));
 
-  const quiz: QuizContent | null = quizQuestions && quizQuestions.length > 0
+  const quiz: Quiz | null = quizQuestions && quizQuestions.length > 0
     ? {
         id: contentId,
         title: listening?.title || "Quiz",

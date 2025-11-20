@@ -17,7 +17,7 @@ import {
   Crown,
   ArrowRight,
 } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useSettingsStore } from "@/features/admin/features/settings";
 

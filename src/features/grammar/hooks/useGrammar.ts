@@ -1,6 +1,6 @@
+import { grammarService } from "@/shared/services/supabase/grammarService";
+import { quizService } from "@/shared/services/supabase/quizService";
 import { useQuery } from "@tanstack/react-query";
-import { grammarService } from "../services";
-import { quizService } from "@/features/quiz/services";
 
 export function useGrammarByCategory(categoryId: string) {
   return useQuery({

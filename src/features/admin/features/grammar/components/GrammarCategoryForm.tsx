@@ -15,14 +15,13 @@ import { createGrammarCategorySchema, type CreateGrammarCategoryFormData } from 
 interface GrammarCategoryFormProps {
   isOpen: boolean;
   onToggle: () => void;
-  onSubmit: (data: CategoryFormData) => Promise<void>;
-  initialData?: Partial<CategoryFormData>;
+  onSubmit: (data: CreateGrammarCategoryFormData) => Promise<void>;
+  initialData?: Partial<CreateGrammarCategoryFormData>;
   isLoading?: boolean;
   mode?: "create" | "edit";
 }
 
-export type CategoryFormData = CreateGrammarCategoryFormData;
-
+ 
 export function GrammarCategoryForm({
   isOpen,
   onToggle,
@@ -39,7 +38,7 @@ export function GrammarCategoryForm({
       description: "",
       icon: "📚",
       color: "#f59e0b",
-      order_index: 1,
+      order: 1,
       is_active: true,
     },
     mode: "onBlur",
@@ -54,7 +53,7 @@ export function GrammarCategoryForm({
         description: initialData.description ?? "",
         icon: initialData.icon ?? "📚",
         color: initialData.color ?? "#f59e0b",
-        order_index: initialData.order_index ?? 1,
+        order: initialData.order ?? 1,
         is_active: initialData.is_active ?? true,
       });
     }
@@ -67,7 +66,7 @@ export function GrammarCategoryForm({
       description: data.description ?? null,
       icon: data.icon,
       color: data.color,
-      order_index: data.order_index,
+      order: data.order,
       is_active: data.is_active,
     });
   };
@@ -190,7 +189,7 @@ export function GrammarCategoryForm({
               <div className="space-y-2">
                 <FormField
                   control={form.control}
-                  name="order_index"
+                  name="order"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-semibold">Display Order</FormLabel>
@@ -252,7 +251,7 @@ export function GrammarCategoryForm({
                       description: "",
                       icon: "📚",
                       color: "#f59e0b",
-                      order_index: 1,
+                      order: 1,
                       is_active: true,
                     });
                     onToggle();

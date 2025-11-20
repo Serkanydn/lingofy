@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { PageHeader, ContentCard, FilterBar, DataTable, DeleteConfirmDialog, type DataTableColumn } from '@/features/admin/shared/components';
-import { ListeningForm, type ListeningFormData } from '../components';
-import { useListeningContent, useDeleteListening, useCreateListening, useUpdateListening } from '../hooks';
+import { ListeningFormData } from '../types/validation';
+import { useCreateListening, useDeleteListening, useListeningContent, useUpdateListening } from '../hooks/useListeningContent';
+import { ListeningForm } from '../components/ListeningForm';
 
 export function ListeningPageClient() {
   const [showForm, setShowForm] = useState(false);
@@ -50,27 +51,14 @@ export function ListeningPageClient() {
   };
 
   const handleFormSubmit = async (data: ListeningFormData) => {
-    const { questions, duration, ...listeningData } = data;
-    
+
     if (editingListening) {
       await updateListening.mutateAsync({
         id: editingListening.id,
-        data: {
-          ...listeningData,
-          description: editingListening.description || '',
-          duration_seconds: duration || 0,
-          updated_at: new Date().toISOString(),
-        },
-        questions,
+        updateData: data,
       });
     } else {
-      await createListening.mutateAsync({
-        ...listeningData,
-        description: '',
-        duration_seconds: duration || 0,
-        updated_at: new Date().toISOString(),
-        questions,
-      });
+      await createListening.mutateAsync(data);
     }
     setShowForm(false);
     setEditingListening(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { QuizContainer } from "@/features/quiz/components/QuizContainer";
 import { AddWordDialog } from "@/features/words/components/addWordDialog";
 import { Breadcrumb } from "../components/Breadcrumb";

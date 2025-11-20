@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
-import { Level } from "@/shared/types/common.types";
+import { Level } from "@/shared/types/model/common.types";
 import { Lock } from "lucide-react";
 import Link from "next/link";
 import { LEVEL_INFO } from "../constants/levels";
 import { useListeningCountByLevel } from "../hooks/useListening";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 
 interface LevelCardProps {
   level: Level;

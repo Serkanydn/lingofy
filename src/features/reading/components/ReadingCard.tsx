@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Lock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { ReadingContent } from "../types/reading.types";
-import type { Level } from "@/shared/types/common.types";
+import type { ReadingContent } from "../../../shared/types/model/reading.types";
+import type { Level } from "@/shared/types/model/common.types";
 
 /**
  * Category color mapping for reading cards

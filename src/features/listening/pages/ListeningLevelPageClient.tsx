@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState, useMemo } from "react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useListeningDetailByLevel } from "../hooks/useListening";
 import { PaywallModal } from "@/features/premium/components/PaywallModal";
 import { ListeningCard } from "../components/ListeningCard";
@@ -11,7 +11,6 @@ import { EmptyState } from "../components/EmptyState";
 import { Breadcrumb } from "../components/Breadcrumb";
 import { useQuizLimit } from "@/features/statistics/hooks/useQuizLimit";
 import { QuizLimitWarning } from "@/features/statistics/components/QuizLimitWarning";
-import type { Level } from "@/shared/types/common.types";
 import { useReadingAttempts } from "@/features/reading/hooks";
 
 interface ListeningLevelPageClientProps {
@@ -30,7 +29,7 @@ export function ListeningLevelPageClient({
   params,
 }: ListeningLevelPageClientProps) {
   const { level: paramLevel } = use(params);
-  const level = paramLevel.toUpperCase() as Level;
+  const level = paramLevel.toUpperCase();
   const { data: listeningContent, isLoading } = useListeningDetailByLevel(level);
   const { user, isPremium } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);

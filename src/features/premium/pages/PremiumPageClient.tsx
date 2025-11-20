@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { PRICING } from "@/shared/lib/lemonsqueezy/config";
 import { usePremiumSubscription } from "../hooks/usePremiumSubscription";
 import { PREMIUM_FEATURES } from "../constants/features";

@@ -1,7 +1,8 @@
+import { CEFRLevel } from "@/shared/types/enums/cefrLevel.enum";
 import { z } from "zod";
 
 // Level schema
-export const levelSchema = z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]);
+export const levelSchema = z.enum(CEFRLevel);
 
 // Grammar Category schemas
 export const grammarCategorySchema = z.object({
@@ -14,7 +15,10 @@ export const grammarCategorySchema = z.object({
     .string()
     .min(2, "Slug must be at least 2 characters")
     .max(100, "Slug must not exceed 100 characters")
-    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug must contain only lowercase letters, numbers, and hyphens"
+    )
     .trim(),
   description: z
     .string()
@@ -27,8 +31,11 @@ export const grammarCategorySchema = z.object({
     .max(2, "Icon must be a single emoji"),
   color: z
     .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color (e.g., #3b82f6)"),
-  order_index: z
+    .regex(
+      /^#[0-9A-Fa-f]{6}$/,
+      "Color must be a valid hex color (e.g., #3b82f6)"
+    ),
+  order: z
     .number()
     .int("Order must be an integer")
     .nonnegative("Order must be 0 or greater"),
@@ -64,7 +71,7 @@ export const grammarTopicSchema = z.object({
     .array(z.string().trim().min(1, "Example cannot be empty"))
     .min(1, "At least one example is required")
     .max(10, "Maximum 10 examples allowed"),
-  order_index: z
+  order: z
     .number()
     .int("Order must be an integer")
     .positive("Order must be greater than 0"),
@@ -78,47 +85,20 @@ export const updateGrammarTopicSchema = grammarTopicSchema.partial().extend({
   id: z.string().uuid(),
 });
 
-// Grammar Question schemas
-export const grammarQuestionOptionSchema = z.object({
-  text: z
-    .string()
-    .min(1, "Option text is required")
-    .trim(),
-  is_correct: z.boolean(),
-});
-
-export const grammarQuestionSchema = z.object({
-  question: z
-    .string()
-    .min(10, "Question must be at least 10 characters")
-    .trim(),
-  options: z
-    .array(z.string().trim().min(1, "Option cannot be empty"))
-    .min(2, "At least 2 options are required")
-    .max(6, "Maximum 6 options allowed"),
-  correct_answer: z
-    .string()
-    .min(1, "Correct answer is required")
-    .trim(),
-  explanation: z
-    .string()
-    .min(10, "Explanation must be at least 10 characters")
-    .trim(),
-}).refine(
-  (data) => data.options.includes(data.correct_answer),
-  {
-    message: "Correct answer must be one of the provided options",
-    path: ["correct_answer"],
-  }
-);
-
 // Type exports
 export type GrammarCategoryFormData = z.infer<typeof grammarCategorySchema>;
-export type CreateGrammarCategoryFormData = z.infer<typeof createGrammarCategorySchema>;
-export type UpdateGrammarCategoryFormData = z.infer<typeof updateGrammarCategorySchema>;
+export type CreateGrammarCategoryFormData = z.infer<
+  typeof createGrammarCategorySchema
+>;
+
+export type UpdateGrammarCategoryFormData = z.infer<
+  typeof updateGrammarCategorySchema
+>;
 
 export type GrammarTopicFormData = z.infer<typeof grammarTopicSchema>;
-export type CreateGrammarTopicFormData = z.infer<typeof createGrammarTopicSchema>;
-export type UpdateGrammarTopicFormData = z.infer<typeof updateGrammarTopicSchema>;
-
-export type GrammarQuestionFormData = z.infer<typeof grammarQuestionSchema>;
+export type CreateGrammarTopicFormData = z.infer<
+  typeof createGrammarTopicSchema
+>;
+export type UpdateGrammarTopicFormData = z.infer<
+  typeof updateGrammarTopicSchema
+>;

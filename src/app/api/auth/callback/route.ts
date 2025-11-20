@@ -15,12 +15,17 @@ export async function GET(request: NextRequest) {
     // Eğer error varsa direkt login'e yönlendir
     if (error_description) {
       return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error_description)}`, request.url)
+        new URL(
+          `/login?error=${encodeURIComponent(error_description)}`,
+          request.url
+        )
       );
     }
 
     if (!code) {
-      return NextResponse.redirect(new URL("/login?error=no_code", request.url));
+      return NextResponse.redirect(
+        new URL("/login?error=no_code", request.url)
+      );
     }
 
     const cookieStore = await cookies();
@@ -29,7 +34,7 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        cookieOptions: { name: "lingofy-auth-token" },
+        // cookieOptions: { name: "lingofy-auth-token" },
         cookies: {
           getAll() {
             return cookieStore.getAll();
@@ -53,7 +58,10 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Exchange code error:", error);
       return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url)
+        new URL(
+          `/login?error=${encodeURIComponent(error.message)}`,
+          request.url
+        )
       );
     }
 
@@ -62,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     // Password recovery mi kontrol et
     const isPasswordRecovery = next.includes("reset-password");
-    
+
     if (isPasswordRecovery) {
       // Reset password sayfasına yönlendir
       return NextResponse.redirect(new URL(next, request.url));
@@ -70,9 +78,10 @@ export async function GET(request: NextRequest) {
 
     // Normal login flow - dashboard'a veya belirtilen next'e yönlendir
     return NextResponse.redirect(new URL(next, request.url));
-
   } catch (error) {
     console.error("Callback error:", error);
-    return NextResponse.redirect(new URL("/login?error=callback_error", request.url));
+    return NextResponse.redirect(
+      new URL("/login?error=callback_error", request.url)
+    );
   }
 }
